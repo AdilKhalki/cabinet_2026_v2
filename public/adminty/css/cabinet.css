@@ -1,0 +1,201 @@
+/* ═══════════════════════════════════════════════════════════════
+   Cabinet Médical — Styles personnalisés (extension d'Adminty)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Variables couleurs */
+:root {
+    --primary: #01a9ac;
+    --dark-sidebar: #353c4e;
+    --pink: #ff5370;
+    --green: #11c15b;
+    --yellow: #f4a100;
+    --blue: #4680ff;
+    --orange: #fc6180;
+}
+
+/* ── Dossier Patient ─────────────────────────────────── */
+.patient-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.dossier-badge {
+    font-family: monospace;
+    background: var(--primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+/* ── Salle d'attente ──────────────────────────────────── */
+.waiting-card {
+    border-left: 4px solid var(--yellow);
+    transition: all 0.2s ease;
+}
+
+.waiting-card.in-progress {
+    border-left-color: var(--primary);
+    background: rgba(1, 169, 172, 0.05);
+}
+
+.queue-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--yellow);
+    line-height: 1;
+}
+
+.queue-number.active {
+    color: var(--primary);
+}
+
+/* ── Consultation ─────────────────────────────────────── */
+.vital-signs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.vital-card {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+
+.vital-card .value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--dark-sidebar);
+}
+
+.vital-card .label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.vital-card .unit {
+    font-size: 11px;
+    color: #aaa;
+}
+
+/* ── Analyses - indicateurs anormaux ─────────────────── */
+.flag-high { color: var(--orange); font-weight: 600; }
+.flag-low  { color: var(--blue); font-weight: 600; }
+.flag-critical { color: var(--pink); font-weight: 700; background: rgba(255,83,112,0.1); padding: 2px 5px; border-radius: 3px; }
+.flag-normal { color: var(--green); }
+
+/* ── Timeline antécédents ─────────────────────────────── */
+.timeline-medical {
+    position: relative;
+    padding-left: 20px;
+}
+
+.timeline-medical::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e0e0e0;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px var(--primary);
+}
+
+/* ── Ordonnance ──────────────────────────────────────── */
+.rx-line {
+    border-bottom: 1px dashed #ddd;
+    padding: 8px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.rx-line .line-number {
+    min-width: 24px;
+    height: 24px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ── Paiement ─────────────────────────────────────────── */
+.payment-status-paid    { background: #d4edda; color: #155724; }
+.payment-status-pending { background: #fff3cd; color: #856404; }
+.payment-status-partial { background: #cce5ff; color: #004085; }
+.payment-status-cancelled { background: #f8d7da; color: #721c24; }
+
+/* ── Dashboard stats ──────────────────────────────────── */
+.stat-icon {
+    font-size: 2.5em;
+    opacity: 0.4;
+}
+
+/* ── Loading indicator ───────────────────────────────── */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* ── Responsive tables ────────────────────────────────── */
+@media (max-width: 768px) {
+    .table-responsive { overflow-x: auto; }
+    .btn-group .btn { padding: 3px 6px; font-size: 11px; }
+}
+
+/* ── Sidebar active state (fix Adminty) ───────────────── */
+.pcoded-navbar .pcoded-item li.active > a {
+    background: var(--primary);
+    color: white;
+}
+
+.pcoded-navbar .pcoded-item li.active > a .pcoded-mtext,
+.pcoded-navbar .pcoded-item li.active > a .pcoded-micon i {
+    color: white;
+}
+
+/* ── Card hover ───────────────────────────────────────── */
+.card:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s ease;
+}
+
+/* ── Pagination Laravel (Bootstrap 3 compat) ─────────── */
+.pagination { display: flex; padding-left: 0; list-style: none; border-radius: 4px; flex-wrap: wrap; }
+.page-item { }
+.page-link { position: relative; display: block; padding: 6px 12px; margin-left: -1px; line-height: 1.42857143; color: var(--primary); background-color: #fff; border: 1px solid #ddd; text-decoration: none; }
+.page-link:hover { z-index: 2; color: #006e70; background-color: #eee; border-color: #ddd; }
+.page-item.active .page-link { z-index: 3; color: #fff; background-color: var(--primary); border-color: var(--primary); }
+.page-item.disabled .page-link { color: #777; cursor: not-allowed; background-color: #fff; border-color: #ddd; }
