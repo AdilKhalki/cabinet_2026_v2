@@ -106,12 +106,12 @@
                         <ul class="show-notification profile-notification dropdown-menu" data-dropdown-in="fadeIn"
                             data-dropdown-out="fadeOut">
                             <li>
-                                <a href="{{ route('settings.profile') }}">
+                                <a href="{{ route('profile.edit') }}">
                                     <i class="feather icon-user"></i> Mon Profil
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('settings.security') }}">
+                                <a href="{{ route('security.edit') }}">
                                     <i class="feather icon-settings"></i> Paramètres
                                 </a>
                             </li>

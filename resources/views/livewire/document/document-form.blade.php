@@ -10,7 +10,7 @@
         <div class="card-header">
             <h5>
                 <i class="feather icon-upload"></i>
-                {{ $documentId ? 'Modifier le Document' : 'Nouveau Document' }}
+                {{ $isEdit ? 'Modifier le Document' : 'Nouveau Document' }}
             </h5>
             <div class="card-header-right">
                 <a href="{{ route('documents.index') }}" class="btn btn-default btn-sm">

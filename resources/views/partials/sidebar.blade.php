@@ -3,7 +3,12 @@
     $isActive = fn(string $prefix) => str_starts_with($currentRoute, $prefix);
 @endphp
 
-<nav class="pcoded-navbar">
+<nav class="pcoded-navbar"
+     navbar-theme="themelight1"
+     active-item-theme="theme1"
+     sub-item-theme="theme2"
+     active-item-style="style0"
+     pcoded-navbar-position="fixed">
     <div class="sidebar_toggle"><a href="#"><i class="icon-close icons"></i></a></div>
     <div class="pcoded-inner-navbar main-menu">
 
@@ -28,7 +33,8 @@
             </li>
 
             {{-- Rendez-vous --}}
-            <li class="pcoded-hasmenu {{ $isActive('appointments') ? 'pcoded-trigger active' : '' }}">
+            <li class="pcoded-hasmenu {{ $isActive('appointments') ? 'pcoded-trigger active' : '' }}"
+                dropdown-icon="style1" subitem-icon="style6">
                 <a href="javascript:void(0)">
                     <span class="pcoded-micon"><i class="feather icon-calendar"></i></span>
                     <span class="pcoded-mtext">Rendez-vous</span>
@@ -140,7 +146,8 @@
         <div class="pcoded-navigatio-lavel">Administration</div>
         <ul class="pcoded-item pcoded-left-item">
 
-            <li class="pcoded-hasmenu {{ $isActive('admin') ? 'pcoded-trigger active' : '' }}">
+            <li class="pcoded-hasmenu {{ $isActive('admin') ? 'pcoded-trigger active' : '' }}"
+                dropdown-icon="style1" subitem-icon="style6">
                 <a href="javascript:void(0)">
                     <span class="pcoded-micon"><i class="feather icon-shield"></i></span>
                     <span class="pcoded-mtext">Gestion Utilisateurs</span>

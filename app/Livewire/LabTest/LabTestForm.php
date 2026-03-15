@@ -55,7 +55,15 @@ class LabTestForm extends Component
         if ($labTest && $labTest->exists) {
             $this->labTest = $labTest->load('results');
             $this->isEdit = true;
-            $this->fill($labTest->toArray());
+            $this->patient_id         = $labTest->patient_id;
+            $this->doctor_id          = $labTest->doctor_id ?? '';
+            $this->consultation_id    = $labTest->consultation_id ?? '';
+            $this->requested_at       = $labTest->requested_at?->format('Y-m-d') ?? today()->format('Y-m-d');
+            $this->result_date        = $labTest->result_date?->format('Y-m-d') ?? '';
+            $this->status             = $labTest->status ?? 'requested';
+            $this->laboratory_name    = $labTest->laboratory_name ?? '';
+            $this->clinical_info      = $labTest->clinical_info ?? '';
+            $this->doctor_interpretation = $labTest->doctor_interpretation ?? '';
             $this->results = $labTest->results->map(fn ($r) => [
                 'id'             => $r->id,
                 'lab_test_type_id' => $r->lab_test_type_id,
@@ -171,8 +179,10 @@ class LabTestForm extends Component
     public function render()
     {
         return view('livewire.lab-test.lab-test-form', [
-            'patients' => Patient::active()->orderBy('last_name')->get(),
-            'doctors'  => User::doctors()->active()->get(),
+            'patients'     => Patient::active()->orderBy('last_name')->get(),
+            'doctors'      => User::doctors()->active()->get(),
+            'labTestTypes' => $this->labTestTypes,
+            'isEdit'       => $this->isEdit,
         ])->layout('layouts.cabinet', [
             'title' => $this->isEdit ? 'Modifier Analyse' : 'Nouvelle Analyse',
             'header' => $this->isEdit ? 'Modifier l\'Analyse' : 'Nouvelle Analyse',

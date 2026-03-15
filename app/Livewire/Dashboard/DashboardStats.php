@@ -104,8 +104,17 @@ class DashboardStats extends Component
 
     public function render()
     {
-        return view('livewire.dashboard.dashboard-stats')
-            ->layout('layouts.cabinet', [
+        return view('livewire.dashboard.dashboard-stats', [
+            'todayAppointments'       => $this->todayAppointments,
+            'todayWaiting'            => $this->todayWaiting,
+            'totalPatients'           => $this->totalPatients,
+            'newPatientsThisMonth'    => $this->newPatientsThisMonth,
+            'monthlyRevenue'          => $this->monthlyRevenue,
+            'pendingPayments'         => $this->pendingPayments,
+            'upcomingAppointments'    => $this->upcomingAppointments,
+            'recentConsultations'     => $this->recentConsultations,
+            'monthlyConsultationsChart' => $this->monthlyConsultationsChart,
+        ])->layout('layouts.cabinet', [
                 'title' => 'Tableau de bord',
                 'header' => 'Tableau de bord',
                 'headerIcon' => 'icon-home',

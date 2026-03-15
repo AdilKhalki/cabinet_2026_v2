@@ -37,7 +37,7 @@
                 <div class="col-md-3">
                     <strong><i class="feather icon-tag"></i> Catégorie :</strong><br>
                     @php
-                        $catColors = ['xray'=>'label-info','mri'=>'label-primary','ct_scan'=>'label-warning','ultrasound'=>'label-success','ecg'=>'label-default','other'=>'label-default'];
+                        $catColors = ['chest_xray'=>'label-info','abdominal_xray'=>'label-info','limb_xray'=>'label-info','ct_scan'=>'label-warning','mri'=>'label-primary','ultrasound'=>'label-success','other'=>'label-default'];
                         $catColor = $catColors[$medicalImage->category] ?? 'label-default';
                     @endphp
                     <span class="label {{ $catColor }}">{{ $categoryLabels[$medicalImage->category] ?? $medicalImage->category }}</span>

@@ -44,7 +44,19 @@
         </div>
     </div>
 
-    <div id="pcoded" class="pcoded">
+    <div id="pcoded" class="pcoded"
+         nav-type="st2"
+         theme-layout="vertical"
+         vertical-placement="left"
+         vertical-layout="wide"
+         pcoded-device-type="desktop"
+         vertical-nav-type="expanded"
+         vertical-effect="shrink"
+         vnavigation-view="view1"
+         fream-type="theme1"
+         sidebar-img="false"
+         sidebar-img-type="img1"
+         layout-type="light">
         <div class="pcoded-overlay-box"></div>
         <div class="pcoded-container navbar-wrapper">
 
@@ -130,7 +142,11 @@
 
     {{-- Scripts de base (chargés UNE SEULE FOIS) --}}
     <script src="{{ asset('adminty/js/jquery.min.js') }}"></script>
+    {{-- Popper.js requis par Bootstrap 4 --}}
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="{{ asset('adminty/js/bootstrap.min.js') }}"></script>
+    {{-- jQuery slimScroll requis par script.min.js --}}
+    <script src="https://cdn.jsdelivr.net/npm/jquery-slimscroll@1.3.8/jquery.slimscroll.min.js"></script>
     <script src="{{ asset('adminty/js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
     <script src="{{ asset('adminty/js/pcoded.min.js') }}"></script>
     <script src="{{ asset('adminty/js/vartical-layout.min.js') }}"></script>

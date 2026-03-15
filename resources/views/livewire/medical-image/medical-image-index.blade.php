@@ -74,7 +74,7 @@
                                     </p>
                                     <p class="m-b-5">
                                         @php
-                                            $catColors = ['xray'=>'label-info','mri'=>'label-primary','ct_scan'=>'label-warning','ultrasound'=>'label-success','ecg'=>'label-default','other'=>'label-default'];
+                                            $catColors = ['chest_xray'=>'label-info','abdominal_xray'=>'label-info','limb_xray'=>'label-info','ct_scan'=>'label-warning','mri'=>'label-primary','ultrasound'=>'label-success','other'=>'label-default'];
                                             $catColor = $catColors[$image->category] ?? 'label-default';
                                         @endphp
                                         <span class="label {{ $catColor }}">{{ $categories[$image->category] ?? $image->category }}</span>

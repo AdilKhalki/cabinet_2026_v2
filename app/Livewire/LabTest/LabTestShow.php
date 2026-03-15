@@ -48,8 +48,10 @@ class LabTestShow extends Component
 
     public function render()
     {
-        return view('livewire.lab-test.lab-test-show')
-            ->layout('layouts.cabinet', [
+        return view('livewire.lab-test.lab-test-show', [
+            'labTest'       => $this->labTest,
+            'evolutionData' => $this->evolutionData,
+        ])->layout('layouts.cabinet', [
                 'title' => "Analyse {$this->labTest->request_number}",
                 'header' => "Résultats : {$this->labTest->request_number}",
                 'headerIcon' => 'icon-thermometer',

@@ -39,7 +39,7 @@
                         <select wire:model.live="doctorFilter" class="form-control">
                             <option value="">-- Tous les médecins --</option>
                             @foreach($doctors as $doctor)
-                                <option value="{{ $doctor->id }}">{{ $doctor->full_name }}</option>
+                                <option value="{{ $doctor->id }}">Dr. {{ $doctor->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -168,9 +168,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
     document.addEventListener('livewire:initialized', function () {
-        var monthlyData = @json($monthlyRevenueData ?? []);
-        var labels = monthlyData.map(function (d) { return d.label; });
-        var values = monthlyData.map(function (d) { return d.total; });
+        var monthlyData = @json($monthlyRevenueData ?? ['labels' => [], 'data' => []]);
+        var labels = Array.isArray(monthlyData.labels) ? monthlyData.labels : [];
+        var values = Array.isArray(monthlyData.data)   ? monthlyData.data   : [];
 
         var ctx = document.getElementById('monthlyRevenueChart');
         if (ctx) {

@@ -122,8 +122,8 @@
                                 @forelse($topMedications ?? [] as $i => $med)
                                     <tr>
                                         <td><span class="label label-info">{{ $i + 1 }}</span></td>
-                                        <td>{{ $med->name ?? $med->medication_name ?? '—' }}</td>
-                                        <td><strong>{{ $med->count ?? 0 }}</strong></td>
+                                        <td>{{ $med->medication_name ?? '—' }}</td>
+                                        <td><strong>{{ $med->total ?? 0 }}</strong></td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -155,8 +155,8 @@
                                 @forelse($topLabTests ?? [] as $i => $test)
                                     <tr>
                                         <td><span class="label label-success">{{ $i + 1 }}</span></td>
-                                        <td>{{ $test->name ?? $test->parameter_name ?? '—' }}</td>
-                                        <td><strong>{{ $test->count ?? 0 }}</strong></td>
+                                        <td>{{ $test->parameter_name ?? '—' }}</td>
+                                        <td><strong>{{ $test->total ?? 0 }}</strong></td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -177,15 +177,15 @@
     document.addEventListener('livewire:initialized', function () {
 
         // Consultations by Type — Doughnut
-        var consultationTypeData = @json($consultationsByType ?? []);
+        var consultationTypeData = @json($consultationsByType ?? ['labels' => [], 'data' => []]);
         var ctxDoughnut = document.getElementById('consultationTypeChart');
-        if (ctxDoughnut && consultationTypeData.length) {
+        if (ctxDoughnut && consultationTypeData.labels && consultationTypeData.labels.length) {
             new Chart(ctxDoughnut, {
                 type: 'doughnut',
                 data: {
-                    labels: consultationTypeData.map(function (d) { return d.type; }),
+                    labels: consultationTypeData.labels,
                     datasets: [{
-                        data: consultationTypeData.map(function (d) { return d.count; }),
+                        data: consultationTypeData.data,
                         backgroundColor: ['#4099ff','#2ed8b6','#ffb64d','#ff5370','#7759de','#a389d4'],
                         borderWidth: 2,
                     }]
@@ -207,7 +207,7 @@
                     labels: newPatientsData.map(function (d) { return d.label; }),
                     datasets: [{
                         label: 'Nouveaux patients',
-                        data: newPatientsData.map(function (d) { return d.count; }),
+                        data: newPatientsData.map(function (d) { return d.value; }),
                         backgroundColor: 'rgba(46,216,182,0.7)',
                         borderColor: '#2ed8b6',
                         borderWidth: 1,

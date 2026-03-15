@@ -60,8 +60,10 @@ class WaitingRoom extends Component
 
     public function render()
     {
-        return view('livewire.appointment.waiting-room')
-            ->layout('layouts.cabinet', [
+        return view('livewire.appointment.waiting-room', [
+            'waitingPatients' => $this->waitingPatients,
+            'todayStats'      => $this->todayStats,
+        ])->layout('layouts.cabinet', [
                 'title' => 'Salle d\'attente',
                 'header' => 'Salle d\'Attente — ' . now()->format('d/m/Y'),
                 'headerIcon' => 'icon-users',

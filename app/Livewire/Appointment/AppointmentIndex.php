@@ -168,8 +168,11 @@ class AppointmentIndex extends Component
 
     public function render()
     {
-        return view('livewire.appointment.appointment-index')
-            ->layout('layouts.cabinet', [
+        return view('livewire.appointment.appointment-index', [
+            'appointments' => $this->appointments,
+            'doctors'      => $this->doctors,
+            'patients'     => $this->patients,
+        ])->layout('layouts.cabinet', [
                 'title' => 'Rendez-vous',
                 'header' => 'Gestion des Rendez-vous',
                 'headerIcon' => 'icon-calendar',

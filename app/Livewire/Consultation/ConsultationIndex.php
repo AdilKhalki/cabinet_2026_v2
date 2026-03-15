@@ -30,8 +30,9 @@ class ConsultationIndex extends Component
 
     public function render()
     {
-        return view('livewire.consultation.consultation-index')
-            ->layout('layouts.cabinet', [
+        return view('livewire.consultation.consultation-index', [
+            'consultations' => $this->consultations,
+        ])->layout('layouts.cabinet', [
                 'title' => 'Consultations',
                 'header' => 'Consultations',
                 'headerIcon' => 'icon-activity',

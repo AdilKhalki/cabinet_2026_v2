@@ -148,6 +148,57 @@ class PaymentIndex extends Component
         $this->redirect(route('payments.pdf', $id));
     }
 
+    public function openForm(): void
+    {
+        $this->reset(['editingId', 'patient_id', 'doctor_id', 'consultation_id', 'discount', 'insurance_coverage', 'amount_paid', 'notes', 'lines']);
+        $this->payment_method = 'cash';
+        $this->payment_date = today()->format('Y-m-d');
+        $this->discount = '0';
+        $this->insurance_coverage = '0';
+        $this->amount_paid = '0';
+        $this->doctor_id = auth()->user()->isMedecin() ? auth()->id() : '';
+        $this->addLine();
+        $this->showForm = true;
+    }
+
+    public function openEdit(int $id): void
+    {
+        $payment = Payment::with('lines')->findOrFail($id);
+        $this->editingId = $id;
+        $this->patient_id = $payment->patient_id;
+        $this->doctor_id = $payment->doctor_id;
+        $this->consultation_id = $payment->consultation_id ?? '';
+        $this->payment_method = $payment->payment_method;
+        $this->discount = (string) $payment->discount;
+        $this->insurance_coverage = (string) $payment->insurance_coverage;
+        $this->amount_paid = (string) $payment->amount_paid;
+        $this->payment_date = $payment->payment_date ?? today()->format('Y-m-d');
+        $this->notes = $payment->notes ?? '';
+        $this->lines = $payment->lines->map(fn($l) => [
+            'medical_act_id' => $l->medical_act_id ?? '',
+            'description'    => $l->description,
+            'quantity'       => $l->quantity,
+            'unit_price'     => $l->unit_price,
+            'total_price'    => $l->total_price,
+        ])->toArray();
+        $this->showForm = true;
+    }
+
+    public function closeForm(): void { $this->showForm = false; $this->editingId = null; }
+
+    public ?int $confirmingDeleteId = null;
+    public function confirmDelete(int $id): void { $this->confirmingDeleteId = $id; }
+    public function cancelDelete(): void { $this->confirmingDeleteId = null; }
+    public function delete(): void
+    {
+        if ($this->confirmingDeleteId) {
+            Payment::findOrFail($this->confirmingDeleteId)->delete();
+            session()->flash('success', 'Paiement supprimé.');
+            $this->confirmingDeleteId = null;
+            unset($this->payments);
+        }
+    }
+
     #[Computed]
     public function payments()
     {

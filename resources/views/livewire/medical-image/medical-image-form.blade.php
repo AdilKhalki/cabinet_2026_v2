@@ -10,7 +10,7 @@
         <div class="card-header">
             <h5>
                 <i class="feather icon-upload"></i>
-                {{ $imageId ? 'Modifier Image Médicale' : 'Nouvelle Image Médicale' }}
+                {{ $isEdit ? 'Modifier Image Médicale' : 'Nouvelle Image Médicale' }}
             </h5>
             <div class="card-header-right">
                 <a href="{{ route('medical-images.index') }}" class="btn btn-default btn-sm">

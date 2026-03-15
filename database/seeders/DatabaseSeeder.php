@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             MedicalActSeeder::class,
             MedicationSeeder::class,
+            LabTestTypeSeeder::class,
+            DemoDataSeeder::class,
         ]);
     }
 }

@@ -86,8 +86,9 @@ class PatientIndex extends Component
 
     public function render()
     {
-        return view('livewire.patient.patient-index')
-            ->layout('layouts.cabinet', [
+        return view('livewire.patient.patient-index', [
+            'patients' => $this->patients,
+        ])->layout('layouts.cabinet', [
                 'title' => 'Patients',
                 'header' => 'Gestion des Patients',
                 'headerIcon' => 'icon-users',

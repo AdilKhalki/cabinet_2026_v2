@@ -50,14 +50,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('prescriptions')->name('prescriptions.')->group(function () {
         Route::get('/', \App\Livewire\Prescription\PrescriptionIndex::class)->name('index');
         Route::get('/create', \App\Livewire\Prescription\PrescriptionForm::class)->name('create');
-        Route::get('/{prescription}', \App\Livewire\Prescription\PrescriptionShow::class)->name('show');
+        Route::get('/{prescription}/edit', \App\Livewire\Prescription\PrescriptionForm::class)->name('edit');
         Route::get('/{prescription}/pdf', [\App\Http\Controllers\PrescriptionController::class, 'pdf'])->name('pdf');
+        Route::get('/{prescription}', \App\Livewire\Prescription\PrescriptionShow::class)->name('show');
     });
 
     // ── Analyses ───────────────────────────────────────────────
     Route::prefix('lab-tests')->name('lab-tests.')->group(function () {
         Route::get('/', \App\Livewire\LabTest\LabTestIndex::class)->name('index');
         Route::get('/create', \App\Livewire\LabTest\LabTestForm::class)->name('create');
+        Route::get('/{labTest}/edit', \App\Livewire\LabTest\LabTestForm::class)->name('edit');
         Route::get('/{labTest}', \App\Livewire\LabTest\LabTestShow::class)->name('show');
     });
 
@@ -65,6 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('medical-images')->name('medical-images.')->group(function () {
         Route::get('/', \App\Livewire\MedicalImage\MedicalImageIndex::class)->name('index');
         Route::get('/create', \App\Livewire\MedicalImage\MedicalImageForm::class)->name('create');
+        Route::get('/{medicalImage}/edit', \App\Livewire\MedicalImage\MedicalImageForm::class)->name('edit');
         Route::get('/{medicalImage}', \App\Livewire\MedicalImage\MedicalImageShow::class)->name('show');
     });
 
@@ -72,13 +75,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('documents')->name('documents.')->group(function () {
         Route::get('/', \App\Livewire\Document\DocumentIndex::class)->name('index');
         Route::get('/create', \App\Livewire\Document\DocumentForm::class)->name('create');
+        Route::get('/{document}/edit', \App\Livewire\Document\DocumentForm::class)->name('edit');
     });
 
     // ── Rapports médicaux ──────────────────────────────────────
     Route::prefix('medical-reports')->name('medical-reports.')->group(function () {
         Route::get('/', \App\Livewire\MedicalReport\MedicalReportIndex::class)->name('index');
         Route::get('/create', \App\Livewire\MedicalReport\MedicalReportForm::class)->name('create');
+        Route::get('/{medicalReport}/edit', \App\Livewire\MedicalReport\MedicalReportForm::class)->name('edit');
         Route::get('/{medicalReport}/pdf', [\App\Http\Controllers\MedicalReportController::class, 'pdf'])->name('pdf');
+        Route::get('/{medicalReport}', \App\Livewire\MedicalReport\MedicalReportShow::class)->name('show');
     });
 
     // ── Paiements ──────────────────────────────────────────────

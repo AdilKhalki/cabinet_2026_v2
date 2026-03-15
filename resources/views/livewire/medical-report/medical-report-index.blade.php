@@ -74,7 +74,7 @@
                                 <td><span class="label {{ $typeColor }}">{{ $typeLabel }}</span></td>
                                 <td>{{ $report->title }}</td>
                                 <td>{{ $report->report_date ? \Carbon\Carbon::parse($report->report_date)->format('d/m/Y') : '—' }}</td>
-                                <td>{{ $report->doctor->full_name ?? '—' }}</td>
+                                <td>{{ $report->doctor->name ?? '—' }}</td>
                                 <td>
                                     <a href="{{ route('medical-reports.show', $report) }}" class="btn btn-info btn-xs" title="Voir">
                                         <i class="feather icon-eye"></i>

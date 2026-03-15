@@ -41,12 +41,18 @@ class LabTestIndex extends Component
 
     public function render()
     {
-        return view('livewire.lab-test.lab-test-index')
-            ->layout('layouts.cabinet', [
-                'title' => 'Analyses',
-                'header' => 'Analyses & Résultats de Laboratoire',
-                'headerIcon' => 'icon-thermometer',
-                'breadcrumbs' => [['label' => 'Analyses']],
-            ]);
+        return view('livewire.lab-test.lab-test-index', [
+            'labTests' => $this->labTests,
+            'colors'   => [
+                'pending'   => 'warning',
+                'completed' => 'success',
+                'cancelled' => 'default',
+            ],
+        ])->layout('layouts.cabinet', [
+            'title'      => 'Analyses',
+            'header'     => 'Analyses & Résultats de Laboratoire',
+            'headerIcon' => 'icon-thermometer',
+            'breadcrumbs' => [['label' => 'Analyses']],
+        ]);
     }
 }

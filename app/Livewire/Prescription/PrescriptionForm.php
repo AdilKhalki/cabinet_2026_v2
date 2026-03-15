@@ -46,6 +46,20 @@ class PrescriptionForm extends Component
         $this->lines = array_values($this->lines);
     }
 
+    public function selectMedication(int $index, string $medicationId): void
+    {
+        if ($medicationId) {
+            $med = Medication::find((int) $medicationId);
+            if ($med) {
+                $name = $med->name;
+                if ($med->strength) $name .= ' ' . $med->strength;
+                $this->lines[$index]['medication_name'] = $name;
+            }
+        } else {
+            $this->lines[$index]['medication_name'] = '';
+        }
+    }
+
     public function save(): void
     {
         $this->validate([

@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Prescription;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Gate;
 
 class PrescriptionController extends Controller
 {
     public function pdf(Prescription $prescription)
     {
-        $this->authorize('view', $prescription->patient);
+        Gate::authorize('view', $prescription->patient);
 
         $prescription->load(['patient', 'doctor', 'lines.medication']);
 

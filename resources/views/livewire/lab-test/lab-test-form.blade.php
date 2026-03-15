@@ -10,7 +10,7 @@
         <div class="card-header">
             <h5>
                 <i class="feather icon-activity"></i>
-                {{ $labTestId ? 'Modifier Analyse' : 'Nouvelle Demande d\'Analyse' }}
+                {{ $isEdit ? 'Modifier Analyse' : 'Nouvelle Demande d\'Analyse' }}
             </h5>
             <div class="card-header-right">
                 <a href="{{ route('lab-tests.index') }}" class="btn btn-default btn-sm">
@@ -62,8 +62,8 @@
                             <div class="col-md-4">
                                 <div class="form-group {{ $errors->has('resulted_at') ? 'has-error' : '' }}">
                                     <label>Date des résultats</label>
-                                    <input type="date" wire:model="resulted_at" class="form-control">
-                                    @error('resulted_at')<span class="help-block text-danger">{{ $message }}</span>@enderror
+                                    <input type="date" wire:model="result_date" class="form-control">
+                                    @error('result_date')<span class="help-block text-danger">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                             <div class="col-md-4">

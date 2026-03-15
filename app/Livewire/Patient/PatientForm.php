@@ -63,9 +63,25 @@ class PatientForm extends Component
     public function mount(?Patient $patient = null): void
     {
         if ($patient && $patient->exists) {
-            $this->patient = $patient;
-            $this->isEdit = true;
-            $this->fill($patient->toArray());
+            $this->patient         = $patient;
+            $this->isEdit          = true;
+            $this->first_name      = $patient->first_name ?? '';
+            $this->last_name       = $patient->last_name ?? '';
+            $this->cin             = $patient->cin ?? '';
+            $this->ip_number       = $patient->ip_number ?? '';
+            $this->birth_date      = $patient->birth_date?->format('Y-m-d') ?? '';
+            $this->gender          = $patient->gender ?? '';
+            $this->phone           = $patient->phone ?? '';
+            $this->phone_secondary = $patient->phone_secondary ?? '';
+            $this->email           = $patient->email ?? '';
+            $this->address         = $patient->address ?? '';
+            $this->city            = $patient->city ?? '';
+            $this->blood_group     = $patient->blood_group ?? '';
+            $this->known_allergies = $patient->known_allergies ?? '';
+            $this->profession      = $patient->profession ?? '';
+            $this->insurance_name  = $patient->insurance_name ?? '';
+            $this->insurance_number= $patient->insurance_number ?? '';
+            $this->notes           = $patient->notes ?? '';
         }
     }
 
