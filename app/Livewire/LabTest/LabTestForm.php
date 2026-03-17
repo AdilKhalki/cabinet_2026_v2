@@ -15,7 +15,7 @@ class LabTestForm extends Component
 {
     use WithFileUploads;
 
-    public ?LabTest $labTest = null;
+    public ?int $labTestId = null;
     public bool $isEdit = false;
 
     public int|string $patient_id = '';
@@ -47,7 +47,7 @@ class LabTestForm extends Component
         ];
     }
 
-    public function mount(?LabTest $labTest = null): void
+    public function mount($labTest = null): void
     {
         $this->requested_at = today()->format('Y-m-d');
         $this->doctor_id = auth()->user()->isMedecin() ? auth()->id() : '';
@@ -56,19 +56,23 @@ class LabTestForm extends Component
             $this->patient_id = (int) $patientId;
         }
 
-        if ($labTest && $labTest->exists) {
-            $this->labTest = $labTest->load('results');
+        if ($labTest) {
+            $record = $labTest instanceof LabTest
+                ? $labTest->load('results')
+                : LabTest::with('results')->findOrFail($labTest);
+
+            $this->labTestId = $record->id;
             $this->isEdit = true;
-            $this->patient_id         = $labTest->patient_id;
-            $this->doctor_id          = $labTest->doctor_id ?? '';
-            $this->consultation_id    = $labTest->consultation_id ?? '';
-            $this->requested_at       = $labTest->requested_at?->format('Y-m-d') ?? today()->format('Y-m-d');
-            $this->result_date        = $labTest->result_date?->format('Y-m-d') ?? '';
-            $this->status             = $labTest->status ?? 'requested';
-            $this->laboratory_name    = $labTest->laboratory_name ?? '';
-            $this->clinical_info      = $labTest->clinical_info ?? '';
-            $this->doctor_interpretation = $labTest->doctor_interpretation ?? '';
-            $this->results = $labTest->results->map(fn ($r) => [
+            $this->patient_id         = $record->patient_id;
+            $this->doctor_id          = $record->doctor_id ?? '';
+            $this->consultation_id    = $record->consultation_id ?? '';
+            $this->requested_at       = $record->requested_at?->format('Y-m-d') ?? today()->format('Y-m-d');
+            $this->result_date        = $record->result_date?->format('Y-m-d') ?? '';
+            $this->status             = $record->status ?? 'requested';
+            $this->laboratory_name    = $record->laboratory_name ?? '';
+            $this->clinical_info      = $record->clinical_info ?? '';
+            $this->doctor_interpretation = $record->doctor_interpretation ?? '';
+            $this->results = $record->results->map(fn ($r) => [
                 'id'             => $r->id,
                 'lab_test_type_id' => $r->lab_test_type_id,
                 'parameter_name' => $r->parameter_name,
@@ -141,7 +145,6 @@ class LabTestForm extends Component
             'laboratory_name'      => $this->laboratory_name ?: null,
             'clinical_info'        => $this->clinical_info ?: null,
             'doctor_interpretation'=> $this->doctor_interpretation ?: null,
-            'created_by'           => auth()->id(),
         ];
 
         if ($this->pdf_file) {
@@ -149,11 +152,14 @@ class LabTestForm extends Component
         }
 
         if ($this->isEdit) {
-            $this->labTest->update($data);
-            $labTest = $this->labTest;
+            $labTest = LabTest::findOrFail($this->labTestId);
+            $labTest->update($data);
             $labTest->results()->delete();
+            $message = 'Analyse mise à jour.';
         } else {
+            $data['created_by'] = auth()->id();
             $labTest = LabTest::create($data);
+            $message = 'Analyse enregistrée.';
         }
 
         foreach ($this->results as $r) {
@@ -170,7 +176,7 @@ class LabTestForm extends Component
             ]);
         }
 
-        session()->flash('success', 'Analyse enregistrée.');
+        session()->flash('success', $message);
         $this->redirect(route('lab-tests.show', $labTest));
     }
 

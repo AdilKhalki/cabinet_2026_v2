@@ -11,6 +11,9 @@ use Livewire\Component;
 
 class PrescriptionForm extends Component
 {
+    public ?int $prescriptionId = null;
+    public bool $isEdit = false;
+
     public int|string $patient_id = '';
     public int|string $doctor_id = '';
     public int|string $consultation_id = '';
@@ -19,7 +22,7 @@ class PrescriptionForm extends Component
     public string $notes = '';
     public array $lines = [];
 
-    public function mount(): void
+    public function mount($prescription = null): void
     {
         $this->prescribed_at = today()->format('Y-m-d');
         $this->doctor_id = auth()->user()->isMedecin() ? auth()->id() : '';
@@ -36,7 +39,41 @@ class PrescriptionForm extends Component
             $this->consultation_id = (int) $consultationId;
         }
 
-        $this->addLine();
+        // Mode édition
+        if ($prescription) {
+            $record = $prescription instanceof Prescription
+                ? $prescription
+                : Prescription::with('lines')->findOrFail($prescription);
+
+            $this->prescriptionId = $record->id;
+            $this->isEdit = true;
+            $this->patient_id = $record->patient_id;
+            $this->doctor_id = $record->doctor_id;
+            $this->consultation_id = $record->consultation_id ?? '';
+            $this->prescribed_at = $record->prescribed_at ? \Carbon\Carbon::parse($record->prescribed_at)->format('Y-m-d') : today()->format('Y-m-d');
+            $this->valid_until = $record->valid_until ? \Carbon\Carbon::parse($record->valid_until)->format('Y-m-d') : '';
+            $this->notes = $record->notes ?? '';
+
+            $this->lines = [];
+            foreach ($record->lines()->orderBy('sort_order')->get() as $line) {
+                $this->lines[] = [
+                    'medication_id'   => $line->medication_id ?? '',
+                    'medication_name' => $line->medication_name ?? '',
+                    'dosage'          => $line->dosage ?? '',
+                    'frequency'       => $line->frequency ?? '',
+                    'duration_days'   => $line->duration_days ?? '',
+                    'route'           => $line->route ?? 'Oral',
+                    'instructions'    => $line->instructions ?? '',
+                    'quantity'        => $line->quantity ?? '',
+                ];
+            }
+
+            if (empty($this->lines)) {
+                $this->addLine();
+            }
+        } else {
+            $this->addLine();
+        }
     }
 
     public function addLine(): void
@@ -83,15 +120,27 @@ class PrescriptionForm extends Component
             'lines.*.medication_name' => 'required|string',
         ]);
 
-        $prescription = Prescription::create([
+        $data = [
             'patient_id'      => $this->patient_id,
             'doctor_id'       => $this->doctor_id,
             'consultation_id' => $this->consultation_id ?: null,
             'prescribed_at'   => $this->prescribed_at,
             'valid_until'     => $this->valid_until ?: null,
             'notes'           => $this->notes ?: null,
-            'created_by'      => auth()->id(),
-        ]);
+        ];
+
+        if ($this->isEdit) {
+            $prescription = Prescription::findOrFail($this->prescriptionId);
+            $prescription->update($data);
+
+            // Supprimer les anciennes lignes et recréer
+            $prescription->lines()->delete();
+            $message = 'Ordonnance mise à jour.';
+        } else {
+            $data['created_by'] = auth()->id();
+            $prescription = Prescription::create($data);
+            $message = 'Ordonnance créée.';
+        }
 
         foreach ($this->lines as $i => $line) {
             PrescriptionLine::create([
@@ -108,23 +157,25 @@ class PrescriptionForm extends Component
             ]);
         }
 
-        session()->flash('success', 'Ordonnance créée.');
+        session()->flash('success', $message);
         $this->redirect(route('prescriptions.show', $prescription));
     }
 
     public function render()
     {
+        $title = $this->isEdit ? 'Modifier l\'Ordonnance' : 'Nouvelle Ordonnance';
+
         return view('livewire.prescription.prescription-form', [
-            'patients'  => Patient::active()->orderBy('last_name')->get(),
-            'doctors'   => User::doctors()->active()->get(),
+            'patients'    => Patient::active()->orderBy('last_name')->get(),
+            'doctors'     => User::doctors()->active()->get(),
             'medications' => Medication::active()->orderBy('name')->get(),
         ])->layout('layouts.cabinet', [
-            'title' => 'Nouvelle Ordonnance',
-            'header' => 'Nouvelle Ordonnance',
+            'title' => $title,
+            'header' => $title,
             'headerIcon' => 'icon-file-text',
             'breadcrumbs' => [
                 ['label' => 'Ordonnances', 'url' => route('prescriptions.index')],
-                ['label' => 'Nouvelle'],
+                ['label' => $this->isEdit ? 'Modifier' : 'Nouvelle'],
             ],
         ]);
     }

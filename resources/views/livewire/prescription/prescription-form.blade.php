@@ -24,14 +24,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Patient <span class="text-danger">*</span></label>
-                                    <select class="form-control" wire:model="patient_id">
-                                        <option value="">-- Sélectionner un patient --</option>
-                                        @foreach($patients as $patient)
-                                            <option value="{{ $patient->id }}">
-                                                {{ $patient->full_name }} ({{ $patient->dossier_number }})
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <x-patient-search-select :patients="$patients" />
                                     @error('patient_id') <span class="text-danger small">{{ $message }}</span> @enderror
                                 </div>
                             </div>
@@ -305,7 +298,7 @@
                                 <span class="fa fa-spinner fa-spin"></span>
                             </div>
                             <i class="feather icon-save"></i>
-                            Enregistrer l'ordonnance
+                            {{ $isEdit ? 'Mettre à jour l\'ordonnance' : 'Enregistrer l\'ordonnance' }}
                         </button>
                         <a href="{{ route('prescriptions.index') }}" class="btn btn-default btn-block">
                             <i class="feather icon-x"></i> Annuler

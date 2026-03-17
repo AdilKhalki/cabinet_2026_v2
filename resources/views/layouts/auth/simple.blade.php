@@ -61,7 +61,7 @@
                 {{ $slot }}
             </div>
             <div class="auth-footer">
-                &copy; {{ date('Y') }} {{ config('app.name', 'CabiMed') }} — Cabinet Médical
+                &copy; {{ date('Y') }} {{ config('app.name', 'MISAHATI') }} — Cabinet Médical
             </div>
         </div>
         @fluxScripts

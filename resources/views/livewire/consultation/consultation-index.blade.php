@@ -3,9 +3,11 @@
         <div class="card-header">
             <h5><i class="feather icon-activity"></i> Consultations</h5>
             <div class="card-header-right">
+                @can('create', App\Models\Consultation::class)
                 <a href="{{ route('consultations.create') }}" class="btn btn-primary btn-sm">
                     <i class="feather icon-plus"></i> Nouvelle consultation
                 </a>
+                @endcan
             </div>
         </div>
         <div class="card-block">
@@ -46,7 +48,9 @@
                                 </td>
                                 <td>
                                     <a href="{{ route('consultations.show', $consult) }}" class="btn btn-info btn-xs"><i class="feather icon-eye"></i></a>
-                                    <a href="{{ route('consultations.edit', $consult) }}" class="btn btn-primary btn-xs"><i class="feather icon-edit"></i></a>
+                                    @can('update', $consult)
+                                    <a href="{{ route('consultations.edit', $consult) }}" class="btn btn-warning btn-xs"><i class="feather icon-edit"></i></a>
+                                    @endcan
                                 </td>
                             </tr>
                         @empty

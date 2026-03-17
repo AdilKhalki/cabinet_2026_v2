@@ -65,13 +65,13 @@ class PaymentIndex extends Component
     public function updatedLines(): void
     {
         foreach ($this->lines as $i => &$line) {
-            $line['total_price'] = ($line['quantity'] ?? 1) * ($line['unit_price'] ?? 0);
+            $line['total_price'] = (float)($line['quantity'] ?: 1) * (float)($line['unit_price'] ?: 0);
         }
     }
 
     public function getSubtotalProperty(): float
     {
-        return collect($this->lines)->sum(fn ($l) => ($l['quantity'] ?? 1) * ($l['unit_price'] ?? 0));
+        return collect($this->lines)->sum(fn ($l) => (float)($l['quantity'] ?: 1) * (float)($l['unit_price'] ?: 0));
     }
 
     public function getTotalProperty(): float

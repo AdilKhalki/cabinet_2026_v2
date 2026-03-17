@@ -24,17 +24,23 @@ class RolesAndPermissionsSeeder extends Seeder
         $permissions = [
             // Patients
             'view patients', 'create patients', 'edit patients', 'delete patients',
+            // Rendez-vous
+            'view appointments', 'create appointments', 'edit appointments', 'delete appointments',
             // Consultations
             'view consultations', 'create consultations', 'edit consultations', 'delete consultations',
             // Ordonnances
             'view prescriptions', 'create prescriptions', 'print prescriptions',
             // Analyses
             'view lab-tests', 'create lab-tests', 'edit lab-tests',
+            // Imagerie médicale
+            'view medical-images', 'create medical-images', 'edit medical-images', 'delete medical-images',
+            // Rapports médicaux
+            'view medical-reports', 'create medical-reports', 'edit medical-reports', 'delete medical-reports', 'print medical-reports',
             // Paiements
             'view payments', 'create payments', 'edit payments', 'delete payments',
             // Documents
             'view documents', 'upload documents', 'delete documents',
-            // Rapports
+            // Rapports financiers
             'view reports', 'generate reports',
             // Admin
             'manage users', 'manage roles', 'manage medications', 'view activity-log',
@@ -50,9 +56,12 @@ class RolesAndPermissionsSeeder extends Seeder
         // Permissions médecin
         $medecin->syncPermissions([
             'view patients', 'create patients', 'edit patients',
+            'view appointments', 'create appointments', 'edit appointments',
             'view consultations', 'create consultations', 'edit consultations',
             'view prescriptions', 'create prescriptions', 'print prescriptions',
             'view lab-tests', 'create lab-tests', 'edit lab-tests',
+            'view medical-images', 'create medical-images', 'edit medical-images', 'delete medical-images',
+            'view medical-reports', 'create medical-reports', 'edit medical-reports', 'print medical-reports',
             'view documents', 'upload documents',
             'view payments',
             'view reports', 'generate reports',
@@ -61,6 +70,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Permissions secrétaire
         $secretaire->syncPermissions([
             'view patients', 'create patients', 'edit patients',
+            'view appointments', 'create appointments', 'edit appointments', 'delete appointments',
             'view payments', 'create payments', 'edit payments',
             'view documents', 'upload documents',
         ]);

@@ -10,9 +10,11 @@
         <div class="card-header">
             <h5><i class="feather icon-image"></i> Imagerie Médicale</h5>
             <div class="card-header-right">
+                @can('create', App\Models\MedicalImage::class)
                 <a href="{{ route('medical-images.create') }}" class="btn btn-primary btn-sm">
                     <i class="feather icon-plus"></i> Nouvelle image
                 </a>
+                @endcan
             </div>
         </div>
         <div class="card-block">
@@ -90,15 +92,19 @@
                                         <a href="{{ route('medical-images.show', $image) }}" class="btn btn-info btn-sm" title="Voir">
                                             <i class="feather icon-eye"></i>
                                         </a>
+                                        @can('update', $image)
                                         <a href="{{ route('medical-images.edit', $image) }}" class="btn btn-warning btn-sm" title="Modifier">
                                             <i class="feather icon-edit"></i>
                                         </a>
+                                        @endcan
+                                        @can('delete', $image)
                                         <button type="button"
                                             wire:click="confirmDelete({{ $image->id }})"
                                             wire:confirm="Êtes-vous sûr de vouloir supprimer cette image ?"
                                             class="btn btn-danger btn-sm" title="Supprimer">
                                             <i class="feather icon-trash-2"></i>
                                         </button>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>

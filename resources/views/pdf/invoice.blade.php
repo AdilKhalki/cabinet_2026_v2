@@ -25,7 +25,7 @@
             <div class="header-subtitle">{{ $payment->invoice_number }}</div>
         </div>
         <div style="float:right; text-align:right; color: #ccc; font-size: 11px;">
-            Cabinet Médical — CabiMed<br>
+            Cabinet Médical — {{ config('app.name', 'MISAHATI') }}<br>
             Dr. {{ $payment->doctor->name }}<br>
             Date: {{ $payment->payment_date?->format('d/m/Y') ?? now()->format('d/m/Y') }}
         </div>
@@ -110,7 +110,7 @@
     @endif
 
     <div style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 15px; font-size: 10px; color: #999; text-align: center;">
-        Merci de votre confiance — Cabinet Médical CabiMed
+        Merci de votre confiance — Cabinet Médical MISAHATI
     </div>
 </body>
 </html>

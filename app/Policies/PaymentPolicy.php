@@ -9,26 +9,26 @@ class PaymentPolicy
 {
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->hasPermissionTo('view payments');
     }
 
     public function view(User $user, Payment $payment): bool
     {
-        return true;
+        return $user->hasPermissionTo('view payments');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'secretaire']);
+        return $user->hasPermissionTo('create payments');
     }
 
     public function update(User $user, Payment $payment): bool
     {
-        return $user->hasAnyRole(['admin', 'secretaire']);
+        return $user->hasPermissionTo('edit payments');
     }
 
     public function delete(User $user, Payment $payment): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasPermissionTo('delete payments');
     }
 }

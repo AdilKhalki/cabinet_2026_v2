@@ -21,14 +21,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Patient <span class="text-danger">*</span></label>
-                                    <select class="form-control" wire:model="patient_id" {{ $isEdit ? 'disabled' : '' }}>
-                                        <option value="">-- Sélectionner un patient --</option>
-                                        @foreach($patients as $patient)
-                                            <option value="{{ $patient->id }}">
-                                                {{ $patient->full_name }} ({{ $patient->dossier_number }})
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <x-patient-search-select :patients="$patients" :disabled="$isEdit" />
                                     @error('patient_id') <span class="text-danger small">{{ $message }}</span> @enderror
                                 </div>
                             </div>

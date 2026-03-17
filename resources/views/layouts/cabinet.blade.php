@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? config('app.name') }} - Cabinet Médical</title>
+    <title>{{ $title ?? config('') }} - Cabinet Médical</title>
     <link rel="icon" href="{{ asset('adminty/images/favicon.ico') }}" type="image/x-icon">
 
     {{-- Google Fonts --}}

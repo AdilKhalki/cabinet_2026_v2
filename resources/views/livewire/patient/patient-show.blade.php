@@ -51,12 +51,16 @@
                                     <i class="feather icon-edit"></i> Modifier
                                 </a>
                             @endcan
+                            @can('create', App\Models\Appointment::class)
                             <a href="{{ route('appointments.create', ['patient' => $patient->id]) }}" class="btn btn-info btn-sm m-t-5">
                                 <i class="feather icon-calendar"></i> RDV
                             </a>
+                            @endcan
+                            @can('create', App\Models\Consultation::class)
                             <a href="{{ route('consultations.create', ['patient' => $patient->id]) }}" class="btn btn-success btn-sm m-t-5">
                                 <i class="feather icon-activity"></i> Consultation
                             </a>
+                            @endcan
                         </div>
                     </div>
                 </div>
@@ -67,22 +71,29 @@
     {{-- Onglets de navigation --}}
     <div class="card">
         <div class="card-block p-0">
+            @php
+                $tabs = [
+                    'overview'       => ['icon'=>'icon-eye',        'label'=>'Vue d\'ensemble',                        'roles'=>null],
+                    'consultations'  => ['icon'=>'icon-activity',   'label'=>'Consultations ('.count($patient->consultations).')',   'roles'=>['admin','medecin']],
+                    'prescriptions'  => ['icon'=>'icon-file-text',  'label'=>'Ordonnances ('.count($patient->prescriptions).')',     'roles'=>['admin','medecin']],
+                    'lab-tests'      => ['icon'=>'icon-thermometer','label'=>'Analyses ('.count($patient->labTests).')',             'roles'=>['admin','medecin']],
+                    'images'         => ['icon'=>'icon-image',      'label'=>'Imagerie ('.count($patient->medicalImages).')',        'roles'=>['admin','medecin']],
+                    'reports'        => ['icon'=>'icon-clipboard',  'label'=>'Rapports ('.count($patient->medicalReports).')',       'roles'=>['admin','medecin']],
+                    'acts'           => ['icon'=>'icon-list',       'label'=>'Actes Médicaux',                          'roles'=>['admin','medecin']],
+                    'history'        => ['icon'=>'icon-clock',      'label'=>'Antécédents',                             'roles'=>null],
+                    'documents'      => ['icon'=>'icon-folder',     'label'=>'Documents ('.count($patient->documents).')',           'roles'=>null],
+                    'payments'       => ['icon'=>'icon-credit-card','label'=>'Paiements ('.count($patient->payments).')',            'roles'=>null],
+                ];
+            @endphp
             <ul class="nav nav-tabs" style="margin:0;border-bottom:none;">
-                @foreach([
-                    'overview'       => ['icon'=>'icon-eye',       'label'=>'Vue d\'ensemble'],
-                    'consultations'  => ['icon'=>'icon-activity',   'label'=>'Consultations ('.count($patient->consultations).')'],
-                    'prescriptions'  => ['icon'=>'icon-file-text',  'label'=>'Ordonnances ('.count($patient->prescriptions).')'],
-                    'lab-tests'      => ['icon'=>'icon-thermometer','label'=>'Analyses ('.count($patient->labTests).')'],
-                    'images'         => ['icon'=>'icon-image',      'label'=>'Imagerie ('.count($patient->medicalImages).')'],
-                    'history'        => ['icon'=>'icon-clock',      'label'=>'Antécédents'],
-                    'documents'      => ['icon'=>'icon-folder',     'label'=>'Documents ('.count($patient->documents).')'],
-                    'payments'       => ['icon'=>'icon-credit-card','label'=>'Paiements ('.count($patient->payments).')'],
-                ] as $tab => $info)
+                @foreach($tabs as $tab => $info)
+                    @if($info['roles'] === null || auth()->user()->hasAnyRole($info['roles']))
                     <li class="{{ $activeTab === $tab ? 'active' : '' }}">
                         <a href="#" wire:click.prevent="setTab('{{ $tab }}')" style="border-radius:0;">
                             <i class="feather {{ $info['icon'] }}"></i> {{ $info['label'] }}
                         </a>
                     </li>
+                    @endif
                 @endforeach
             </ul>
         </div>
@@ -454,6 +465,129 @@
                                     <tr><td colspan="6" class="text-center text-muted">Aucun document</td></tr>
                                 @endforelse
                             </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Rapports Médicaux --}}
+        @if($activeTab === 'reports')
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="feather icon-clipboard"></i> Rapports Médicaux</h5>
+                    <div class="card-header-right">
+                        <a href="{{ route('medical-reports.create', ['patient' => $patient->id]) }}"
+                           class="btn btn-primary btn-sm">
+                            <i class="feather icon-plus"></i> Nouveau rapport
+                        </a>
+                    </div>
+                </div>
+                <div class="card-block">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>N° Rapport</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Titre</th>
+                                    <th>Médecin</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($patient->medicalReports as $report)
+                                    <tr>
+                                        <td><strong>{{ $report->report_number }}</strong></td>
+                                        <td>{{ $report->report_date?->format('d/m/Y') ?? '—' }}</td>
+                                        <td>
+                                            <span class="label label-info">
+                                                {{ \App\Models\MedicalReport::TYPE_LABELS[$report->type] ?? $report->type }}
+                                            </span>
+                                        </td>
+                                        <td>{{ Str::limit($report->title, 50) }}</td>
+                                        <td>Dr. {{ $report->doctor->name ?? '—' }}</td>
+                                        <td>
+                                            <a href="{{ route('medical-reports.show', $report) }}"
+                                               class="btn btn-info btn-xs" title="Voir">
+                                                <i class="feather icon-eye"></i>
+                                            </a>
+                                            <a href="{{ route('medical-reports.edit', $report) }}"
+                                               class="btn btn-warning btn-xs" title="Modifier">
+                                                <i class="feather icon-edit"></i>
+                                            </a>
+                                            <a href="{{ route('medical-reports.pdf', $report) }}"
+                                               class="btn btn-primary btn-xs" title="PDF" target="_blank">
+                                                <i class="feather icon-printer"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="6" class="text-center text-muted">Aucun rapport médical</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Actes Médicaux --}}
+        @if($activeTab === 'acts')
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="feather icon-list"></i> Actes Médicaux Effectués</h5>
+                </div>
+                <div class="card-block">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>N° Facture</th>
+                                    <th>Code</th>
+                                    <th>Acte</th>
+                                    <th>Qté</th>
+                                    <th>Prix Unit.</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $acts = $patient->payments->flatMap(function($payment) {
+                                        return $payment->lines->filter(fn($line) => $line->medical_act_id)->map(function($line) use ($payment) {
+                                            $line->_payment = $payment;
+                                            return $line;
+                                        });
+                                    })->sortByDesc(fn($line) => $line->_payment->payment_date);
+                                @endphp
+                                @forelse($acts as $line)
+                                    <tr>
+                                        <td>{{ $line->_payment->payment_date?->format('d/m/Y') ?? '—' }}</td>
+                                        <td>
+                                            <strong>{{ $line->_payment->invoice_number }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="label label-default">{{ $line->medicalAct->code ?? '—' }}</span>
+                                        </td>
+                                        <td>{{ $line->medicalAct->name ?? $line->description }}</td>
+                                        <td class="text-center">{{ $line->quantity }}</td>
+                                        <td class="text-right">{{ number_format($line->unit_price, 2) }} MAD</td>
+                                        <td class="text-right">{{ number_format($line->total_price, 2) }} MAD</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="7" class="text-center text-muted">Aucun acte médical enregistré</td></tr>
+                                @endforelse
+                            </tbody>
+                            @if($acts->isNotEmpty())
+                                <tfoot>
+                                    <tr class="active">
+                                        <td colspan="6" class="text-right"><strong>Total</strong></td>
+                                        <td class="text-right"><strong>{{ number_format($acts->sum('total_price'), 2) }} MAD</strong></td>
+                                    </tr>
+                                </tfoot>
+                            @endif
                         </table>
                     </div>
                 </div>

@@ -9,36 +9,36 @@ class PatientPolicy
 {
     public function viewAny(User $user): bool
     {
-        return true; // Tous les utilisateurs authentifiés
+        return $user->hasPermissionTo('view patients');
     }
 
     public function view(User $user, Patient $patient): bool
     {
-        return true;
+        return $user->hasPermissionTo('view patients');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'medecin', 'secretaire']);
+        return $user->hasPermissionTo('create patients');
     }
 
     public function update(User $user, Patient $patient): bool
     {
-        return $user->hasAnyRole(['admin', 'medecin', 'secretaire']);
+        return $user->hasPermissionTo('edit patients');
     }
 
     public function delete(User $user, Patient $patient): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasPermissionTo('delete patients');
     }
 
     public function restore(User $user, Patient $patient): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasPermissionTo('delete patients');
     }
 
     public function forceDelete(User $user, Patient $patient): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasPermissionTo('delete patients');
     }
 }

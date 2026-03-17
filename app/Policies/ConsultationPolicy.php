@@ -9,29 +9,26 @@ class ConsultationPolicy
 {
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->hasPermissionTo('view consultations');
     }
 
     public function view(User $user, Consultation $consultation): bool
     {
-        if ($user->hasRole('admin')) return true;
-        if ($user->hasRole('medecin')) return $consultation->doctor_id === $user->id;
-        return false; // La secrétaire ne voit pas les consultations
+        return $user->hasPermissionTo('view consultations');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'medecin']);
+        return $user->hasPermissionTo('create consultations');
     }
 
     public function update(User $user, Consultation $consultation): bool
     {
-        if ($user->hasRole('admin')) return true;
-        return $user->hasRole('medecin') && $consultation->doctor_id === $user->id;
+        return $user->hasPermissionTo('edit consultations');
     }
 
     public function delete(User $user, Consultation $consultation): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasPermissionTo('delete consultations');
     }
 }

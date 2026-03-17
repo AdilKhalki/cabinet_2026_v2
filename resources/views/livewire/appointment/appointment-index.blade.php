@@ -26,14 +26,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label>Patient <span class="text-danger">*</span></label>
-                            <select class="form-control" wire:model="patient_id">
-                                <option value="">-- Sélectionner --</option>
-                                @foreach($patients as $patient)
-                                    <option value="{{ $patient->id }}">
-                                        {{ $patient->full_name }} ({{ $patient->dossier_number }})
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-patient-search-select :patients="$patients" />
                             @error('patient_id') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
                     </div>
@@ -123,9 +116,11 @@
                 <a href="{{ route('appointments.waiting-room') }}" class="btn btn-warning btn-sm m-r-5">
                     <i class="feather icon-users"></i> Salle d'attente
                 </a>
+                @can('create', App\Models\Appointment::class)
                 <button type="button" wire:click="openForm()" class="btn btn-primary btn-sm">
                     <i class="feather icon-plus"></i> Nouveau RDV
                 </button>
+                @endcan
             </div>
         </div>
         <div class="card-block">
@@ -252,6 +247,7 @@
 
 
                                 {{-- Boutons de changement de statut rapide --}}
+                                @can('update', $appt)
                                 @if($appt->status === 'planned' || $appt->status === 'confirmed')
                                     <div class="m-t-5">
                                         <button wire:click="updateStatus({{ $appt->id }}, 'confirmed')"
@@ -282,6 +278,7 @@
                                         </button>
                                     </div>
                                 @endif
+                                @endcan
                                 <span class="label {{ \App\Models\Appointment::STATUS_COLORS[$appt->status] ?? 'label-default' }}">
                                     {{ \App\Models\Appointment::STATUS_LABELS[$appt->status] ?? $appt->status }}
                                 </span>
@@ -290,6 +287,7 @@
                             {{-- Actions --}}
                             <td class="text-center">
                                 {{-- Créer une consultation depuis le RDV --}}
+                                @can('create', App\Models\Consultation::class)
                                 @if(in_array($appt->status, ['confirmed','waiting','in_progress']) && !$appt->consultation)
                                     <a href="{{ route('consultations.create', ['appointmentId' => $appt->id]) }}"
                                        class="btn btn-sm btn-success m-b-2" title="Créer consultation">
@@ -301,20 +299,25 @@
                                         <i class="feather icon-eye"></i>
                                     </a>
                                 @endif
+                                @endcan
 
                                 {{-- Modifier --}}
+                                @can('update', $appt)
                                 @if(!in_array($appt->status, ['completed','cancelled','no_show']))
                                     <button wire:click="openForm({{ $appt->id }})"
                                             class="btn btn-sm btn-warning m-b-2" title="Modifier">
                                         <i class="feather icon-edit"></i>
                                     </button>
                                 @endif
+                                @endcan
 
                                 {{-- Supprimer --}}
+                                @can('delete', $appt)
                                 <button wire:click="confirmDelete({{ $appt->id }})"
                                         class="btn btn-sm btn-danger m-b-2" title="Supprimer">
                                     <i class="feather icon-trash-2"></i>
                                 </button>
+                                @endcan
                             </td>
                         </tr>
                         @endforeach

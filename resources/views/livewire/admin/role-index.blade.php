@@ -1,13 +1,13 @@
 <div>
     @if(session('success'))
         <div class="alert alert-success alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert">×</button>
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
             <i class="feather icon-check-circle"></i> {{ session('success') }}
         </div>
     @endif
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert">×</button>
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
             <i class="feather icon-alert-triangle"></i> {{ session('error') }}
         </div>
     @endif
@@ -39,6 +39,16 @@
                             @error('name') <span class="help-block text-danger">{{ $message }}</span> @enderror
                         </div>
                     </div>
+                    <div class="col-md-8">
+                        <label>&nbsp;</label>
+                        <div>
+                            <span class="label label-info" style="font-size: 12px;">
+                                <i class="feather icon-check-circle"></i>
+                                {{ count($selectedPermissions) }} permission(s) sélectionnée(s)
+                                sur {{ $allPermissions->count() }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 {{-- Permissions groupées --}}
@@ -46,33 +56,39 @@
                 <div class="row">
                     @foreach($groups as $groupName => $groupPerms)
                         @php
-                            $existingInGroup = $allPermissions->whereIn('name', $groupPerms)->pluck('name');
-                            $allChecked = $existingInGroup->count() > 0 &&
-                                          $existingInGroup->every(fn($p) => in_array($p, $selectedPermissions));
+                            $existingInGroup = $allPermissions->whereIn('name', $groupPerms)->pluck('name')->toArray();
+                            $allChecked = count($existingInGroup) > 0 &&
+                                          count(array_intersect($existingInGroup, $selectedPermissions)) === count($existingInGroup);
                         @endphp
                         <div class="col-md-3 m-b-20">
-                            <div class="card" style="border: 1px solid #e0e0e0;">
-                                <div class="card-header" style="padding: 10px 15px; background: #f8f9fa;">
-                                    <div class="checkbox-fade fade-in-primary m-0">
-                                        <label style="font-weight: 600; font-size: 13px;">
-                                            <input type="checkbox"
-                                                   wire:click="toggleGroupPermissions('{{ $groupName }}')"
-                                                   {{ $allChecked ? 'checked' : '' }}>
-                                            <span class="cr"><i class="cr-icon icofont icofont-ui-check txt-primary"></i></span>
-                                            {{ $groupName }}
-                                        </label>
-                                    </div>
+                            <div class="card" style="border: 1px solid #e0e0e0; margin-bottom: 0;">
+                                <div style="padding: 10px 15px; background: {{ $allChecked ? '#e8f5e9' : '#f8f9fa' }}; border-bottom: 1px solid #e0e0e0; cursor: pointer;"
+                                     wire:click="toggleGroupPermissions('{{ $groupName }}')">
+                                    <label style="font-weight: 600; font-size: 13px; margin: 0; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                                        @if($allChecked)
+                                            <span style="color: #2ed8b6; font-size: 16px;"><i class="feather icon-check-square"></i></span>
+                                        @else
+                                            <span style="color: #999; font-size: 16px;"><i class="feather icon-square"></i></span>
+                                        @endif
+                                        {{ $groupName }}
+                                        <span class="label {{ $allChecked ? 'label-success' : 'label-default' }}" style="font-size: 9px; margin-left: auto;">
+                                            {{ count(array_intersect($existingInGroup, $selectedPermissions)) }}/{{ count($existingInGroup) }}
+                                        </span>
+                                    </label>
                                 </div>
-                                <div class="card-block" style="padding: 10px 15px;">
+                                <div style="padding: 10px 15px;">
                                     @foreach($groupPerms as $perm)
                                         @if($allPermissions->contains('name', $perm))
-                                        <div class="checkbox-fade fade-in-primary m-b-5">
-                                            <label style="font-size: 12px; font-weight: normal;">
+                                        @php $isChecked = in_array($perm, $selectedPermissions); @endphp
+                                        <div style="padding: 4px 0;">
+                                            <label style="font-size: 12px; font-weight: normal; margin: 0; cursor: pointer; display: flex; align-items: center; gap: 6px; width: 100%;">
                                                 <input type="checkbox"
-                                                       wire:model="selectedPermissions"
-                                                       value="{{ $perm }}">
-                                                <span class="cr"><i class="cr-icon icofont icofont-ui-check txt-primary"></i></span>
-                                                {{ $perm }}
+                                                       wire:model.live="selectedPermissions"
+                                                       value="{{ $perm }}"
+                                                       style="width: 16px; height: 16px; accent-color: #01a9ac; cursor: pointer;">
+                                                <span style="{{ $isChecked ? 'color: #333; font-weight: 500;' : 'color: #888;' }}">
+                                                    {{ $perm }}
+                                                </span>
                                             </label>
                                         </div>
                                         @endif
@@ -117,9 +133,10 @@
                     $roleColors = ['admin' => 'bg-c-pink', 'medecin' => 'bg-c-blue', 'secretaire' => 'bg-c-green'];
                     $roleColor  = $roleColors[$role->name] ?? 'bg-c-yellow';
                     $isSystem   = in_array($role->name, ['admin','medecin','secretaire']);
+                    $borderColor = ['admin'=>'#ff5370','medecin'=>'#4099ff','secretaire'=>'#2ed8b6'][$role->name] ?? '#ffb64d';
                 @endphp
                 <div class="col-md-4 m-b-20">
-                    <div class="card" style="border-top: 3px solid {{ ['admin'=>'#ff5370','medecin'=>'#4099ff','secretaire'=>'#2ed8b6'][$role->name] ?? '#ffb64d' }};">
+                    <div class="card" style="border-top: 3px solid {{ $borderColor }};">
                         <div class="card-block">
                             {{-- En-tête rôle --}}
                             <div class="row align-items-center m-b-15">
@@ -140,20 +157,25 @@
                                 </div>
                             </div>
 
-                            {{-- Permissions --}}
+                            {{-- Permissions groupées --}}
                             <div style="min-height: 80px;">
-                                @if($role->permissions->count())
-                                    @foreach($role->permissions->take(8) as $perm)
-                                        <span class="label label-primary m-b-3" style="font-size:10px; display:inline-block; margin:2px 2px 2px 0; color:#000;">
-                                            {{ $perm->name }}
-                                        </span>
-                                    @endforeach
-                                    @if($role->permissions->count() > 8)
-                                        <span class="text-muted" style="font-size:11px;">
-                                            +{{ $role->permissions->count() - 8 }} autres...
-                                        </span>
+                                @foreach($groups as $groupName => $groupPerms)
+                                    @php
+                                        $roleGroupPerms = $role->permissions->whereIn('name', $groupPerms);
+                                    @endphp
+                                    @if($roleGroupPerms->isNotEmpty())
+                                        <div class="m-b-5">
+                                            <small style="font-weight: 600; color: #555;">{{ $groupName }}:</small><br>
+                                            @foreach($roleGroupPerms as $perm)
+                                                <span class="label label-primary m-b-2" style="font-size:10px; display:inline-block; margin:1px;">
+                                                    {{ str_replace(['view ','create ','edit ','delete ','print ','upload ','generate ','manage '], '', $perm->name) }}
+                                                    <small>({{ explode(' ', $perm->name)[0] }})</small>
+                                                </span>
+                                            @endforeach
+                                        </div>
                                     @endif
-                                @else
+                                @endforeach
+                                @if($role->permissions->isEmpty())
                                     <p class="text-muted" style="font-size:12px;">Aucune permission assignée.</p>
                                 @endif
                             </div>
@@ -162,8 +184,11 @@
                             <div class="m-t-10 m-b-10">
                                 <small class="text-muted">
                                     <i class="feather icon-lock"></i>
-                                    {{ $role->permissions->count() }} permission(s) au total
+                                    {{ $role->permissions->count() }} / {{ $allPermissions->count() }} permission(s)
                                 </small>
+                                <div style="background: #eee; border-radius: 4px; height: 6px; margin-top: 5px;">
+                                    <div style="background: {{ $borderColor }}; border-radius: 4px; height: 6px; width: {{ ($role->permissions->count() / max($allPermissions->count(), 1)) * 100 }}%;"></div>
+                                </div>
                             </div>
 
                             {{-- Actions --}}
@@ -187,7 +212,7 @@
         </div>
     </div>
 
-    {{-- ── Tableau récapitulatif des permissions ────────────────────── --}}
+    {{-- ── Matrice des permissions ────────────────────────────────── --}}
     <div class="card">
         <div class="card-header">
             <h5><i class="feather icon-grid"></i> Matrice des permissions</h5>
@@ -219,7 +244,7 @@
                                             @if($role->permissions->contains('name', $perm))
                                                 <i class="feather icon-check-circle text-success" style="font-size:16px;"></i>
                                             @else
-                                                <i class="feather icon-minus text-muted" style="font-size:14px;"></i>
+                                                <i class="feather icon-x-circle text-danger" style="font-size:14px; opacity: 0.3;"></i>
                                             @endif
                                         </td>
                                     @endforeach

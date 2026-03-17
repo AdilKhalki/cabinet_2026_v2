@@ -21,8 +21,8 @@ class PatientShow extends Component
             'labTests.results',
             'medicalImages.doctor',
             'documents.uploadedBy',
-            'payments',
-            'medicalReports',
+            'payments.lines.medicalAct',
+            'medicalReports.doctor',
         ]);
     }
 

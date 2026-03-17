@@ -1,48 +1,132 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DejaVu Sans', sans-serif; font-size: 12px; color: #333; padding: 30px 35px 20px 35px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        .header { border-bottom: 2px solid #01a9ac; padding-bottom: 15px; margin-bottom: 20px; }
-        .header-left { float: left; }
-        .header-right { float: right; text-align: right; }
-        .clearfix::after { content: ''; display: table; clear: both; }
+        body {
+            font-family: 'DejaVu Sans', sans-serif;
+            font-size: 12px;
+            color: #333;
+            padding: 30px 35px 20px 35px;
+        }
 
-        .doctor-name { font-size: 18px; font-weight: bold; color: #01a9ac; }
-        .cabinet-info { font-size: 11px; color: #666; margin-top: 5px; }
+        .header {
+            border-bottom: 2px solid #01a9ac;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
 
-        .patient-box { background: #f8f9fa; border-left: 3px solid #01a9ac; padding: 10px;
-                       margin-bottom: 15px; }
+        .header-left {
+            float: left;
+        }
 
-        .title { font-size: 16px; font-weight: bold; color: #01a9ac; text-align: center;
-                 margin-bottom: 15px; padding: 8px; border: 1px solid #01a9ac; }
+        .header-right {
+            float: right;
+            text-align: right;
+        }
 
-        .info-line { font-size: 11px; color: #555; margin-bottom: 3px; }
+        .clearfix::after {
+            content: '';
+            display: table;
+            clear: both;
+        }
 
-        table.params { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        table.params th { background: #01a9ac; color: #fff; padding: 6px 8px; font-size: 11px;
-                          text-align: left; border: 1px solid #019a9c; }
-        table.params td { padding: 6px 8px; border: 1px solid #ddd; font-size: 11px; }
-        table.params tr:nth-child(even) { background: #f8f9fa; }
+        .doctor-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #01a9ac;
+        }
 
-        .clinical-box { margin-top: 15px; padding: 10px; background: #fffbea; border-left: 3px solid #f4a100; }
+        .cabinet-info {
+            font-size: 11px;
+            color: #666;
+            margin-top: 5px;
+        }
 
-        .footer { margin-top: 40px; border-top: 1px solid #ddd; padding-top: 15px; }
-        .date-city { font-size: 11px; color: #666; }
+        .patient-box {
+            background: #f8f9fa;
+            border-left: 3px solid #01a9ac;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #01a9ac;
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 8px;
+            border: 1px solid #01a9ac;
+        }
+
+        .info-line {
+            font-size: 11px;
+            color: #555;
+            margin-bottom: 3px;
+        }
+
+        table.params {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table.params th {
+            background: #01a9ac;
+            color: #fff;
+            padding: 6px 8px;
+            font-size: 8px;
+            text-align: left;
+            border: 1px solid #019a9c;
+        }
+
+        table.params td {
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            font-size: 8px;
+        }
+
+        table.params tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .clinical-box {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fffbea;
+            border-left: 3px solid #f4a100;
+        }
+
+        .footer {
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+
+        .date-city {
+            font-size: 11px;
+            color: #666;
+        }
     </style>
 </head>
-<body>
+
+<body style="padding-top:140px;">
     {{-- En-tête Médecin --}}
-    <div class="header clearfix">
+    {{-- <div class="header clearfix">
         <div class="header-left">
             <div class="doctor-name">Dr. {{ $labTest->doctor->name }}</div>
-            @if($labTest->doctor->speciality)
+            @if ($labTest->doctor->speciality)
                 <div class="cabinet-info">{{ $labTest->doctor->speciality }}</div>
             @endif
-            @if($labTest->doctor->license_number)
+            @if ($labTest->doctor->license_number)
                 <div class="cabinet-info">N° RPPS: {{ $labTest->doctor->license_number }}</div>
             @endif
             <div class="cabinet-info">Cabinet Médical — CabiMed</div>
@@ -53,30 +137,49 @@
                 Date: {{ $labTest->requested_at->format('d/m/Y') }}
             </div>
         </div>
-    </div>
+    </div> --}}
 
     {{-- Patient --}}
-    <div class="patient-box">
-        <strong>Patient(e) :</strong> {{ $labTest->patient->full_name }}<br>
-        <span style="font-size:11px;">
-            Âge: {{ $labTest->patient->age }} ans —
-            Dossier: {{ $labTest->patient->dossier_number }}
-            @if($labTest->patient->blood_group)
-                — Groupe sanguin: {{ $labTest->patient->blood_group }}
-            @endif
-        </span>
-    </div>
+    <table style="width:100%;">
+        <tr>
+            <td style="width:50%; vertical-align:top;">
+                <div class="patient-box">
+                    <strong>Patient(e) :</strong> {{ $labTest->patient->full_name }}<br>
+                    <span style="font-size:9px;">
+                        Âge: {{ $labTest->patient->age }} ans
+                        @if ($labTest->patient->blood_group)
+                            — Groupe sanguin: {{ $labTest->patient->blood_group }}
+                        @endif
+                        <br>
+                        Dossier: {{ $labTest->patient->dossier_number }}
+                    </span>
+                </div>
+            </td>
+            <td style="width:50%; vertical-align:top;">
+                <div class="patient-box">
+                    <div style="font-size: 11px; color: #666;">
+                        Demande N°: <strong>{{ $labTest->request_number }}</strong><br>
+                        Date: {{ $labTest->requested_at->format('d/m/Y') }}
+                        <br>
+                        .
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
 
     {{-- Titre --}}
     <div class="title">DEMANDE D'ANALYSES BIOLOGIQUES</div>
+    
 
     {{-- Laboratoire --}}
-    @if($labTest->laboratory_name)
+    @if ($labTest->laboratory_name)
         <div class="info-line"><strong>Laboratoire :</strong> {{ $labTest->laboratory_name }}</div>
     @endif
 
     {{-- Tableau des paramètres demandés --}}
-    @if($labTest->results->count())
+    @if ($labTest->results->count())
         <table class="params">
             <thead>
                 <tr>
@@ -87,19 +190,21 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($labTest->results as $result)
+                @foreach ($labTest->results as $result)
                     <tr>
                         <td style="text-align: center;">{{ $loop->iteration }}</td>
                         <td>
                             <strong>{{ $result->parameter_name }}</strong>
-                            @if($result->notes)
+                            @if ($result->notes)
                                 <br><em style="color: #888; font-size: 10px;">{{ $result->notes }}</em>
                             @endif
                         </td>
-                        <td style="font-size: 10px; color: #666;">
-                            @if($result->normal_min !== null && $result->normal_max !== null)
+                        <td style="font-size: 8px; color: #666;">
+                            @if ($result->normal_min !== null && $result->normal_max !== null)
                                 {{ $result->normal_min }} - {{ $result->normal_max }}
-                                @if($result->unit) {{ $result->unit }} @endif
+                                @if ($result->unit)
+                                    {{ $result->unit }}
+                                @endif
                             @elseif($result->unit)
                                 {{ $result->unit }}
                             @else
@@ -118,7 +223,7 @@
     @endif
 
     {{-- Renseignements cliniques --}}
-    @if($labTest->clinical_info)
+    @if ($labTest->clinical_info)
         <div class="clinical-box">
             <strong>Renseignements cliniques :</strong><br>
             {{ $labTest->clinical_info }}
@@ -126,14 +231,14 @@
     @endif
 
     {{-- Signature et cachet --}}
-    <div class="footer">
+    {{-- <div class="footer">
         <div class="clearfix">
             <div class="date-city" style="float: left;">
                 Fait à ____________, le {{ $labTest->requested_at->format('d/m/Y') }}
             </div>
             <div style="float: right; text-align: center;">
                 <p style="font-size: 11px; color: #666;">Signature & Cachet du médecin</p>
-                @if($labTest->doctor->signature_path)
+                @if ($labTest->doctor->signature_path)
                     <img src="{{ storage_path('app/public/' . $labTest->doctor->signature_path) }}"
                          style="max-height: 60px;" alt="Signature">
                 @else
@@ -141,6 +246,7 @@
                 @endif
             </div>
         </div>
-    </div>
+    </div> --}}
 </body>
+
 </html>

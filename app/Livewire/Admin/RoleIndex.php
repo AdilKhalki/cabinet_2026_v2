@@ -20,14 +20,17 @@ class RoleIndex extends Component
 
     // Groupes de permissions pour l'affichage
     public const PERMISSION_GROUPS = [
-        'Patients'      => ['view patients', 'create patients', 'edit patients', 'delete patients'],
-        'Consultations' => ['view consultations', 'create consultations', 'edit consultations', 'delete consultations'],
-        'Ordonnances'   => ['view prescriptions', 'create prescriptions', 'print prescriptions'],
-        'Analyses'      => ['view lab-tests', 'create lab-tests', 'edit lab-tests'],
-        'Paiements'     => ['view payments', 'create payments', 'edit payments', 'delete payments'],
-        'Documents'     => ['view documents', 'upload documents', 'delete documents'],
-        'Rapports'      => ['view reports', 'generate reports'],
-        'Administration'=> ['manage users', 'manage roles', 'manage medications', 'view activity-log'],
+        'Patients'        => ['view patients', 'create patients', 'edit patients', 'delete patients'],
+        'Rendez-vous'     => ['view appointments', 'create appointments', 'edit appointments', 'delete appointments'],
+        'Consultations'   => ['view consultations', 'create consultations', 'edit consultations', 'delete consultations'],
+        'Ordonnances'     => ['view prescriptions', 'create prescriptions', 'print prescriptions'],
+        'Analyses'        => ['view lab-tests', 'create lab-tests', 'edit lab-tests'],
+        'Imagerie'        => ['view medical-images', 'create medical-images', 'edit medical-images', 'delete medical-images'],
+        'Rapports Méd.'   => ['view medical-reports', 'create medical-reports', 'edit medical-reports', 'delete medical-reports', 'print medical-reports'],
+        'Paiements'       => ['view payments', 'create payments', 'edit payments', 'delete payments'],
+        'Documents'       => ['view documents', 'upload documents', 'delete documents'],
+        'Rapports Fin.'   => ['view reports', 'generate reports'],
+        'Administration'  => ['manage users', 'manage roles', 'manage medications', 'view activity-log'],
     ];
 
     #[Computed]

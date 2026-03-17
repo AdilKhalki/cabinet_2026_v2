@@ -10,9 +10,11 @@
         <div class="card-header">
             <h5><i class="feather icon-file-text"></i> Rapports Médicaux</h5>
             <div class="card-header-right">
+                @can('create', App\Models\MedicalReport::class)
                 <a href="{{ route('medical-reports.create') }}" class="btn btn-primary btn-sm">
                     <i class="feather icon-plus"></i> Nouveau rapport
                 </a>
+                @endcan
             </div>
         </div>
         <div class="card-block">
@@ -82,15 +84,19 @@
                                     <a href="{{ route('medical-reports.pdf', $report) }}" target="_blank" class="btn btn-secondary btn-sm" title="Télécharger PDF">
                                         <i class="feather icon-file"></i> PDF
                                     </a>
+                                    @can('update', $report)
                                     <a href="{{ route('medical-reports.edit', $report) }}" class="btn btn-warning btn-sm" title="Modifier">
                                         <i class="feather icon-edit"></i>
                                     </a>
+                                    @endcan
+                                    @can('delete', $report)
                                     <button type="button"
                                         wire:click="delete({{ $report->id }})"
                                         wire:confirm="Êtes-vous sûr de vouloir supprimer ce rapport ?"
                                         class="btn btn-danger btn-sm" title="Supprimer">
                                         <i class="feather icon-trash-2"></i>
                                     </button>
+                                    @endcan
                                 </td>
                             </tr>
                         @empty

@@ -42,9 +42,11 @@
                     <input type="date" class="form-control" wire:model.live="periodTo" placeholder="Au">
                 </div>
                 <div class="col-md-2 text-right">
+                    @can('create', App\Models\Payment::class)
                     <button wire:click="openForm" class="btn btn-primary btn-sm">
                         <i class="feather icon-plus"></i> Nouveau Paiement
                     </button>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -64,12 +66,7 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label>Patient <span class="text-danger">*</span></label>
-                        <select class="form-control" wire:model="patient_id">
-                            <option value="">-- Sélectionner --</option>
-                            @foreach($patients as $pat)
-                                <option value="{{ $pat->id }}">{{ $pat->full_name }} ({{ $pat->dossier_number }})</option>
-                            @endforeach
-                        </select>
+                        <x-patient-search-select :patients="$patients" />
                         @error('patient_id') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
                 </div>
@@ -277,14 +274,18 @@
                                    target="_blank" class="btn btn-primary btn-sm" title="PDF">
                                     <i class="feather icon-printer"></i>
                                 </a>
+                                @can('update', $payment)
                                 <button wire:click="openEdit({{ $payment->id }})"
                                         class="btn btn-warning btn-sm" title="Modifier">
                                     <i class="feather icon-edit"></i>
                                 </button>
+                                @endcan
+                                @can('delete', $payment)
                                 <button wire:click="confirmDelete({{ $payment->id }})"
                                         class="btn btn-danger btn-sm" title="Supprimer">
                                     <i class="feather icon-trash-2"></i>
                                 </button>
+                                @endcan
                             </td>
                         </tr>
                     @empty

@@ -10,9 +10,11 @@
         <div class="card-header">
             <h5><i class="feather icon-thermometer"></i> Analyses & Résultats de Laboratoire</h5>
             <div class="card-header-right">
+                @can('create', App\Models\LabTest::class)
                 <a href="{{ route('lab-tests.create') }}" class="btn btn-primary btn-sm">
                     <i class="feather icon-plus"></i> Nouvelle demande
                 </a>
+                @endcan
             </div>
         </div>
         <div class="card-block">
@@ -84,7 +86,8 @@
                                     <a href="{{ route('lab-tests.pdf', $test) }}" class="btn btn-warning btn-sm" title="Imprimer demande" target="_blank">
                                         <i class="feather icon-printer"></i>
                                     </a>
-                                    <a href="{{ route('lab-tests.create') }}?edit={{ $test->id }}" class="btn btn-primary btn-sm" title="Modifier">
+                                    @can('update', $test)
+                                    <a href="{{ route('lab-tests.edit', $test->id) }}" class="btn btn-warning btn-sm" title="Modifier">
                                         <i class="feather icon-edit"></i>
                                     </a>
                                     @if($test->status === 'requested')
@@ -93,6 +96,7 @@
                                             <i class="feather icon-check"></i>
                                         </button>
                                     @endif
+                                    @endcan
                                 </td>
                             </tr>
                         @empty

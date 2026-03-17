@@ -9,14 +9,14 @@ use Livewire\Component;
 
 class ConsultationForm extends Component
 {
-    public ?Consultation $consultation = null;
+    public ?int $consultationId = null;
     public ?int $appointmentId = null;
     public bool $isEdit = false;
 
     // Champs
     public int|string $patient_id = '';
     public int|string $doctor_id = '';
-    public int|string $appointment_id = '';
+    public int|string|null $appointment_id = null;
     public string $consultation_type = 'general';
     public string $consultation_date = '';
     public string $reason = '';
@@ -62,7 +62,7 @@ class ConsultationForm extends Component
         ];
     }
 
-    public function mount(?Consultation $consultation = null, ?int $appointmentId = null): void
+    public function mount($consultation = null, ?int $appointmentId = null): void
     {
         $this->consultation_date = now()->format('Y-m-d\TH:i');
         $this->doctor_id = auth()->user()->isMedecin() ? auth()->id() : '';
@@ -80,10 +80,34 @@ class ConsultationForm extends Component
             $this->consultation_type = $appt->consultation_type;
         }
 
-        if ($consultation && $consultation->exists) {
-            $this->consultation = $consultation;
+        if ($consultation) {
+            $record = $consultation instanceof Consultation
+                ? $consultation
+                : Consultation::findOrFail($consultation);
+
+            $this->consultationId = $record->id;
             $this->isEdit = true;
-            $this->fill($consultation->toArray());
+            $this->patient_id = $record->patient_id;
+            $this->doctor_id = $record->doctor_id;
+            $this->appointment_id = $record->appointment_id;
+            $this->consultation_type = $record->consultation_type ?? 'general';
+            $this->consultation_date = $record->consultation_date?->format('Y-m-d\TH:i') ?? now()->format('Y-m-d\TH:i');
+            $this->reason = $record->reason ?? '';
+            $this->symptoms = $record->symptoms ?? '';
+            $this->clinical_exam = $record->clinical_exam ?? '';
+            $this->weight_kg = $record->weight_kg ?? '';
+            $this->height_cm = $record->height_cm ?? '';
+            $this->blood_pressure = $record->blood_pressure ?? '';
+            $this->heart_rate = $record->heart_rate ?? '';
+            $this->temperature = $record->temperature ?? '';
+            $this->spo2 = $record->spo2 ?? '';
+            $this->diagnosis = $record->diagnosis ?? '';
+            $this->icd10_code = $record->icd10_code ?? '';
+            $this->treatment_plan = $record->treatment_plan ?? '';
+            $this->doctor_notes = $record->doctor_notes ?? '';
+            $this->summary = $record->summary ?? '';
+            $this->followup_required = (bool) $record->followup_required;
+            $this->followup_date = $record->followup_date?->format('Y-m-d') ?? '';
         }
     }
 
@@ -117,12 +141,11 @@ class ConsultationForm extends Component
         ];
 
         if ($this->isEdit) {
-            $this->consultation->update($data);
-            $consultation = $this->consultation;
+            $consultation = Consultation::findOrFail($this->consultationId);
+            $consultation->update($data);
             session()->flash('success', 'Consultation mise à jour.');
         } else {
             $consultation = Consultation::create($data);
-            // Mettre à jour le statut du RDV si lié
             if ($this->appointment_id) {
                 \App\Models\Appointment::findOrFail($this->appointment_id)
                     ->update(['status' => 'completed', 'ended_at' => now()]);

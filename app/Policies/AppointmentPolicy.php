@@ -9,30 +9,26 @@ class AppointmentPolicy
 {
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->hasPermissionTo('view appointments');
     }
 
     public function view(User $user, Appointment $appointment): bool
     {
-        if ($user->hasRole('admin')) return true;
-        if ($user->hasRole('medecin')) return $appointment->doctor_id === $user->id;
-        return $user->hasRole('secretaire');
+        return $user->hasPermissionTo('view appointments');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'medecin', 'secretaire']);
+        return $user->hasPermissionTo('create appointments');
     }
 
     public function update(User $user, Appointment $appointment): bool
     {
-        if ($user->hasRole('admin')) return true;
-        if ($user->hasRole('medecin')) return $appointment->doctor_id === $user->id;
-        return $user->hasRole('secretaire');
+        return $user->hasPermissionTo('edit appointments');
     }
 
     public function delete(User $user, Appointment $appointment): bool
     {
-        return $user->hasAnyRole(['admin', 'secretaire']);
+        return $user->hasPermissionTo('delete appointments');
     }
 }

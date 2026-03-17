@@ -29,12 +29,7 @@
                             <div class="col-md-6">
                                 <div class="form-group {{ $errors->has('patient_id') ? 'has-error' : '' }}">
                                     <label>Patient <span class="text-danger">*</span></label>
-                                    <select wire:model="patient_id" class="form-control">
-                                        <option value="">-- Sélectionner un patient --</option>
-                                        @foreach($patients as $patient)
-                                            <option value="{{ $patient->id }}">{{ $patient->full_name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <x-patient-search-select :patients="$patients" />
                                     @error('patient_id')<span class="help-block text-danger">{{ $message }}</span>@enderror
                                 </div>
                             </div>

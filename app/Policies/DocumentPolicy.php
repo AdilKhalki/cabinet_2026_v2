@@ -9,26 +9,26 @@ class DocumentPolicy
 {
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->hasPermissionTo('view documents');
     }
 
     public function view(User $user, Document $document): bool
     {
-        return true;
+        return $user->hasPermissionTo('view documents');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'medecin', 'secretaire']);
+        return $user->hasPermissionTo('upload documents');
     }
 
     public function update(User $user, Document $document): bool
     {
-        return $user->hasAnyRole(['admin', 'medecin']);
+        return $user->hasPermissionTo('upload documents');
     }
 
     public function delete(User $user, Document $document): bool
     {
-        return $user->hasAnyRole(['admin', 'medecin']);
+        return $user->hasPermissionTo('delete documents');
     }
 }

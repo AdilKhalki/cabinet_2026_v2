@@ -10,9 +10,11 @@
         <div class="card-header">
             <h5><i class="feather icon-folder"></i> Documents</h5>
             <div class="card-header-right">
+                @can('create', App\Models\Document::class)
                 <a href="{{ route('documents.create') }}" class="btn btn-primary btn-sm">
                     <i class="feather icon-plus"></i> Nouveau document
                 </a>
+                @endcan
             </div>
         </div>
         <div class="card-block">
@@ -99,15 +101,19 @@
                                             <i class="feather icon-download"></i>
                                         </a>
                                     @endif
+                                    @can('update', $document)
                                     <a href="{{ route('documents.edit', $document) }}" class="btn btn-warning btn-xs" title="Modifier">
                                         <i class="feather icon-edit"></i>
                                     </a>
+                                    @endcan
+                                    @can('delete', $document)
                                     <button type="button"
                                         wire:click="delete({{ $document->id }})"
                                         wire:confirm="Êtes-vous sûr de vouloir supprimer ce document ?"
                                         class="btn btn-danger btn-xs" title="Supprimer">
                                         <i class="feather icon-trash-2"></i>
                                     </button>
+                                    @endcan
                                 </td>
                             </tr>
                         @empty

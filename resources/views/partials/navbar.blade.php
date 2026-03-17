@@ -8,7 +8,7 @@
             <a href="{{ route('home') }}">
                 <img class="img-fluid" src="{{ asset('adminty/images/logo.png') }}" alt="Cabinet Médical"
                     style="max-height:40px;">
-                <span class="f-w-600" style="color:#fff; font-size:16px; margin-left:8px;">CabiMed</span>
+                <span class="f-w-600" style="color:#fff; font-size:16px; margin-left:8px;">{{ config('app.name', 'MISAHATI') }}</span>
             </a>
             <a class="mobile-options">
                 <i class="feather icon-more-horizontal"></i>
