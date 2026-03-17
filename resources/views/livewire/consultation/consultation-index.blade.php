@@ -55,7 +55,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="m-t-15">{{ $this->consultations->links() }}</div>
+            <div class="m-t-15">{{ $this->consultations->links('pagination::bootstrap-5') }}</div>
         </div>
     </div>
 </div>

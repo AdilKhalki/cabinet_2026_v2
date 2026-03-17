@@ -139,7 +139,7 @@
                     </div>
                     <i class="feather icon-save"></i> Enregistrer les paramètres
                 </button>
-                <a href="{{ route('dashboard') }}" class="btn btn-default m-l-10">
+                <a href="{{ route('home') }}" class="btn btn-default m-l-10">
                     Annuler
                 </a>
             </div>

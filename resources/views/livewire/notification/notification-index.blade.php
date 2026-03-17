@@ -144,7 +144,7 @@
             </div>
 
             <div class="m-t-20">
-                {{ $notifications->links() }}
+                {{ $notifications->links('pagination::bootstrap-5') }}
             </div>
 
         </div>

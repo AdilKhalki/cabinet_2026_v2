@@ -87,7 +87,7 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <button type="button" wire:click="saveInline" class="btn btn-success btn-xs" title="Sauvegarder">
+                                        <button type="button" wire:click="save" class="btn btn-success btn-xs" title="Sauvegarder">
                                             <i class="feather icon-check"></i>
                                         </button>
                                         <button type="button" wire:click="cancelEdit" class="btn btn-default btn-xs" title="Annuler">
@@ -110,7 +110,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <button type="button" wire:click="edit({{ $act->id }})" class="btn btn-warning btn-xs" title="Modifier">
+                                        <button type="button" wire:click="openEdit({{ $act->id }})" class="btn btn-warning btn-xs" title="Modifier">
                                             <i class="feather icon-edit"></i>
                                         </button>
                                         <button type="button"
@@ -178,7 +178,7 @@
             </div>
 
             <div class="m-t-20">
-                {{ $medicalActs->links() }}
+                {{ $medicalActs->links('pagination::bootstrap-5') }}
             </div>
 
         </div>

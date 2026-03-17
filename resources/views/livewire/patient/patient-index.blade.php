@@ -171,7 +171,10 @@
                 <p class="text-muted">
                     {{ $this->patients->total() }} patient(s) au total
                 </p>
-                {{ $this->patients->links() }}
+                <div class="d-flex justify-content-center">
+
+                    {{ $this->patients->links('pagination::bootstrap-5') }}
+                </div>
             </div>
 
         </div>

@@ -16,7 +16,7 @@
         <div class="card-header">
             <h5><i class="feather icon-users"></i> Gestion des Utilisateurs</h5>
             <div class="card-header-right">
-                <button type="button" wire:click="openCreateModal" class="btn btn-primary btn-sm">
+                <button type="button" wire:click="openCreate" class="btn btn-primary btn-sm">
                     <i class="feather icon-user-plus"></i> Nouvel utilisateur
                 </button>
             </div>
@@ -77,11 +77,11 @@
                                 <td>{{ $user->email }}</td>
                                 <td>
                                     @php
-                                        $roleColors = ['admin'=>'label-danger','doctor'=>'label-primary','secretary'=>'label-info','nurse'=>'label-success'];
+                                        $roleColors = ['admin'=>'bg-danger','medecin'=>'bg-warning','secretaire'=>'bg-info','nurse'=>'bg-success'];
                                         $roleName = $user->roles->first()->name ?? '—';
-                                        $roleColor = $roleColors[$roleName] ?? 'label-default';
+                                        $roleColor = $roleColors[$roleName] ?? 'bg-dark';
                                     @endphp
-                                    <span class="label {{ $roleColor }}">{{ $roleName }}</span>
+                                    <span class="badge {{ $roleColor }}">{{ $roleName }}</span>
                                 </td>
                                 <td>{{ $user->phone ?? '—' }}</td>
                                 <td>{{ $user->speciality ?? '—' }}</td>
@@ -93,7 +93,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <button type="button" wire:click="openEditModal({{ $user->id }})" class="btn btn-warning btn-xs" title="Modifier">
+                                    <button type="button" wire:click="openEdit({{ $user->id }})" class="btn btn-warning btn-xs" title="Modifier">
                                         <i class="feather icon-edit"></i>
                                     </button>
                                     <button type="button"
@@ -123,7 +123,7 @@
             </div>
 
             <div class="m-t-20">
-                {{ $users->links() }}
+                {{ $users->links('pagination::bootstrap-5') }}
             </div>
 
         </div>
@@ -139,7 +139,7 @@
                             <i class="feather icon-user"></i>
                             {{ $editingUserId ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}
                         </h4>
-                        <button type="button" class="close" wire:click="closeModal">×</button>
+                        <button type="button" class="close" wire:click="$set('showModal', false)">×</button>
                     </div>
                     <div class="modal-body">
                         <form wire:submit="saveUser">
@@ -221,7 +221,7 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" wire:click="closeModal">
+                        <button type="button" class="btn btn-default" wire:click="$set('showModal', false)">
                             <i class="feather icon-x"></i> Annuler
                         </button>
                         <button type="button" class="btn btn-primary" wire:click="saveUser" wire:loading.attr="disabled">

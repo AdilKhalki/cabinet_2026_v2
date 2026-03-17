@@ -31,6 +31,10 @@ class DocumentForm extends Component
     {
         $this->document_date = today()->format('Y-m-d');
 
+        if ($patientId = request()->query('patient')) {
+            $this->patient_id = (int) $patientId;
+        }
+
         if ($document && $document->exists) {
             $this->document         = $document;
             $this->isEdit           = true;

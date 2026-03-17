@@ -13,12 +13,14 @@ class PatientShow extends Component
     public function mount(Patient $patient): void
     {
         $this->patient = $patient->load([
-            'consultations.prescriptions',
+            'consultations',
+            'prescriptions.lines',
+            'prescriptions.doctor',
             'appointments',
             'medicalHistories',
             'labTests.results',
-            'medicalImages',
-            'documents',
+            'medicalImages.doctor',
+            'documents.uploadedBy',
             'payments',
             'medicalReports',
         ]);

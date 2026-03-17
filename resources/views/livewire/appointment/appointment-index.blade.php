@@ -229,9 +229,9 @@
                             {{-- Type --}}
                             <td>
                                 @php
-                                    $typeColors = ['general'=>'label-default','specialized'=>'label-primary','followup'=>'label-info','emergency'=>'label-danger','control'=>'label-warning','teleconsultation'=>'bg-c-blue'];
+                                    $typeColors = ['general'=>'bg-dark','specialized'=>'bg-primary','followup'=>'bg-info','emergency'=>'bg-danger','control'=>'bg-warning','teleconsultation'=>'bg-c-blue'];
                                 @endphp
-                                <span class="label {{ $typeColors[$appt->consultation_type] ?? 'label-default' }}" style="font-size:11px;">
+                                <span class="badge {{ $typeColors[$appt->consultation_type] ?? 'bg-default' }}" style="font-size:11px;">
                                     {{ \App\Models\Appointment::TYPE_LABELS[$appt->consultation_type] ?? $appt->consultation_type }}
                                 </span>
                                 @if($appt->notes)
@@ -248,42 +248,43 @@
                             </td>
 
                             {{-- Statut + changement rapide --}}
-                            <td>
-                                <span class="label {{ \App\Models\Appointment::STATUS_COLORS[$appt->status] ?? 'label-default' }}">
-                                    {{ \App\Models\Appointment::STATUS_LABELS[$appt->status] ?? $appt->status }}
-                                </span>
+                            <td class="text-center">
+
 
                                 {{-- Boutons de changement de statut rapide --}}
                                 @if($appt->status === 'planned' || $appt->status === 'confirmed')
                                     <div class="m-t-5">
                                         <button wire:click="updateStatus({{ $appt->id }}, 'confirmed')"
-                                                class="btn btn-xs btn-info m-b-2" title="Confirmer" style="font-size:10px; {{ $appt->status === 'confirmed' ? 'opacity:0.5' : '' }}">
+                                                class="btn btn-sm btn-info m-b-2" title="Confirmer" style="font-size:10px; {{ $appt->status === 'confirmed' ? 'opacity:0.5' : '' }}">
                                             <i class="feather icon-check"></i>
                                         </button>
                                         <button wire:click="updateStatus({{ $appt->id }}, 'waiting')"
-                                                class="btn btn-xs btn-warning m-b-2" title="Arrivé en salle d'attente" style="font-size:10px;">
+                                                class="btn btn-sm btn-warning m-b-2" title="Arrivé en salle d'attente" style="font-size:10px;">
                                             <i class="feather icon-user-check"></i>
                                         </button>
                                         <button wire:click="updateStatus({{ $appt->id }}, 'cancelled')"
-                                                class="btn btn-xs btn-danger m-b-2" title="Annuler" style="font-size:10px;">
+                                                class="btn btn-sm btn-danger m-b-2" title="Annuler" style="font-size:10px;">
                                             <i class="feather icon-x"></i>
                                         </button>
                                     </div>
                                 @elseif($appt->status === 'waiting')
                                     <div class="m-t-5">
                                         <button wire:click="updateStatus({{ $appt->id }}, 'in_progress')"
-                                                class="btn btn-xs btn-primary" title="Démarrer la consultation" style="font-size:10px;">
+                                                class="btn btn-sm btn-primary" title="Démarrer la consultation" style="font-size:10px;">
                                             <i class="feather icon-play"></i> Démarrer
                                         </button>
                                     </div>
                                 @elseif($appt->status === 'in_progress')
                                     <div class="m-t-5">
                                         <button wire:click="updateStatus({{ $appt->id }}, 'completed')"
-                                                class="btn btn-xs btn-success" title="Terminer" style="font-size:10px;">
+                                                class="btn btn-sm btn-success" title="Terminer" style="font-size:10px;">
                                             <i class="feather icon-check-circle"></i> Terminer
                                         </button>
                                     </div>
                                 @endif
+                                <span class="label {{ \App\Models\Appointment::STATUS_COLORS[$appt->status] ?? 'label-default' }}">
+                                    {{ \App\Models\Appointment::STATUS_LABELS[$appt->status] ?? $appt->status }}
+                                </span>
                             </td>
 
                             {{-- Actions --}}
@@ -291,12 +292,12 @@
                                 {{-- Créer une consultation depuis le RDV --}}
                                 @if(in_array($appt->status, ['confirmed','waiting','in_progress']) && !$appt->consultation)
                                     <a href="{{ route('consultations.create', ['appointmentId' => $appt->id]) }}"
-                                       class="btn btn-xs btn-success m-b-2" title="Créer consultation">
+                                       class="btn btn-sm btn-success m-b-2" title="Créer consultation">
                                         <i class="feather icon-activity"></i>
                                     </a>
                                 @elseif($appt->consultation)
                                     <a href="{{ route('consultations.show', $appt->consultation) }}"
-                                       class="btn btn-xs btn-info m-b-2" title="Voir consultation">
+                                       class="btn btn-sm btn-info m-b-2" title="Voir consultation">
                                         <i class="feather icon-eye"></i>
                                     </a>
                                 @endif
@@ -304,14 +305,14 @@
                                 {{-- Modifier --}}
                                 @if(!in_array($appt->status, ['completed','cancelled','no_show']))
                                     <button wire:click="openForm({{ $appt->id }})"
-                                            class="btn btn-xs btn-warning m-b-2" title="Modifier">
+                                            class="btn btn-sm btn-warning m-b-2" title="Modifier">
                                         <i class="feather icon-edit"></i>
                                     </button>
                                 @endif
 
                                 {{-- Supprimer --}}
                                 <button wire:click="confirmDelete({{ $appt->id }})"
-                                        class="btn btn-xs btn-danger m-b-2" title="Supprimer">
+                                        class="btn btn-sm btn-danger m-b-2" title="Supprimer">
                                     <i class="feather icon-trash-2"></i>
                                 </button>
                             </td>
@@ -322,7 +323,7 @@
             </div>
 
             <div class="m-t-15">
-                {{ $appointments->links() }}
+                {{ $appointments->links('pagination::bootstrap-5') }}
             </div>
 
             @else

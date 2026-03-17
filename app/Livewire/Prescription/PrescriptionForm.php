@@ -23,6 +23,19 @@ class PrescriptionForm extends Component
     {
         $this->prescribed_at = today()->format('Y-m-d');
         $this->doctor_id = auth()->user()->isMedecin() ? auth()->id() : '';
+
+        if ($patientId = request()->query('patient')) {
+            $this->patient_id = (int) $patientId;
+        }
+
+        if ($doctorId = request()->query('doctor')) {
+            $this->doctor_id = (int) $doctorId;
+        }
+
+        if ($consultationId = request()->query('consultation')) {
+            $this->consultation_id = (int) $consultationId;
+        }
+
         $this->addLine();
     }
 

@@ -38,26 +38,19 @@
         <div class="ball-scale">
             <div class="contain">
                 @for ($i = 0; $i < 10; $i++)
-                    <div class="ring"><div class="frame"></div></div>
+                    <div class="ring">
+                        <div class="frame"></div>
+                    </div>
                 @endfor
             </div>
         </div>
     </div>
 
-    <div id="pcoded" class="pcoded"
-         nav-type="st2"
-         theme-layout="vertical"
-         vertical-placement="left"
-         vertical-layout="wide"
-         pcoded-device-type="desktop"
-         vertical-nav-type="expanded"
-         vertical-effect="shrink"
-         vnavigation-view="view1"
-         fream-type="theme1"
-         sidebar-img="false"
-         sidebar-img-type="img1"
-         layout-type="light">
+    <div id="pcoded" class="pcoded" nav-type="st2" theme-layout="vertical" vertical-placement="left"
+        vertical-layout="wide" pcoded-device-type="desktop" vertical-nav-type="expanded" vertical-effect="shrink"
+        vnavigation-view="view1" fream-type="theme1" sidebar-img="false" sidebar-img-type="img1" layout-type="light">
         <div class="pcoded-overlay-box"></div>
+
         <div class="pcoded-container navbar-wrapper">
 
             {{-- NAVBAR --}}
@@ -85,7 +78,8 @@
                                                     <div class="page-header-title">
                                                         <div class="d-inline">
                                                             @isset($headerIcon)
-                                                                <i class="feather {{ $headerIcon }} bg-c-blue update-card text-white"></i>
+                                                                <i
+                                                                    class="feather {{ $headerIcon }} bg-c-blue update-card text-white"></i>
                                                             @endisset
                                                             <div class="d-inline">
                                                                 <h4>{{ $header }}</h4>
@@ -100,17 +94,19 @@
                                                     <div class="page-header-breadcrumb">
                                                         <ul class="breadcrumb-title">
                                                             <li class="breadcrumb-item">
-                                                                <a href="{{ route('dashboard') }}">
+                                                                <a href="{{ route('home') }}">
                                                                     <i class="feather icon-home"></i>
                                                                 </a>
                                                             </li>
                                                             @isset($breadcrumbs)
-                                                                @foreach($breadcrumbs as $bc)
-                                                                    <li class="breadcrumb-item {{ $loop->last ? 'active' : '' }}">
-                                                                        @if($loop->last)
+                                                                @foreach ($breadcrumbs as $bc)
+                                                                    <li
+                                                                        class="breadcrumb-item {{ $loop->last ? 'active' : '' }}">
+                                                                        @if ($loop->last)
                                                                             {{ $bc['label'] }}
                                                                         @else
-                                                                            <a href="{{ $bc['url'] ?? '#' }}">{{ $bc['label'] }}</a>
+                                                                            <a
+                                                                                href="{{ $bc['url'] ?? '#' }}">{{ $bc['label'] }}</a>
                                                                         @endif
                                                                     </li>
                                                                 @endforeach
@@ -124,20 +120,21 @@
 
                                     {{-- CONTENU --}}
                                     {{ $slot }}
+                                    {{-- FOOTER --}}
 
                                 </div>
                             </div>
                         </div>
+                        {{-- FOOTER --}}
+                        {{-- @include('partials.footer') --}}
                     </div>
                     {{-- FIN CONTENU PRINCIPAL --}}
 
+
                 </div>
             </div>
-
         </div>
     </div>
-
-    {{-- FOOTER --}}
     @include('partials.footer')
 
     {{-- Scripts de base (chargés UNE SEULE FOIS) --}}
@@ -161,4 +158,5 @@
     @stack('scripts')
 
 </body>
+
 </html>

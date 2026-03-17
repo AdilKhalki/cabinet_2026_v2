@@ -59,28 +59,28 @@
                                 </td>
                                 <td>Dr. {{ $p->doctor->name ?? '-' }}</td>
                                 <td>{{ $p->prescribed_at ? \Carbon\Carbon::parse($p->prescribed_at)->format('d/m/Y') : $p->created_at->format('d/m/Y') }}</td>
-                                <td>
-                                    <span class="label label-info">{{ $p->lines->count() }} méd.</span>
+                                <td class="text-center">
+                                    <span class="badge bg-info">{{ $p->lines->count() }} méd.</span>
                                 </td>
                                 <td class="text-center">
                                     @if($p->is_printed)
-                                        <span class="label label-success"><i class="feather icon-check"></i> Oui</span>
+                                        <span class="badge bg-success"><i class="feather icon-check"></i> Oui</span>
                                     @else
-                                        <span class="label label-default">Non</span>
+                                        <span class="badge bg-warning">Non</span>
                                     @endif
                                 </td>
                                 <td>
                                     <a href="{{ route('prescriptions.show', $p->id) }}"
-                                       class="btn btn-info btn-xs" title="Voir">
+                                       class="btn btn-info btn-sm" title="Voir">
                                         <i class="feather icon-eye"></i>
                                     </a>
                                     <a href="{{ route('prescriptions.pdf', $p->id) }}"
                                        target="_blank"
-                                       class="btn btn-primary btn-xs" title="PDF">
+                                       class="btn btn-primary btn-sm" title="PDF">
                                         <i class="feather icon-printer"></i>
                                     </a>
                                     <button wire:click="confirmDelete({{ $p->id }})"
-                                            class="btn btn-danger btn-xs" title="Supprimer">
+                                            class="btn btn-danger btn-sm" title="Supprimer">
                                         <i class="feather icon-trash-2"></i>
                                     </button>
                                 </td>
@@ -99,7 +99,7 @@
 
             {{-- Pagination --}}
             <div class="m-t-10">
-                {{ $this->prescriptions->links() }}
+                {{ $this->prescriptions->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>

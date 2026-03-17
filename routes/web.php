@@ -13,14 +13,16 @@ use App\Livewire\Patient\PatientShow;
 use App\Livewire\Payment\PaymentIndex;
 use Illuminate\Support\Facades\Route;
 
-// Page d'accueil
-Route::view('/', 'welcome')->name('home');
+
+//Route::view('/','pages.auth.login2')->name('login2');
 
 // Routes protégées
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Page d'accueil
+    //Route::view('/', 'dashboard')->name('home');
 
     // Dashboard
-    Route::get('/dashboard', DashboardStats::class)->name('dashboard');
+    Route::get('/', DashboardStats::class)->name('home');
 
     // ── Patients ──────────────────────────────────────────────
     Route::prefix('patients')->name('patients.')->group(function () {
@@ -60,6 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', \App\Livewire\LabTest\LabTestIndex::class)->name('index');
         Route::get('/create', \App\Livewire\LabTest\LabTestForm::class)->name('create');
         Route::get('/{labTest}/edit', \App\Livewire\LabTest\LabTestForm::class)->name('edit');
+        Route::get('/{labTest}/pdf', [\App\Http\Controllers\LabTestController::class, 'pdf'])->name('pdf');
         Route::get('/{labTest}', \App\Livewire\LabTest\LabTestShow::class)->name('show');
     });
 
@@ -102,12 +105,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Notifications ──────────────────────────────────────────
     Route::get('/notifications', \App\Livewire\Notification\NotificationIndex::class)->name('notifications.index');
 
+    // ── Actes Médicaux ─────────────────────────────────────────
+    Route::get('/medical-acts', \App\Livewire\Admin\MedicalActIndex::class)->name('medical-acts.index');
+
+    // ── Médicaments ──────────────────────────────────────────
+    Route::get('/medications', \App\Livewire\Admin\MedicationIndex::class)->name('medications.index');
+
     // ── Administration (admin uniquement) ──────────────────────
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::get('/users', \App\Livewire\Admin\UserIndex::class)->name('users.index');
         Route::get('/roles', \App\Livewire\Admin\RoleIndex::class)->name('roles.index');
-        Route::get('/medical-acts', \App\Livewire\Admin\MedicalActIndex::class)->name('medical-acts.index');
-        Route::get('/medications', \App\Livewire\Admin\MedicationIndex::class)->name('medications.index');
         Route::get('/activity-log', \App\Livewire\Admin\ActivityLog::class)->name('activity-log');
         Route::get('/settings', \App\Livewire\Admin\CabinetSettings::class)->name('settings');
     });
@@ -119,7 +126,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/medications/search', [\App\Http\Controllers\Api\MedicationApiController::class, 'search'])
             ->name('medications.search');
     });
-
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';

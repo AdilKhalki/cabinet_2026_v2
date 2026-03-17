@@ -71,12 +71,12 @@
                 @foreach([
                     'overview'       => ['icon'=>'icon-eye',       'label'=>'Vue d\'ensemble'],
                     'consultations'  => ['icon'=>'icon-activity',   'label'=>'Consultations ('.count($patient->consultations).')'],
-                    'prescriptions'  => ['icon'=>'icon-file-text',  'label'=>'Ordonnances'],
-                    'lab-tests'      => ['icon'=>'icon-thermometer','label'=>'Analyses'],
-                    'images'         => ['icon'=>'icon-image',      'label'=>'Imagerie'],
+                    'prescriptions'  => ['icon'=>'icon-file-text',  'label'=>'Ordonnances ('.count($patient->prescriptions).')'],
+                    'lab-tests'      => ['icon'=>'icon-thermometer','label'=>'Analyses ('.count($patient->labTests).')'],
+                    'images'         => ['icon'=>'icon-image',      'label'=>'Imagerie ('.count($patient->medicalImages).')'],
                     'history'        => ['icon'=>'icon-clock',      'label'=>'Antécédents'],
-                    'documents'      => ['icon'=>'icon-folder',     'label'=>'Documents'],
-                    'payments'       => ['icon'=>'icon-credit-card','label'=>'Paiements'],
+                    'documents'      => ['icon'=>'icon-folder',     'label'=>'Documents ('.count($patient->documents).')'],
+                    'payments'       => ['icon'=>'icon-credit-card','label'=>'Paiements ('.count($patient->payments).')'],
                 ] as $tab => $info)
                     <li class="{{ $activeTab === $tab ? 'active' : '' }}">
                         <a href="#" wire:click.prevent="setTab('{{ $tab }}')" style="border-radius:0;">
@@ -213,6 +213,253 @@
             </div>
         @endif
 
+        {{-- Ordonnances --}}
+        @if($activeTab === 'prescriptions')
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="feather icon-file-text"></i> Ordonnances</h5>
+                    <div class="card-header-right">
+                        <a href="{{ route('prescriptions.create', ['patient' => $patient->id]) }}"
+                           class="btn btn-primary btn-sm">
+                            <i class="feather icon-plus"></i> Nouvelle ordonnance
+                        </a>
+                    </div>
+                </div>
+                <div class="card-block">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>N° Ordonnance</th>
+                                    <th>Date</th>
+                                    <th>Médecin</th>
+                                    <th>Médicaments</th>
+                                    <th>Validité</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($patient->prescriptions as $prescription)
+                                    <tr>
+                                        <td><strong>{{ $prescription->prescription_number }}</strong></td>
+                                        <td>{{ $prescription->prescribed_at->format('d/m/Y') }}</td>
+                                        <td>{{ $prescription->doctor->name }}</td>
+                                        <td>
+                                            @foreach($prescription->lines as $line)
+                                                <span class="label label-default m-b-2" style="display:inline-block;">{{ $line->medication_name }}</span>
+                                            @endforeach
+                                            @if($prescription->lines->isEmpty())
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($prescription->valid_until)
+                                                <span class="{{ $prescription->valid_until->isPast() ? 'text-danger' : 'text-success' }}">
+                                                    {{ $prescription->valid_until->format('d/m/Y') }}
+                                                </span>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('prescriptions.show', $prescription) }}"
+                                               class="btn btn-info btn-xs" title="Voir">
+                                                <i class="feather icon-eye"></i>
+                                            </a>
+                                            <a href="{{ route('prescriptions.pdf', $prescription) }}"
+                                               class="btn btn-warning btn-xs" title="PDF" target="_blank">
+                                                <i class="feather icon-printer"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="6" class="text-center text-muted">Aucune ordonnance</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Analyses --}}
+        @if($activeTab === 'lab-tests')
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="feather icon-thermometer"></i> Analyses Biologiques</h5>
+                    <div class="card-header-right">
+                        <a href="{{ route('lab-tests.create', ['patient' => $patient->id]) }}"
+                           class="btn btn-primary btn-sm">
+                            <i class="feather icon-plus"></i> Nouvelle analyse
+                        </a>
+                    </div>
+                </div>
+                <div class="card-block">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>N° Demande</th>
+                                    <th>Date demande</th>
+                                    <th>Laboratoire</th>
+                                    <th>Résultats</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($patient->labTests as $labTest)
+                                    <tr>
+                                        <td><strong>{{ $labTest->request_number }}</strong></td>
+                                        <td>{{ $labTest->requested_at->format('d/m/Y') }}</td>
+                                        <td>{{ $labTest->laboratory_name ?? '—' }}</td>
+                                        <td>{{ $labTest->results->count() }} résultat(s)</td>
+                                        <td>
+                                            <span class="label label-{{ match($labTest->status) {
+                                                'completed' => 'success',
+                                                'requested' => 'info',
+                                                'pending' => 'warning',
+                                                'cancelled' => 'danger',
+                                                default => 'default'
+                                            } }}">
+                                                {{ match($labTest->status) {
+                                                    'requested' => 'Demandé',
+                                                    'pending' => 'En attente',
+                                                    'completed' => 'Terminé',
+                                                    'cancelled' => 'Annulé',
+                                                    default => $labTest->status
+                                                } }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('lab-tests.show', $labTest) }}"
+                                               class="btn btn-info btn-xs" title="Voir">
+                                                <i class="feather icon-eye"></i>
+                                            </a>
+                                            <a href="{{ route('lab-tests.pdf', $labTest) }}"
+                                               class="btn btn-warning btn-xs" title="Imprimer" target="_blank">
+                                                <i class="feather icon-printer"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="6" class="text-center text-muted">Aucune analyse</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Imagerie --}}
+        @if($activeTab === 'images')
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="feather icon-image"></i> Imagerie Médicale</h5>
+                    <div class="card-header-right">
+                        <a href="{{ route('medical-images.create', ['patient' => $patient->id]) }}"
+                           class="btn btn-primary btn-sm">
+                            <i class="feather icon-plus"></i> Nouvelle imagerie
+                        </a>
+                    </div>
+                </div>
+                <div class="card-block">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Catégorie</th>
+                                    <th>Titre</th>
+                                    <th>Partie du corps</th>
+                                    <th>Médecin</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($patient->medicalImages as $image)
+                                    <tr>
+                                        <td>{{ $image->image_date?->format('d/m/Y') ?? '—' }}</td>
+                                        <td>
+                                            <span class="label label-info">
+                                                {{ \App\Models\MedicalImage::CATEGORY_LABELS[$image->category] ?? $image->category }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $image->title }}</td>
+                                        <td>{{ $image->body_part ?? '—' }}</td>
+                                        <td>{{ $image->doctor->name ?? '—' }}</td>
+                                        <td>
+                                            <a href="{{ route('medical-images.show', $image) }}"
+                                               class="btn btn-info btn-xs" title="Voir">
+                                                <i class="feather icon-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="6" class="text-center text-muted">Aucune imagerie</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Documents --}}
+        @if($activeTab === 'documents')
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="feather icon-folder"></i> Documents</h5>
+                    <div class="card-header-right">
+                        <a href="{{ route('documents.create', ['patient' => $patient->id]) }}"
+                           class="btn btn-primary btn-sm">
+                            <i class="feather icon-plus"></i> Nouveau document
+                        </a>
+                    </div>
+                </div>
+                <div class="card-block">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Catégorie</th>
+                                    <th>Titre</th>
+                                    <th>Fichier</th>
+                                    <th>Taille</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($patient->documents as $document)
+                                    <tr>
+                                        <td>{{ $document->document_date?->format('d/m/Y') ?? '—' }}</td>
+                                        <td>
+                                            <span class="label label-primary">
+                                                {{ \App\Models\Document::CATEGORY_LABELS[$document->category] ?? $document->category }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $document->title }}</td>
+                                        <td>{{ $document->file_name ?? '—' }}</td>
+                                        <td>{{ $document->file_size_formatted }}</td>
+                                        <td>
+                                            <a href="{{ $document->file_url }}"
+                                               class="btn btn-info btn-xs" title="Télécharger" target="_blank">
+                                                <i class="feather icon-download"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="6" class="text-center text-muted">Aucun document</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- Antécédents --}}
         @if($activeTab === 'history')
             <div class="card">
@@ -303,6 +550,7 @@
                 </div>
             </div>
         @endif
+
 
     </div>
 </div>

@@ -18,7 +18,7 @@
 
             {{-- Tableau de bord --}}
             <li class="{{ $isActive('dashboard') ? 'active' : '' }}">
-                <a href="{{ route('dashboard') }}">
+                <a href="{{ route('home') }}">
                     <span class="pcoded-micon"><i class="feather icon-home"></i></span>
                     <span class="pcoded-mtext">Tableau de bord</span>
                 </a>
@@ -106,6 +106,22 @@
                 </a>
             </li>
 
+            {{-- Actes Médicaux --}}
+            <li class="{{ $isActive('medical-acts') ? 'pcoded-trigger active' : '' }}">
+                <a href="{{ route('medical-acts.index') }}">
+                    <span class="pcoded-micon"><i class="feather icon-list"></i></span>
+                    <span class="pcoded-mtext">Actes Médicaux</span>
+                </a>
+            </li>
+
+            {{-- Médicaments --}}
+            <li class="{{ $isActive('medications') ? 'pcoded-trigger active' : '' }}">
+                <a href="{{ route('medications.index') }}">
+                    <span class="pcoded-micon"><i class="feather icon-package"></i></span>
+                    <span class="pcoded-mtext">Médicaments</span>
+                </a>
+            </li>
+
         </ul>
 
         {{-- FINANCE --}}
@@ -164,20 +180,6 @@
                         </a>
                     </li>
                 </ul>
-            </li>
-
-            <li class="{{ $isActive('admin.medical-acts') ? 'pcoded-trigger active' : '' }}">
-                <a href="{{ route('admin.medical-acts.index') }}">
-                    <span class="pcoded-micon"><i class="feather icon-list"></i></span>
-                    <span class="pcoded-mtext">Actes Médicaux</span>
-                </a>
-            </li>
-
-            <li class="{{ $isActive('admin.medications') ? 'pcoded-trigger active' : '' }}">
-                <a href="{{ route('admin.medications.index') }}">
-                    <span class="pcoded-micon"><i class="feather icon-package"></i></span>
-                    <span class="pcoded-mtext">Médicaments</span>
-                </a>
             </li>
 
             <li class="{{ $isActive('admin.activity-log') ? 'pcoded-trigger active' : '' }}">

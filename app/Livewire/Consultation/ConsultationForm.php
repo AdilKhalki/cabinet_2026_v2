@@ -67,6 +67,10 @@ class ConsultationForm extends Component
         $this->consultation_date = now()->format('Y-m-d\TH:i');
         $this->doctor_id = auth()->user()->isMedecin() ? auth()->id() : '';
 
+        if ($patientId = request()->query('patient')) {
+            $this->patient_id = (int) $patientId;
+        }
+
         if ($appointmentId) {
             $appt = \App\Models\Appointment::findOrFail($appointmentId);
             $this->appointmentId = $appointmentId;

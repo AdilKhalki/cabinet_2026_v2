@@ -10,7 +10,7 @@
         <div class="card-header">
             <h5><i class="feather icon-pie-chart"></i> Statistiques du Cabinet</h5>
             <div class="card-header-right">
-                <a href="{{ route('dashboard') }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('home') }}" class="btn btn-primary btn-sm">
                     <i class="feather icon-home"></i> Tableau de bord
                 </a>
             </div>

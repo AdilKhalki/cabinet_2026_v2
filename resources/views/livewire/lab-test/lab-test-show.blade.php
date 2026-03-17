@@ -19,6 +19,9 @@
                         <i class="feather icon-file"></i> Voir PDF
                     </a>
                 @endif
+                <a href="{{ route('lab-tests.pdf', $labTest) }}" target="_blank" class="btn btn-primary btn-sm">
+                    <i class="feather icon-printer"></i> Imprimer demande
+                </a>
                 <a href="{{ route('lab-tests.edit', $labTest) }}" class="btn btn-warning btn-sm">
                     <i class="feather icon-edit"></i> Modifier
                 </a>

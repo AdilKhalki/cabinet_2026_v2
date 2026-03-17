@@ -59,7 +59,7 @@
                                 <td>{{ $test->requested_at->format('d/m/Y') }}</td>
                                 <td>
                                     @if($test->results->count() > 0)
-                                        <span class="label label-default">{{ $test->results->count() }} param.</span>
+                                        <span class="label label-info" style="color: #000000;">{{ $test->results->count() }} param.</span>
                                         @if($critical > 0)
                                             <span class="label label-danger">{{ $critical }} critique(s)</span>
                                         @elseif($abnormal > 0)
@@ -78,15 +78,18 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('lab-tests.show', $test) }}" class="btn btn-info btn-xs">
+                                    <a href="{{ route('lab-tests.show', $test) }}" class="btn btn-info btn-sm" title="Voir">
                                         <i class="feather icon-eye"></i>
                                     </a>
-                                    <a href="{{ route('lab-tests.create') }}?edit={{ $test->id }}" class="btn btn-primary btn-xs">
+                                    <a href="{{ route('lab-tests.pdf', $test) }}" class="btn btn-warning btn-sm" title="Imprimer demande" target="_blank">
+                                        <i class="feather icon-printer"></i>
+                                    </a>
+                                    <a href="{{ route('lab-tests.create') }}?edit={{ $test->id }}" class="btn btn-primary btn-sm" title="Modifier">
                                         <i class="feather icon-edit"></i>
                                     </a>
                                     @if($test->status === 'requested')
                                         <button wire:click="updateStatus({{ $test->id }}, 'completed')"
-                                                class="btn btn-success btn-xs" title="Marquer complété">
+                                                class="btn btn-success btn-sm" title="Marquer complété">
                                             <i class="feather icon-check"></i>
                                         </button>
                                     @endif
@@ -98,7 +101,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="m-t-15">{{ $this->labTests->links() }}</div>
+            <div class="m-t-15">{{ $this->labTests->links('pagination::bootstrap-5') }}</div>
         </div>
     </div>
 </div>

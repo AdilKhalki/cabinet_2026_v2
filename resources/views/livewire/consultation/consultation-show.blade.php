@@ -37,7 +37,7 @@
                     </p>
                 </div>
                 <div class="col-md-6 text-right">
-                    <a href="{{ route('prescriptions.create', ['consultation_id' => $consultation->id]) }}"
+                    <a href="{{ route('prescriptions.create', ['patient' => $consultation->patient_id, 'doctor' => $consultation->doctor_id, 'consultation' => $consultation->id]) }}"
                        class="btn btn-success btn-sm m-r-5">
                         <i class="feather icon-file-text"></i> Nouvelle Ordonnance
                     </a>

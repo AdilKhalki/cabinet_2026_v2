@@ -56,39 +56,39 @@
                         @forelse($reports as $report)
                             @php
                                 $typeColors = [
-                                    'sick_leave'          => 'label-warning',
-                                    'fitness_certificate' => 'label-success',
-                                    'medical_certificate' => 'label-info',
-                                    'referral'            => 'label-primary',
-                                    'prescription'        => 'label-default',
-                                    'surgery_report'      => 'label-danger',
-                                    'hospitalization'     => 'label-danger',
-                                    'other'               => 'label-default',
+                                    'sick_leave'          => 'bg-warning',
+                                    'fitness_certificate' => 'bg-success',
+                                    'medical_certificate' => 'bg-info',
+                                    'referral'            => 'bg-primary',
+                                    'prescription'        => 'bg-default text-dark',
+                                    'surgery_report'      => 'bg-danger',
+                                    'hospitalization'     => 'bg-danger',
+                                    'other'               => 'bg-default text-dark',
                                 ];
-                                $typeColor = $typeColors[$report->type] ?? 'label-default';
+                                $typeColor = $typeColors[$report->type] ?? 'badge bg-default text-dark';
                                 $typeLabel = $types[$report->type] ?? $report->type;
                             @endphp
                             <tr>
                                 <td><strong>{{ $report->report_number ?? ('RPT-' . str_pad($report->id, 5, '0', STR_PAD_LEFT)) }}</strong></td>
                                 <td>{{ $report->patient->full_name ?? '—' }}</td>
-                                <td><span class="label {{ $typeColor }}">{{ $typeLabel }}</span></td>
+                                <td><span class="badge {{ $typeColor }}">{{ $typeLabel }}</span></td>
                                 <td>{{ $report->title }}</td>
                                 <td>{{ $report->report_date ? \Carbon\Carbon::parse($report->report_date)->format('d/m/Y') : '—' }}</td>
                                 <td>{{ $report->doctor->name ?? '—' }}</td>
                                 <td>
-                                    <a href="{{ route('medical-reports.show', $report) }}" class="btn btn-info btn-xs" title="Voir">
+                                    <a href="{{ route('medical-reports.show', $report) }}" class="btn btn-info btn-sm" title="Voir">
                                         <i class="feather icon-eye"></i>
                                     </a>
-                                    <a href="{{ route('medical-reports.pdf', $report) }}" target="_blank" class="btn btn-default btn-xs" title="Télécharger PDF">
+                                    <a href="{{ route('medical-reports.pdf', $report) }}" target="_blank" class="btn btn-secondary btn-sm" title="Télécharger PDF">
                                         <i class="feather icon-file"></i> PDF
                                     </a>
-                                    <a href="{{ route('medical-reports.edit', $report) }}" class="btn btn-warning btn-xs" title="Modifier">
+                                    <a href="{{ route('medical-reports.edit', $report) }}" class="btn btn-warning btn-sm" title="Modifier">
                                         <i class="feather icon-edit"></i>
                                     </a>
                                     <button type="button"
                                         wire:click="delete({{ $report->id }})"
                                         wire:confirm="Êtes-vous sûr de vouloir supprimer ce rapport ?"
-                                        class="btn btn-danger btn-xs" title="Supprimer">
+                                        class="btn btn-danger btn-sm" title="Supprimer">
                                         <i class="feather icon-trash-2"></i>
                                     </button>
                                 </td>
@@ -106,7 +106,7 @@
             </div>
 
             <div class="m-t-20">
-                {{ $reports->links() }}
+                {{ $reports->links('pagination::bootstrap-5') }}
             </div>
 
         </div>

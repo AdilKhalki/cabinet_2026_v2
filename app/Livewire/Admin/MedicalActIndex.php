@@ -20,17 +20,11 @@ class MedicalActIndex extends Component
 
     public int $perPage = 15;
 
-    public bool $showModal = false;
     public ?int $editingId = null;
-    public ?int $confirmingDeleteId = null;
+    public bool $creatingNew = false;
 
-    public string $code = '';
-    public string $name = '';
-    public string $description = '';
-    public string $category = '';
-    public string $price = '';
-    public string $duration_minutes = '30';
-    public bool $is_active = true;
+    public array $editForm = [];
+    public array $newForm = [];
 
     public function updatingSearch(): void { $this->resetPage(); }
     public function updatingCategoryFilter(): void { $this->resetPage(); }
@@ -53,81 +47,98 @@ class MedicalActIndex extends Component
         return MedicalAct::distinct()->orderBy('category')->pluck('category')->filter();
     }
 
-    public function openCreate(): void
+    public function addNew(): void
     {
-        $this->reset(['editingId', 'code', 'name', 'description', 'category', 'price']);
-        $this->duration_minutes = '30';
-        $this->is_active = true;
-        $this->showModal = true;
+        $this->cancelEdit();
+        $this->creatingNew = true;
+        $this->newForm = [
+            'code' => '',
+            'name' => '',
+            'category' => '',
+            'price' => '',
+            'duration_minutes' => '30',
+            'is_active' => '1',
+        ];
     }
 
     public function openEdit(int $id): void
     {
+        $this->creatingNew = false;
         $act = MedicalAct::findOrFail($id);
         $this->editingId = $id;
-        $this->code = $act->code ?? '';
-        $this->name = $act->name;
-        $this->description = $act->description ?? '';
-        $this->category = $act->category ?? '';
-        $this->price = (string) $act->price;
-        $this->duration_minutes = (string) $act->duration_minutes;
-        $this->is_active = $act->is_active;
-        $this->showModal = true;
+        $this->editForm = [
+            'code' => $act->code ?? '',
+            'name' => $act->name,
+            'category' => $act->category ?? '',
+            'price' => (string) $act->price,
+            'duration_minutes' => (string) $act->duration_minutes,
+            'is_active' => $act->is_active ? '1' : '0',
+        ];
+    }
+
+    public function cancelEdit(): void
+    {
+        $this->editingId = null;
+        $this->editForm = [];
     }
 
     public function save(): void
     {
         $this->validate([
-            'code'             => 'nullable|string|max:20|unique:medical_acts,code' . ($this->editingId ? ",{$this->editingId}" : ''),
-            'name'             => 'required|string|max:255',
-            'category'         => 'nullable|string|max:100',
-            'price'            => 'required|numeric|min:0',
-            'duration_minutes' => 'required|integer|min:5',
-            'is_active'        => 'boolean',
+            'editForm.code'             => 'nullable|string|max:20|unique:medical_acts,code,' . $this->editingId,
+            'editForm.name'             => 'required|string|max:255',
+            'editForm.category'         => 'nullable|string|max:100',
+            'editForm.price'            => 'required|numeric|min:0',
+            'editForm.duration_minutes' => 'required|integer|min:5',
+            'editForm.is_active'        => 'boolean',
         ]);
 
-        $data = [
-            'code'             => $this->code ?: null,
-            'name'             => $this->name,
-            'description'      => $this->description ?: null,
-            'category'         => $this->category ?: null,
-            'price'            => $this->price,
-            'duration_minutes' => $this->duration_minutes,
-            'is_active'        => $this->is_active,
-        ];
+        MedicalAct::findOrFail($this->editingId)->update([
+            'code'             => $this->editForm['code'] ?: null,
+            'name'             => $this->editForm['name'],
+            'category'         => $this->editForm['category'] ?: null,
+            'price'            => $this->editForm['price'],
+            'duration_minutes' => $this->editForm['duration_minutes'],
+            'is_active'        => $this->editForm['is_active'],
+        ]);
 
-        if ($this->editingId) {
-            MedicalAct::findOrFail($this->editingId)->update($data);
-            session()->flash('success', 'Acte médical mis à jour.');
-        } else {
-            MedicalAct::create($data);
-            session()->flash('success', 'Acte médical créé.');
-        }
-
-        $this->showModal = false;
+        session()->flash('success', 'Acte médical mis à jour.');
+        $this->cancelEdit();
         unset($this->acts);
     }
 
-    public function toggleActive(int $id): void
+    public function saveNew(): void
     {
-        $act = MedicalAct::findOrFail($id);
-        $act->update(['is_active' => !$act->is_active]);
+        $this->validate([
+            'newForm.code'             => 'nullable|string|max:20|unique:medical_acts,code',
+            'newForm.name'             => 'required|string|max:255',
+            'newForm.category'         => 'nullable|string|max:100',
+            'newForm.price'            => 'required|numeric|min:0',
+            'newForm.duration_minutes' => 'required|integer|min:5',
+            'newForm.is_active'        => 'boolean',
+        ]);
+
+        MedicalAct::create([
+            'code'             => $this->newForm['code'] ?: null,
+            'name'             => $this->newForm['name'],
+            'category'         => $this->newForm['category'] ?: null,
+            'price'            => $this->newForm['price'],
+            'duration_minutes' => $this->newForm['duration_minutes'],
+            'is_active'        => $this->newForm['is_active'],
+        ]);
+
+        session()->flash('success', 'Acte médical créé.');
+        $this->creatingNew = false;
+        $this->newForm = [];
         unset($this->acts);
     }
 
-    public function confirmDelete(int $id): void { $this->confirmingDeleteId = $id; }
-
-    public function delete(): void
+    public function delete(int $id): void
     {
-        if ($this->confirmingDeleteId) {
-            MedicalAct::findOrFail($this->confirmingDeleteId)->delete();
-            session()->flash('success', 'Acte supprimé.');
-            $this->confirmingDeleteId = null;
-            unset($this->acts);
-        }
+        MedicalAct::findOrFail($id)->delete();
+        session()->flash('success', 'Acte supprimé.');
+        unset($this->acts);
     }
-
-    public function cancelDelete(): void { $this->confirmingDeleteId = null; }
 
     public function render()
     {
@@ -135,7 +146,7 @@ class MedicalActIndex extends Component
             'medicalActs' => $this->acts,
             'categories'  => $this->categories,
             'editingId'   => $this->editingId,
-            'creatingNew' => $this->showModal && !$this->editingId,
+            'creatingNew' => $this->creatingNew,
         ])->layout('layouts.cabinet', [
             'title'      => 'Actes Médicaux',
             'header'     => 'Actes Médicaux',

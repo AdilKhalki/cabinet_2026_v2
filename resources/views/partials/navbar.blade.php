@@ -5,7 +5,7 @@
             <a class="mobile-menu" id="mobile-collapse" href="#!">
                 <i class="feather icon-menu"></i>
             </a>
-            <a href="{{ route('dashboard') }}">
+            <a href="{{ route('home') }}">
                 <img class="img-fluid" src="{{ asset('adminty/images/logo.png') }}" alt="Cabinet Médical"
                     style="max-height:40px;">
                 <span class="f-w-600" style="color:#fff; font-size:16px; margin-left:8px;">CabiMed</span>

@@ -22,6 +22,9 @@ class ActivityLog extends Component
     public string $causerFilter = '';
 
     #[Url]
+    public string $actionFilter = '';
+
+    #[Url]
     public string $dateFrom = '';
 
     #[Url]
@@ -38,6 +41,7 @@ class ActivityLog extends Component
     public function updatingSearch(): void { $this->resetPage(); }
     public function updatingSubjectFilter(): void { $this->resetPage(); }
     public function updatingCauserFilter(): void { $this->resetPage(); }
+    public function updatingActionFilter(): void { $this->resetPage(); }
     public function updatingDateFrom(): void { $this->resetPage(); }
     public function updatingDateTo(): void { $this->resetPage(); }
 
@@ -48,6 +52,7 @@ class ActivityLog extends Component
             ->when($this->search, fn($q) => $q->where('description', 'like', "%{$this->search}%"))
             ->when($this->subjectFilter, fn($q) => $q->where('subject_type', 'like', "%{$this->subjectFilter}%"))
             ->when($this->causerFilter, fn($q) => $q->where('causer_id', $this->causerFilter)->where('causer_type', 'App\Models\User'))
+            ->when($this->actionFilter, fn($q) => $q->where('event', $this->actionFilter))
             ->when($this->dateFrom, fn($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('created_at', '<=', $this->dateTo))
             ->orderByDesc('created_at')
@@ -65,6 +70,7 @@ class ActivityLog extends Component
         $this->search = '';
         $this->subjectFilter = '';
         $this->causerFilter = '';
+        $this->actionFilter = '';
         $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
         $this->dateTo = now()->format('Y-m-d');
         $this->resetPage();
@@ -76,13 +82,7 @@ class ActivityLog extends Component
             'logs'             => $this->logs,
             'causers'          => $this->causers,
             'users'            => $this->causers,
-            'availableActions' => [
-                ''         => 'Toutes les actions',
-                'created'  => 'Créé',
-                'updated'  => 'Modifié',
-                'deleted'  => 'Supprimé',
-                'restored' => 'Restauré',
-            ],
+            'availableActions' => ['created', 'updated', 'deleted', 'restored'],
             'actionColors'     => [
                 'created'  => 'label-success',
                 'updated'  => 'label-warning',

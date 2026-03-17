@@ -52,6 +52,10 @@ class LabTestForm extends Component
         $this->requested_at = today()->format('Y-m-d');
         $this->doctor_id = auth()->user()->isMedecin() ? auth()->id() : '';
 
+        if ($patientId = request()->query('patient')) {
+            $this->patient_id = (int) $patientId;
+        }
+
         if ($labTest && $labTest->exists) {
             $this->labTest = $labTest->load('results');
             $this->isEdit = true;

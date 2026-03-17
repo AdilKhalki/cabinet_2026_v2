@@ -131,7 +131,7 @@
                             </td>
                             <td class="text-center">
                                 @if(count($lines) > 1)
-                                <button wire:click="removeLine({{ $i }})" class="btn btn-danger btn-xs">
+                                <button wire:click="removeLine({{ $i }})" class="btn btn-danger btn-sm">
                                     <i class="feather icon-trash-2"></i>
                                 </button>
                                 @endif
@@ -249,7 +249,7 @@
                     <tbody>
                     @forelse($this->payments as $payment)
                         @php
-                            $statusColors = ['paid'=>'label-success','partial'=>'label-warning','pending'=>'label-danger','cancelled'=>'label-default','refunded'=>'label-info'];
+                            $statusColors = ['paid'=>'bg-success','partial'=>'bg-warning','pending'=>'bg-danger','cancelled'=>'bg-dark','refunded'=>'bg-info'];
                             $statusLabels = ['paid'=>'Payé','partial'=>'Partiel','pending'=>'Impayé','cancelled'=>'Annulé','refunded'=>'Remboursé'];
                             $methodLabels = ['cash'=>'Espèces','card'=>'Carte','transfer'=>'Virement','insurance'=>'Assurance','check'=>'Chèque'];
                         @endphp
@@ -268,21 +268,21 @@
                             </td>
                             <td>{{ $methodLabels[$payment->payment_method] ?? $payment->payment_method }}</td>
                             <td>
-                                <span class="label {{ $statusColors[$payment->status] ?? 'label-default' }}">
+                                <span class="badge {{ $statusColors[$payment->status] ?? 'label-default' }}">
                                     {{ $statusLabels[$payment->status] ?? $payment->status }}
                                 </span>
                             </td>
                             <td>
                                 <a href="{{ route('payments.pdf', $payment->id) }}"
-                                   target="_blank" class="btn btn-primary btn-xs" title="PDF">
+                                   target="_blank" class="btn btn-primary btn-sm" title="PDF">
                                     <i class="feather icon-printer"></i>
                                 </a>
                                 <button wire:click="openEdit({{ $payment->id }})"
-                                        class="btn btn-warning btn-xs" title="Modifier">
+                                        class="btn btn-warning btn-sm" title="Modifier">
                                     <i class="feather icon-edit"></i>
                                 </button>
                                 <button wire:click="confirmDelete({{ $payment->id }})"
-                                        class="btn btn-danger btn-xs" title="Supprimer">
+                                        class="btn btn-danger btn-sm" title="Supprimer">
                                     <i class="feather icon-trash-2"></i>
                                 </button>
                             </td>
@@ -299,7 +299,7 @@
                 </table>
             </div>
             <div class="m-t-10">
-                {{ $this->payments->links() }}
+                {{ $this->payments->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>

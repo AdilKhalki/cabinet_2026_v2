@@ -10,7 +10,7 @@
         <div class="card-header">
             <h5><i class="feather icon-package"></i> Médicaments</h5>
             <div class="card-header-right">
-                <button type="button" wire:click="openCreateModal" class="btn btn-primary btn-sm">
+                <button type="button" wire:click="openCreate" class="btn btn-primary btn-sm">
                     <i class="feather icon-plus"></i> Nouveau médicament
                 </button>
             </div>
@@ -22,7 +22,7 @@
                 <div class="col-md-6">
                     <div class="input-group">
                         <span class="input-group-addon"><i class="feather icon-search"></i></span>
-                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control" placeholder="Rechercher par nom, DCI, forme...">
+                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control" placeholder="Rechercher par nom, DCI...">
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -55,17 +55,17 @@
                             <tr>
                                 <td><strong>{{ $medication->name }}</strong></td>
                                 <td>{{ $medication->generic_name ?? '—' }}</td>
-                                <td>{{ $medication->form ?? '—' }}</td>
-                                <td>{{ $medication->dosage ?? '—' }}</td>
+                                <td>{{ $medication->dosage_form ?? '—' }}</td>
+                                <td>{{ $medication->strength ?? '—' }}</td>
                                 <td>
-                                    @if($medication->is_active ?? true)
+                                    @if($medication->is_active)
                                         <span class="label label-success">Actif</span>
                                     @else
                                         <span class="label label-danger">Inactif</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <button type="button" wire:click="openEditModal({{ $medication->id }})" class="btn btn-warning btn-xs" title="Modifier">
+                                    <button type="button" wire:click="openEdit({{ $medication->id }})" class="btn btn-warning btn-xs" title="Modifier">
                                         <i class="feather icon-edit"></i>
                                     </button>
                                     <button type="button"
@@ -89,88 +89,78 @@
             </div>
 
             <div class="m-t-20">
-                {{ $medications->links() }}
+                {{ $medications->links('pagination::bootstrap-5') }}
             </div>
 
         </div>
     </div>
 
-    {{-- Edit/Create Modal --}}
+    {{-- Modal Créer/Modifier --}}
     @if($showModal)
-        <div class="modal fade in" style="display: block; background: rgba(0,0,0,0.5);" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">
-                            <i class="feather icon-package"></i>
-                            {{ $editingMedicationId ? 'Modifier le médicament' : 'Nouveau médicament' }}
-                        </h4>
-                        <button type="button" class="close" wire:click="closeModal">×</button>
+        <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1050;display:flex;align-items:center;justify-content:center;">
+            <div style="background:#fff;border-radius:6px;width:550px;max-width:95%;max-height:90vh;overflow-y:auto;">
+                <div style="padding:15px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
+                    <h5 style="margin:0;">
+                        <i class="feather icon-package"></i>
+                        {{ $editingId ? 'Modifier le médicament' : 'Nouveau médicament' }}
+                    </h5>
+                    <button type="button" wire:click="closeModal" style="border:none;background:none;font-size:20px;cursor:pointer;">×</button>
+                </div>
+                <div style="padding:20px;">
+                    <div class="form-group {{ $errors->has('name') ? 'has-error' : '' }}">
+                        <label>Nom commercial <span class="text-danger">*</span></label>
+                        <input type="text" wire:model="name" class="form-control" placeholder="Ex: Doliprane">
+                        @error('name')<span class="help-block text-danger">{{ $message }}</span>@enderror
                     </div>
-                    <div class="modal-body">
-                        <div class="form-group {{ $errors->has('medForm.name') ? 'has-error' : '' }}">
-                            <label>Nom commercial <span class="text-danger">*</span></label>
-                            <input type="text" wire:model="medForm.name" class="form-control" placeholder="Ex: Doliprane">
-                            @error('medForm.name')<span class="help-block text-danger">{{ $message }}</span>@enderror
-                        </div>
-                        <div class="form-group {{ $errors->has('medForm.generic_name') ? 'has-error' : '' }}">
-                            <label>DCI (Dénomination Commune Internationale)</label>
-                            <input type="text" wire:model="medForm.generic_name" class="form-control" placeholder="Ex: Paracétamol">
-                            @error('medForm.generic_name')<span class="help-block text-danger">{{ $message }}</span>@enderror
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group {{ $errors->has('medForm.form') ? 'has-error' : '' }}">
-                                    <label>Forme galénique</label>
-                                    <select wire:model="medForm.form" class="form-control">
-                                        <option value="">-- Forme --</option>
-                                        <option value="Comprimé">Comprimé</option>
-                                        <option value="Gélule">Gélule</option>
-                                        <option value="Sirop">Sirop</option>
-                                        <option value="Injectable">Injectable</option>
-                                        <option value="Pommade">Pommade</option>
-                                        <option value="Suppositoire">Suppositoire</option>
-                                        <option value="Patch">Patch</option>
-                                        <option value="Collyre">Collyre</option>
-                                        <option value="Sachet">Sachet</option>
-                                        <option value="Spray">Spray</option>
-                                        <option value="Autre">Autre</option>
-                                    </select>
-                                    @error('medForm.form')<span class="help-block text-danger">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group {{ $errors->has('medForm.dosage') ? 'has-error' : '' }}">
-                                    <label>Dosage</label>
-                                    <input type="text" wire:model="medForm.dosage" class="form-control" placeholder="Ex: 500mg, 250mg/5ml">
-                                    @error('medForm.dosage')<span class="help-block text-danger">{{ $message }}</span>@enderror
-                                </div>
+                    <div class="form-group {{ $errors->has('generic_name') ? 'has-error' : '' }}">
+                        <label>DCI (Dénomination Commune Internationale)</label>
+                        <input type="text" wire:model="generic_name" class="form-control" placeholder="Ex: Paracétamol">
+                        @error('generic_name')<span class="help-block text-danger">{{ $message }}</span>@enderror
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Forme galénique</label>
+                                <select wire:model="dosage_form" class="form-control">
+                                    <option value="">-- Forme --</option>
+                                    <option value="Comprimé">Comprimé</option>
+                                    <option value="Gélule">Gélule</option>
+                                    <option value="Sirop">Sirop</option>
+                                    <option value="Injectable">Injectable</option>
+                                    <option value="Pommade">Pommade</option>
+                                    <option value="Suppositoire">Suppositoire</option>
+                                    <option value="Patch">Patch</option>
+                                    <option value="Collyre">Collyre</option>
+                                    <option value="Sachet">Sachet</option>
+                                    <option value="Spray">Spray</option>
+                                    <option value="Autre">Autre</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" wire:model="medForm.is_active"> Médicament actif
-                            </label>
-                        </div>
-                        <div class="form-group {{ $errors->has('medForm.notes') ? 'has-error' : '' }}">
-                            <label>Notes / Remarques</label>
-                            <textarea wire:model="medForm.notes" class="form-control" rows="2" placeholder="Informations complémentaires..."></textarea>
-                            @error('medForm.notes')<span class="help-block text-danger">{{ $message }}</span>@enderror
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Dosage</label>
+                                <input type="text" wire:model="strength" class="form-control" placeholder="Ex: 500mg, 250mg/5ml">
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" wire:click="closeModal">
-                            <i class="feather icon-x"></i> Annuler
-                        </button>
-                        <button type="button" class="btn btn-primary" wire:click="saveMedication" wire:loading.attr="disabled">
-                            <span wire:loading.remove wire:target="saveMedication">
-                                <i class="feather icon-save"></i> Enregistrer
-                            </span>
-                            <span wire:loading wire:target="saveMedication">
-                                <i class="feather icon-loader"></i> Enregistrement...
-                            </span>
-                        </button>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" wire:model="is_active"> Médicament actif
+                        </label>
                     </div>
+                    <div class="form-group">
+                        <label>Notes / Remarques</label>
+                        <textarea wire:model="description" class="form-control" rows="2" placeholder="Informations complémentaires..."></textarea>
+                    </div>
+                </div>
+                <div style="padding:15px 20px;border-top:1px solid #eee;text-align:right;">
+                    <button type="button" class="btn btn-default" wire:click="closeModal">
+                        <i class="feather icon-x"></i> Annuler
+                    </button>
+                    <button type="button" class="btn btn-primary" wire:click="save">
+                        <i class="feather icon-save"></i> Enregistrer
+                    </button>
                 </div>
             </div>
         </div>

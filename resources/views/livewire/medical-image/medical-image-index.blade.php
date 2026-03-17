@@ -107,7 +107,7 @@
                 </div>
 
                 <div class="m-t-20">
-                    {{ $medicalImages->links() }}
+                    {{ $medicalImages->links('pagination::bootstrap-5') }}
                 </div>
             @else
                 <div class="text-center p-30 text-muted">

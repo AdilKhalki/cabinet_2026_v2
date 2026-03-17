@@ -14,7 +14,7 @@
                 <button class="btn btn-default btn-sm" disabled title="Export à implémenter">
                     <i class="feather icon-download"></i> Exporter <small class="text-muted">(à implémenter)</small>
                 </button>
-                <a href="{{ route('dashboard') }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('home') }}" class="btn btn-primary btn-sm">
                     <i class="feather icon-home"></i> Tableau de bord
                 </a>
             </div>

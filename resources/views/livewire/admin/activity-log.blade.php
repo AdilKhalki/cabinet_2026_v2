@@ -10,7 +10,7 @@
         <div class="card-header">
             <h5><i class="feather icon-shield"></i> Journal d'Audit</h5>
             <div class="card-header-right">
-                <a href="{{ route('dashboard') }}" class="btn btn-default btn-sm">
+                <a href="{{ route('home') }}" class="btn btn-default btn-sm">
                     <i class="feather icon-home"></i> Tableau de bord
                 </a>
             </div>
@@ -56,7 +56,6 @@
                             <th style="width: 110px;">Action</th>
                             <th style="width: 130px;">Modèle</th>
                             <th>Description</th>
-                            <th style="width: 120px;">IP</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -67,26 +66,23 @@
                                     'updated'  => 'label-warning',
                                     'deleted'  => 'label-danger',
                                     'restored' => 'label-info',
-                                    'login'    => 'label-primary',
-                                    'logout'   => 'label-default',
-                                    'viewed'   => 'label-default',
                                 ];
-                                $actionColor = $actionColors[$log->action] ?? 'label-default';
+                                $actionColor = $actionColors[$log->event] ?? 'label-default';
                             @endphp
                             <tr>
                                 <td>
                                     <small>{{ $log->created_at ? $log->created_at->format('d/m/Y H:i:s') : '—' }}</small>
                                 </td>
                                 <td>
-                                    @if($log->user)
+                                    @if($log->causer)
                                         <i class="feather icon-user text-muted"></i>
-                                        {{ $log->user->full_name ?? $log->user->name }}
+                                        {{ $log->causer->full_name ?? $log->causer->name }}
                                     @else
                                         <span class="text-muted"><i class="feather icon-user-x"></i> Système</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="label {{ $actionColor }}">{{ $log->action ?? '—' }}</span>
+                                    <span class="label {{ $actionColor }}">{{ $log->event ?? '—' }}</span>
                                 </td>
                                 <td>
                                     @if($log->subject_type)
@@ -106,18 +102,15 @@
                                         <br>
                                         <small class="text-muted">
                                             @foreach(array_slice((array)$log->properties, 0, 3) as $key => $val)
-                                                <span class="label label-default" style="font-size:10px;">{{ $key }}: {{ is_scalar($val) ? $val : json_encode($val) }}</span>
+                                                <span class="badge bg-success" style="font-size:10px;">{{ $key }}: {{ is_scalar($val) ? $val : json_encode($val) }}</span>
                                             @endforeach
                                         </small>
                                     @endif
                                 </td>
-                                <td>
-                                    <small class="text-muted"><i class="feather icon-globe"></i> {{ $log->ip_address ?? '—' }}</small>
-                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted p-20">
+                                <td colspan="5" class="text-center text-muted p-20">
                                     <i class="feather icon-shield" style="font-size: 2em;"></i>
                                     <p>Aucun log d'audit trouvé.</p>
                                 </td>
@@ -128,7 +121,7 @@
             </div>
 
             <div class="m-t-20">
-                {{ $logs->links() }}
+                {{ $logs->links('pagination::bootstrap-5') }}
             </div>
 
         </div>

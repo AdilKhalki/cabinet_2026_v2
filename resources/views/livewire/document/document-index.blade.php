@@ -123,7 +123,7 @@
             </div>
 
             <div class="m-t-20">
-                {{ $documents->links() }}
+                {{ $documents->links('pagination::bootstrap-5') }}
             </div>
 
         </div>

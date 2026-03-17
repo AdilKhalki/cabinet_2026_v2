@@ -33,6 +33,10 @@ class MedicalImageForm extends Component
         $this->image_date = today()->format('Y-m-d');
         $this->doctor_id = auth()->user()->isMedecin() ? auth()->id() : '';
 
+        if ($patientId = request()->query('patient')) {
+            $this->patient_id = (int) $patientId;
+        }
+
         if ($medicalImage && $medicalImage->exists) {
             $this->medicalImage      = $medicalImage;
             $this->isEdit            = true;
