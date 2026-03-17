@@ -127,3 +127,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__ . '/settings.php';
+
+// Route temporaire pour vider le cache (à supprimer après usage)
+Route::get('/clear-cache-2026', function () {
+    Artisan::call('optimize:clear');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear');
+    Artisan::call('config:clear');
+    Artisan::call('event:clear');
+
+    // Supprimer le cache OPcache si disponible
+    if (function_exists('opcache_reset')) {
+        opcache_reset();
+    }
+
+    return 'Cache vidé avec succès ! Supprimez cette route après usage.';
+});

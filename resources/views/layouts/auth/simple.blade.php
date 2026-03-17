@@ -60,8 +60,10 @@
                 </div>
                 {{ $slot }}
             </div>
-            <div class="auth-footer">
+            <div class="auth-footer" style="color:darkblue">
                 &copy; {{ date('Y') }} {{ config('app.name', 'MISAHATI') }} — Cabinet Médical
+                <br>
+                Adil KHALKI
             </div>
         </div>
         @fluxScripts

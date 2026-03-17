@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="flex flex-col gap-6">
-                <x-auth-header :title="__('MISAHATI')" :description="__('Taper votre email et mot de passe pour se connecter')" />
+                <x-auth-header :title="__('')" :description="__('Taper votre email et mot de passe pour se connecter')" />
 
                 <!-- Session Status -->
                 <x-auth-session-status class="text-center" :status="session('status')" />
@@ -44,10 +44,7 @@
         @endif --}}
             </div>
         </div>
-        <div class="col-md-6">
-
-
-        </div>
+        
     </div>
 
 </x-layouts::auth>

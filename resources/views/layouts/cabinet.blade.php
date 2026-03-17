@@ -75,11 +75,11 @@
                                         <div class="page-header">
                                             <div class="row align-items-end">
                                                 <div class="col-lg-8">
+
                                                     <div class="page-header-title">
                                                         <div class="d-inline">
                                                             @isset($headerIcon)
-                                                                <i
-                                                                    class="feather {{ $headerIcon }} bg-c-blue update-card text-white"></i>
+                                                                <i class="feather {{ $headerIcon }} bg-c-blue update-card text-white"></i>
                                                             @endisset
                                                             <div class="d-inline">
                                                                 <h4>{{ $header }}</h4>

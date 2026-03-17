@@ -2,15 +2,27 @@
    Cabinet Médical — Styles personnalisés (extension d'Adminty)
    ═══════════════════════════════════════════════════════════════ */
 
-/* Variables couleurs */
+/* Variables couleurs — Thème Cabinet Médical (inspiré salle d'attente) */
 :root {
-    --primary: #01a9ac;
-    --dark-sidebar: #353c4e;
-    --pink: #ff5370;
-    --green: #11c15b;
-    --yellow: #f4a100;
-    --blue: #4680ff;
-    --orange: #fc6180;
+    --primary: #5ab0b8;
+    --primary-dark: #3d8f96;
+    --primary-light: #8ed0d6;
+    --coral: #d4916a;
+    --coral-light: #e8b08e;
+    --coral-dark: #c07a52;
+    --sidebar-bg: #1a5c63;
+    --sidebar-hover: #237078;
+    --sidebar-active: #d4916a;
+    --sidebar-text: #b8e0e4;
+    --sidebar-text-active: #ffffff;
+    --sidebar-separator: rgba(184, 224, 228, 0.18);
+    --sidebar-icon: #7cc0c6;
+    --dark-sidebar: #1a5c63;
+    --pink: #d4916a;
+    --green: #5ab88a;
+    --yellow: #e8b08e;
+    --blue: #5ab0b8;
+    --orange: #d4916a;
 }
 
 /* ── Dossier Patient ─────────────────────────────────── */
@@ -175,15 +187,158 @@
     .btn-group .btn { padding: 3px 6px; font-size: 11px; }
 }
 
-/* ── Sidebar active state (fix Adminty) ───────────────── */
-.pcoded-navbar .pcoded-item li.active > a {
-    background: var(--primary);
-    color: white;
+/* ══════════════════════════════════════════════════════════
+   SIDEBAR — Thème Cabinet Médical (bleu foncé / teal)
+   ══════════════════════════════════════════════════════════ */
+
+/* Fond principal */
+.pcoded-navbar {
+    background: var(--sidebar-bg) !important;
+}
+
+.pcoded-navbar .pcoded-inner-navbar {
+    background: var(--sidebar-bg) !important;
+}
+
+/* Séparateurs de section */
+.pcoded-navigatio-lavel {
+    color: var(--coral-light) !important;
+    border-bottom: 1px solid var(--sidebar-separator) !important;
+    font-size: 11px !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    padding: 15px 20px 8px !important;
+    font-weight: 600 !important;
+    opacity: 0.8;
+}
+
+/* Liens du menu */
+.pcoded-navbar .pcoded-item > li > a {
+    color: var(--sidebar-text) !important;
+    border-bottom: 1px solid var(--sidebar-separator) !important;
+    transition: all 0.2s ease !important;
+}
+
+.pcoded-navbar .pcoded-item > li > a .pcoded-mtext {
+    color: var(--sidebar-text) !important;
+}
+
+.pcoded-navbar .pcoded-item > li > a .pcoded-micon i {
+    color: var(--sidebar-icon) !important;
+    transition: color 0.2s ease !important;
+}
+
+/* Hover */
+.pcoded-navbar .pcoded-item > li:hover > a {
+    background: var(--sidebar-hover) !important;
+    color: var(--sidebar-text-active) !important;
+}
+
+.pcoded-navbar .pcoded-item > li:hover > a .pcoded-mtext {
+    color: var(--sidebar-text-active) !important;
+}
+
+.pcoded-navbar .pcoded-item > li:hover > a .pcoded-micon i {
+    color: var(--coral-light) !important;
+}
+
+/* Item actif */
+.pcoded-navbar .pcoded-item li.active > a,
+.pcoded-navbar .pcoded-item li.pcoded-trigger.active > a {
+    background: linear-gradient(135deg, var(--coral), var(--coral-dark)) !important;
+    color: var(--sidebar-text-active) !important;
+    border-left: 3px solid var(--coral-light) !important;
+    box-shadow: 0 2px 8px rgba(212, 145, 106, 0.35) !important;
 }
 
 .pcoded-navbar .pcoded-item li.active > a .pcoded-mtext,
-.pcoded-navbar .pcoded-item li.active > a .pcoded-micon i {
-    color: white;
+.pcoded-navbar .pcoded-item li.pcoded-trigger.active > a .pcoded-mtext {
+    color: var(--sidebar-text-active) !important;
+}
+
+.pcoded-navbar .pcoded-item li.active > a .pcoded-micon i,
+.pcoded-navbar .pcoded-item li.pcoded-trigger.active > a .pcoded-micon i {
+    color: var(--sidebar-text-active) !important;
+}
+
+/* Sous-menus */
+.pcoded-navbar .pcoded-submenu {
+    background: rgba(0, 0, 0, 0.15) !important;
+}
+
+.pcoded-navbar .pcoded-submenu li > a {
+    color: var(--sidebar-text) !important;
+    border-bottom: none !important;
+}
+
+.pcoded-navbar .pcoded-submenu li > a:hover {
+    color: var(--sidebar-text-active) !important;
+    background: var(--sidebar-hover) !important;
+}
+
+.pcoded-navbar .pcoded-submenu li.active > a {
+    color: var(--coral-light) !important;
+    background: rgba(212, 145, 106, 0.12) !important;
+    font-weight: 600 !important;
+}
+
+.pcoded-navbar .pcoded-submenu li.active > a::before {
+    border-color: var(--coral-light) !important;
+}
+
+/* Bouton toggle sidebar */
+.sidebar_toggle a {
+    color: var(--sidebar-text) !important;
+}
+
+.sidebar_toggle a:hover {
+    color: var(--sidebar-text-active) !important;
+}
+
+/* Scrollbar sidebar */
+.pcoded-navbar .pcoded-inner-navbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.pcoded-navbar .pcoded-inner-navbar::-webkit-scrollbar-track {
+    background: var(--sidebar-bg);
+}
+
+.pcoded-navbar .pcoded-inner-navbar::-webkit-scrollbar-thumb {
+    background: var(--sidebar-hover);
+    border-radius: 4px;
+}
+
+/* Flèche sous-menu */
+.pcoded-navbar .pcoded-hasmenu .pcoded-micon::after,
+.pcoded-navbar .pcoded-hasmenu > a::after {
+    color: var(--sidebar-icon) !important;
+}
+
+/* Override thème Adminty (forcer le custom) */
+.pcoded-navbar[navbar-theme="themelight1"] {
+    background: var(--sidebar-bg) !important;
+}
+
+.pcoded-navbar[navbar-theme="themelight1"] .pcoded-item > li > a {
+    color: var(--sidebar-text) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   NAVBAR LOGO — assorti au sidebar
+   ══════════════════════════════════════════════════════════ */
+.navbar-logo {
+    background: var(--sidebar-bg) !important;
+    border-bottom: 1px solid var(--sidebar-separator) !important;
+}
+
+.header-navbar .navbar-wrapper .navbar-logo a .pcoded-micon i,
+.header-navbar .navbar-wrapper .navbar-logo .mobile-menu i {
+    color: var(--sidebar-text) !important;
+}
+
+.header-navbar .navbar-wrapper .navbar-logo .mobile-menu:hover i {
+    color: var(--coral-light) !important;
 }
 
 /* ── Card hover ───────────────────────────────────────── */

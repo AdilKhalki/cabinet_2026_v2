@@ -25,7 +25,7 @@
                         </span>
                     </button>
                 @endif
-                <a href="{{ route('dashboard') }}" class="btn btn-default btn-sm">
+                <a href="{{ route('home') }}" class="btn btn-default btn-sm">
                     <i class="feather icon-home"></i> Tableau de bord
                 </a>
             </div>

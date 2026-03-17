@@ -7,6 +7,7 @@ use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\PrescriptionLine;
 use App\Models\User;
+use App\Services\NotificationService;
 use Livewire\Component;
 
 class PrescriptionForm extends Component
@@ -139,6 +140,7 @@ class PrescriptionForm extends Component
         } else {
             $data['created_by'] = auth()->id();
             $prescription = Prescription::create($data);
+            NotificationService::prescriptionCreated($prescription->id, $this->patient_id, $this->doctor_id);
             $message = 'Ordonnance créée.';
         }
 

@@ -32,9 +32,9 @@ CREATE TABLE IF NOT EXISTS `activity_log` (
   KEY `subject` (`subject_type`,`subject_id`),
   KEY `causer` (`causer_type`,`causer_id`),
   KEY `activity_log_log_name_index` (`log_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Listage des données de la table db_cabinet_v2.activity_log : ~18 rows (environ)
+-- Listage des données de la table db_cabinet_v2.activity_log : ~25 rows (environ)
 DELETE FROM `activity_log`;
 INSERT INTO `activity_log` (`id`, `log_name`, `description`, `subject_type`, `event`, `subject_id`, `causer_type`, `causer_id`, `properties`, `batch_uuid`, `created_at`, `updated_at`) VALUES
 	(1, 'default', 'created', 'App\\Models\\Prescription', 'created', 126, 'App\\Models\\User', 1, '{"attributes":{"prescription_number":"ORD-2026-00031","patient_id":44,"doctor_id":4,"consultation_id":null,"prescribed_at":"2026-03-14T00:00:00.000000Z","valid_until":"2026-03-14T00:00:00.000000Z","notes":null,"is_printed":false,"pdf_path":null,"created_by":1}}', NULL, '2026-03-14 21:31:06', '2026-03-14 21:31:06'),
@@ -55,7 +55,18 @@ INSERT INTO `activity_log` (`id`, `log_name`, `description`, `subject_type`, `ev
 	(16, 'default', 'updated', 'App\\Models\\Appointment', 'updated', 101, 'App\\Models\\User', 1, '{"attributes":{"arrived_at":"2026-03-15T11:47:47.000000Z"},"old":{"arrived_at":null}}', NULL, '2026-03-15 11:47:47', '2026-03-15 11:47:47'),
 	(17, 'default', 'created', 'App\\Models\\Consultation', 'created', 202, 'App\\Models\\User', 1, '{"attributes":{"patient_id":53,"doctor_id":4,"appointment_id":null,"consultation_type":"general","status":"in_progress","consultation_date":"2026-03-15T12:00:00.000000Z","reason":"ff","symptoms":"qq","clinical_exam":"ww","weight_kg":"90.00","height_cm":"78.0","blood_pressure":"67","heart_rate":null,"temperature":null,"spo2":null,"diagnosis":"rr","icd10_code":null,"treatment_plan":"tt","doctor_notes":"yy","summary":"uu","followup_required":false,"followup_date":null,"created_by":1}}', NULL, '2026-03-15 11:50:46', '2026-03-15 11:50:46'),
 	(18, 'default', 'updated', 'App\\Models\\Prescription', 'updated', 126, 'App\\Models\\User', 1, '{"attributes":{"is_printed":true},"old":{"is_printed":false}}', NULL, '2026-03-15 12:37:12', '2026-03-15 12:37:12'),
-	(19, 'default', 'updated', 'App\\Models\\Appointment', 'updated', 101, 'App\\Models\\User', 1, '{"attributes":{"status":"in_progress","started_at":"2026-03-15T13:20:44.000000Z"},"old":{"status":"waiting","started_at":null}}', NULL, '2026-03-15 13:20:44', '2026-03-15 13:20:44');
+	(19, 'default', 'updated', 'App\\Models\\Appointment', 'updated', 101, 'App\\Models\\User', 1, '{"attributes":{"status":"in_progress","started_at":"2026-03-15T13:20:44.000000Z"},"old":{"status":"waiting","started_at":null}}', NULL, '2026-03-15 13:20:44', '2026-03-15 13:20:44'),
+	(20, 'default', 'Patient updated', 'App\\Models\\Patient', 'updated', 53, 'App\\Models\\User', 1, '{"attributes":{"birth_date":"2000-02-09T00:00:00.000000Z"},"old":{"birth_date":"2026-03-14T00:00:00.000000Z"}}', NULL, '2026-03-16 22:30:08', '2026-03-16 22:30:08'),
+	(21, 'default', 'created', 'App\\Models\\Appointment', 'created', 103, 'App\\Models\\User', 1, '{"attributes":{"patient_id":44,"doctor_id":4,"created_by":1,"scheduled_at":"2026-03-16T23:28:00.000000Z","duration_minutes":30,"consultation_type":"general","status":"planned","cancellation_reason":null,"notes":null,"color":"#01a9ac","reminder_sent":false,"arrived_at":null,"started_at":null,"ended_at":null}}', NULL, '2026-03-16 23:28:58', '2026-03-16 23:28:58'),
+	(22, 'default', 'created', 'App\\Models\\Consultation', 'created', 203, 'App\\Models\\User', 1, '{"attributes":{"patient_id":21,"doctor_id":2,"appointment_id":null,"consultation_type":"general","status":"in_progress","consultation_date":"2026-03-16T23:30:00.000000Z","reason":null,"symptoms":null,"clinical_exam":null,"weight_kg":null,"height_cm":null,"blood_pressure":null,"heart_rate":null,"temperature":null,"spo2":null,"diagnosis":null,"icd10_code":null,"treatment_plan":null,"doctor_notes":null,"summary":null,"followup_required":false,"followup_date":null,"created_by":1}}', NULL, '2026-03-16 23:30:26', '2026-03-16 23:30:26'),
+	(23, 'default', 'created', 'App\\Models\\Payment', 'created', 150, 'App\\Models\\User', 1, '{"attributes":{"invoice_number":"FAC-2026-00037","patient_id":25,"doctor_id":2,"consultation_id":null,"status":"partial","payment_method":"cash","subtotal":"1500.00","discount":"0.00","insurance_coverage":"0.00","total_amount":"1500.00","amount_paid":"1200.00","amount_due":"300.00","payment_date":"2026-03-16T00:00:00.000000Z","due_date":null,"notes":null,"pdf_path":null,"created_by":1}}', NULL, '2026-03-16 23:46:27', '2026-03-16 23:46:27'),
+	(24, 'default', 'Paramètres cabinet mis à jour', NULL, NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, '2026-03-17 00:32:57', '2026-03-17 00:32:57'),
+	(25, 'default', 'Paramètres cabinet mis à jour', NULL, NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, '2026-03-17 00:33:03', '2026-03-17 00:33:03'),
+	(26, 'default', 'updated', 'App\\Models\\Prescription', 'updated', 21, 'App\\Models\\User', 1, '{"attributes":{"is_printed":true},"old":{"is_printed":false}}', NULL, '2026-03-17 01:36:09', '2026-03-17 01:36:09'),
+	(27, 'default', 'created', 'App\\Models\\Payment', 'created', 151, 'App\\Models\\User', 1, '{"attributes":{"invoice_number":"FAC-2026-00038","patient_id":25,"doctor_id":2,"consultation_id":null,"status":"partial","payment_method":"cash","subtotal":"1300.00","discount":"0.00","insurance_coverage":"0.00","total_amount":"1300.00","amount_paid":"1200.00","amount_due":"100.00","payment_date":"2026-03-16T00:00:00.000000Z","due_date":null,"notes":null,"pdf_path":null,"created_by":1}}', NULL, '2026-03-17 03:50:14', '2026-03-17 03:50:14'),
+	(28, 'default', 'created', 'App\\Models\\Payment', 'created', 152, 'App\\Models\\User', 1, '{"attributes":{"invoice_number":"FAC-2026-00039","patient_id":25,"doctor_id":2,"consultation_id":null,"status":"partial","payment_method":"cash","subtotal":"8300.00","discount":"0.00","insurance_coverage":"0.00","total_amount":"8300.00","amount_paid":"1500.00","amount_due":"6800.00","payment_date":"2026-03-16T00:00:00.000000Z","due_date":null,"notes":null,"pdf_path":null,"created_by":1}}', NULL, '2026-03-17 03:52:16', '2026-03-17 03:52:16'),
+	(29, 'default', 'created', 'App\\Models\\Appointment', 'created', 104, 'App\\Models\\User', 3, '{"attributes":{"patient_id":3,"doctor_id":5,"created_by":3,"scheduled_at":"2026-03-12T17:02:00.000000Z","duration_minutes":30,"consultation_type":"general","status":"planned","cancellation_reason":null,"notes":null,"color":"#f41fed","reminder_sent":false,"arrived_at":null,"started_at":null,"ended_at":null}}', NULL, '2026-03-17 17:02:56', '2026-03-17 17:02:56'),
+	(30, 'default', 'created', 'App\\Models\\Appointment', 'created', 105, 'App\\Models\\User', 3, '{"attributes":{"patient_id":27,"doctor_id":5,"created_by":3,"scheduled_at":"2026-03-27T17:04:00.000000Z","duration_minutes":30,"consultation_type":"general","status":"planned","cancellation_reason":null,"notes":null,"color":"#de7717","reminder_sent":false,"arrived_at":null,"started_at":null,"ended_at":null}}', NULL, '2026-03-17 17:04:22', '2026-03-17 17:04:22');
 
 -- Listage de la structure de table db_cabinet_v2. appointments
 CREATE TABLE IF NOT EXISTS `appointments` (
@@ -85,9 +96,9 @@ CREATE TABLE IF NOT EXISTS `appointments` (
   CONSTRAINT `appointments_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `appointments_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `appointments_patient_id_foreign` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Listage des données de la table db_cabinet_v2.appointments : ~102 rows (environ)
+-- Listage des données de la table db_cabinet_v2.appointments : ~103 rows (environ)
 DELETE FROM `appointments`;
 INSERT INTO `appointments` (`id`, `patient_id`, `doctor_id`, `created_by`, `scheduled_at`, `duration_minutes`, `consultation_type`, `status`, `cancellation_reason`, `notes`, `color`, `reminder_sent`, `arrived_at`, `started_at`, `ended_at`, `deleted_at`, `created_at`, `updated_at`) VALUES
 	(1, 37, 6, 6, '2025-12-06 08:45:00', 30, 'general', 'waiting', NULL, NULL, '#01a9ac', 1, '2025-12-06 08:55:00', NULL, NULL, NULL, '2025-11-30 07:45:00', '2025-12-06 07:45:00'),
@@ -191,7 +202,10 @@ INSERT INTO `appointments` (`id`, `patient_id`, `doctor_id`, `created_by`, `sche
 	(99, 43, 6, 6, '2025-10-07 15:45:00', 60, 'specialized', 'completed', NULL, 'Fatigue générale', '#f39c12', 0, '2025-10-07 15:59:00', '2025-10-07 15:53:00', '2025-10-07 16:28:00', NULL, '2025-10-01 14:45:00', '2025-10-07 14:45:00'),
 	(100, 14, 5, 5, '2025-10-20 11:45:00', 15, 'specialized', 'no_show', NULL, NULL, '#f39c12', 0, NULL, NULL, NULL, NULL, '2025-10-08 10:45:00', '2025-10-20 10:45:00'),
 	(101, 53, 4, 1, '2026-03-15 16:50:00', 30, 'followup', 'in_progress', NULL, NULL, '#ff5900', 0, '2026-03-15 11:47:47', '2026-03-15 13:20:44', NULL, NULL, '2026-03-15 02:36:31', '2026-03-15 13:20:44'),
-	(102, 12, 2, 1, '2026-03-15 15:00:00', 30, 'emergency', 'planned', NULL, NULL, '#01a9ac', 0, NULL, NULL, NULL, NULL, '2026-03-15 11:45:52', '2026-03-15 11:45:52');
+	(102, 12, 2, 1, '2026-03-15 15:00:00', 30, 'emergency', 'planned', NULL, NULL, '#01a9ac', 0, NULL, NULL, NULL, NULL, '2026-03-15 11:45:52', '2026-03-15 11:45:52'),
+	(103, 44, 4, 1, '2026-03-16 23:28:00', 30, 'general', 'planned', NULL, NULL, '#01a9ac', 0, NULL, NULL, NULL, NULL, '2026-03-16 23:28:58', '2026-03-16 23:28:58'),
+	(104, 3, 5, 3, '2026-03-12 17:02:00', 30, 'general', 'planned', NULL, NULL, '#f41fed', 0, NULL, NULL, NULL, NULL, '2026-03-17 17:02:56', '2026-03-17 17:02:56'),
+	(105, 27, 5, 3, '2026-03-27 17:04:00', 30, 'general', 'planned', NULL, NULL, '#de7717', 0, NULL, NULL, NULL, NULL, '2026-03-17 17:04:22', '2026-03-17 17:04:22');
 
 -- Listage de la structure de table db_cabinet_v2. cache
 CREATE TABLE IF NOT EXISTS `cache` (
@@ -202,24 +216,8 @@ CREATE TABLE IF NOT EXISTS `cache` (
   KEY `cache_expiration_index` (`expiration`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Listage des données de la table db_cabinet_v2.cache : ~14 rows (environ)
+-- Listage des données de la table db_cabinet_v2.cache : ~1 rows (environ)
 DELETE FROM `cache`;
-INSERT INTO `cache` (`key`, `value`, `expiration`) VALUES
-	('laravel-cache-0f293cc38ee250c14c1860b744c6f864', 'i:1;', 1773574993),
-	('laravel-cache-0f293cc38ee250c14c1860b744c6f864:timer', 'i:1773574993;', 1773574993),
-	('laravel-cache-199d811f851148791334efa4997db886', 'i:1;', 1773524176),
-	('laravel-cache-199d811f851148791334efa4997db886:timer', 'i:1773524176;', 1773524176),
-	('laravel-cache-356a192b7913b04c54574d18c28d46e6395428ab', 'i:1;', 1773577244),
-	('laravel-cache-356a192b7913b04c54574d18c28d46e6395428ab:timer', 'i:1773577244;', 1773577244),
-	('laravel-cache-96302f2ec8e093675d8a205323acc6ed', 'i:1;', 1773513104),
-	('laravel-cache-96302f2ec8e093675d8a205323acc6ed:timer', 'i:1773513104;', 1773513104),
-	('laravel-cache-9ff3322183b1d389083030f3d04b51ce', 'i:1;', 1773541696),
-	('laravel-cache-9ff3322183b1d389083030f3d04b51ce:timer', 'i:1773541696;', 1773541696),
-	('laravel-cache-admin@cabinet.com|192.168.100.72', 'i:1;', 1773541697),
-	('laravel-cache-admin@cabinet.com|192.168.100.72:timer', 'i:1773541697;', 1773541697),
-	('laravel-cache-f9ca4b1a91d12dd4100b208495929867', 'i:1;', 1773522817),
-	('laravel-cache-f9ca4b1a91d12dd4100b208495929867:timer', 'i:1773522817;', 1773522817),
-	('laravel-cache-spatie.permission.cache', 'a:3:{s:5:"alias";a:4:{s:1:"a";s:2:"id";s:1:"b";s:4:"name";s:1:"c";s:10:"guard_name";s:1:"r";s:5:"roles";}s:11:"permissions";a:27:{i:0;a:4:{s:1:"a";i:1;s:1:"b";s:13:"view patients";s:1:"c";s:3:"web";s:1:"r";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}}i:1;a:4:{s:1:"a";i:2;s:1:"b";s:15:"create patients";s:1:"c";s:3:"web";s:1:"r";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}}i:2;a:4:{s:1:"a";i:3;s:1:"b";s:13:"edit patients";s:1:"c";s:3:"web";s:1:"r";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}}i:3;a:4:{s:1:"a";i:4;s:1:"b";s:15:"delete patients";s:1:"c";s:3:"web";s:1:"r";a:1:{i:0;i:1;}}i:4;a:4:{s:1:"a";i:5;s:1:"b";s:18:"view consultations";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:2;}}i:5;a:4:{s:1:"a";i:6;s:1:"b";s:20:"create consultations";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:2;}}i:6;a:4:{s:1:"a";i:7;s:1:"b";s:18:"edit consultations";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:2;}}i:7;a:4:{s:1:"a";i:8;s:1:"b";s:20:"delete consultations";s:1:"c";s:3:"web";s:1:"r";a:1:{i:0;i:1;}}i:8;a:4:{s:1:"a";i:9;s:1:"b";s:18:"view prescriptions";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:2;}}i:9;a:4:{s:1:"a";i:10;s:1:"b";s:20:"create prescriptions";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:2;}}i:10;a:4:{s:1:"a";i:11;s:1:"b";s:19:"print prescriptions";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:2;}}i:11;a:4:{s:1:"a";i:12;s:1:"b";s:14:"view lab-tests";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:2;}}i:12;a:4:{s:1:"a";i:13;s:1:"b";s:16:"create lab-tests";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:2;}}i:13;a:4:{s:1:"a";i:14;s:1:"b";s:14:"edit lab-tests";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:2;}}i:14;a:4:{s:1:"a";i:15;s:1:"b";s:13:"view payments";s:1:"c";s:3:"web";s:1:"r";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}}i:15;a:4:{s:1:"a";i:16;s:1:"b";s:15:"create payments";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:3;}}i:16;a:4:{s:1:"a";i:17;s:1:"b";s:13:"edit payments";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:3;}}i:17;a:4:{s:1:"a";i:18;s:1:"b";s:15:"delete payments";s:1:"c";s:3:"web";s:1:"r";a:1:{i:0;i:1;}}i:18;a:4:{s:1:"a";i:19;s:1:"b";s:14:"view documents";s:1:"c";s:3:"web";s:1:"r";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}}i:19;a:4:{s:1:"a";i:20;s:1:"b";s:16:"upload documents";s:1:"c";s:3:"web";s:1:"r";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}}i:20;a:4:{s:1:"a";i:21;s:1:"b";s:16:"delete documents";s:1:"c";s:3:"web";s:1:"r";a:1:{i:0;i:1;}}i:21;a:4:{s:1:"a";i:22;s:1:"b";s:12:"view reports";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:2;}}i:22;a:4:{s:1:"a";i:23;s:1:"b";s:16:"generate reports";s:1:"c";s:3:"web";s:1:"r";a:2:{i:0;i:1;i:1;i:2;}}i:23;a:4:{s:1:"a";i:24;s:1:"b";s:12:"manage users";s:1:"c";s:3:"web";s:1:"r";a:1:{i:0;i:1;}}i:24;a:4:{s:1:"a";i:25;s:1:"b";s:12:"manage roles";s:1:"c";s:3:"web";s:1:"r";a:1:{i:0;i:1;}}i:25;a:4:{s:1:"a";i:26;s:1:"b";s:18:"manage medications";s:1:"c";s:3:"web";s:1:"r";a:1:{i:0;i:1;}}i:26;a:4:{s:1:"a";i:27;s:1:"b";s:17:"view activity-log";s:1:"c";s:3:"web";s:1:"r";a:1:{i:0;i:1;}}}s:5:"roles";a:3:{i:0;a:3:{s:1:"a";i:1;s:1:"b";s:5:"admin";s:1:"c";s:3:"web";}i:1;a:3:{s:1:"a";i:2;s:1:"b";s:7:"medecin";s:1:"c";s:3:"web";}i:2;a:3:{s:1:"a";i:3;s:1:"b";s:10:"secretaire";s:1:"c";s:3:"web";}}}', 1773587307);
 
 -- Listage de la structure de table db_cabinet_v2. cache_locks
 CREATE TABLE IF NOT EXISTS `cache_locks` (
@@ -271,9 +269,9 @@ CREATE TABLE IF NOT EXISTS `consultations` (
   CONSTRAINT `consultations_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `consultations_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `consultations_patient_id_foreign` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=203 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=204 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Listage des données de la table db_cabinet_v2.consultations : ~200 rows (environ)
+-- Listage des données de la table db_cabinet_v2.consultations : ~201 rows (environ)
 DELETE FROM `consultations`;
 INSERT INTO `consultations` (`id`, `patient_id`, `doctor_id`, `appointment_id`, `consultation_type`, `status`, `consultation_date`, `reason`, `symptoms`, `clinical_exam`, `weight_kg`, `height_cm`, `blood_pressure`, `heart_rate`, `temperature`, `spo2`, `diagnosis`, `icd10_code`, `treatment_plan`, `doctor_notes`, `summary`, `followup_required`, `followup_date`, `created_by`, `deleted_at`, `created_at`, `updated_at`) VALUES
 	(1, 38, 5, NULL, 'followup', 'in_progress', '2025-04-08 16:00:00', 'Suivi hypertension', NULL, NULL, 73.60, NULL, NULL, NULL, 37.1, NULL, 'Diabète de type 2', 'E11', NULL, NULL, NULL, 0, NULL, 5, NULL, '2025-04-08 15:00:00', '2025-04-08 15:00:00'),
@@ -477,7 +475,8 @@ INSERT INTO `consultations` (`id`, `patient_id`, `doctor_id`, `appointment_id`, 
 	(199, 12, 6, NULL, 'general', 'completed', '2025-04-16 12:15:00', 'Céphalées récurrentes', 'Patient se plaint de rhinorrhée et obstruction nasale depuis 7 jours.', NULL, 88.50, NULL, '120/80', 89, NULL, 97, 'Infection des voies respiratoires supérieures', 'J06.9', NULL, NULL, 'Infection des voies respiratoires supérieures. Traitement prescrit.', 0, NULL, 6, NULL, '2025-04-16 11:15:00', '2025-04-16 11:15:00'),
 	(200, 51, 6, NULL, 'control', 'completed', '2025-08-14 09:15:00', 'Céphalées récurrentes', 'Patient se plaint de contrôle tension artérielle depuis 5 jours.', 'Examen général satisfaisant. Auscultation cardio-pulmonaire normale. Abdomen souple.', 107.60, NULL, '150/95', 83, 38.0, 97, 'Migraine sans aura', 'G43.0', NULL, NULL, 'Migraine sans aura. Traitement prescrit.', 0, NULL, 6, NULL, '2025-08-14 08:15:00', '2025-08-14 08:15:00'),
 	(201, 21, 2, NULL, 'followup', 'in_progress', '2026-03-15 02:36:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 1, NULL, '2026-03-15 02:37:12', '2026-03-15 02:37:12'),
-	(202, 53, 4, NULL, 'general', 'in_progress', '2026-03-15 12:00:00', 'ff', 'qq', 'ww', 90.00, 78.0, '67', NULL, NULL, NULL, 'rr', NULL, 'tt', 'yy', 'uu', 0, NULL, 1, NULL, '2026-03-15 11:50:45', '2026-03-15 11:50:45');
+	(202, 53, 4, NULL, 'general', 'in_progress', '2026-03-15 12:00:00', 'ff', 'qq', 'ww', 90.00, 78.0, '67', NULL, NULL, NULL, 'rr', NULL, 'tt', 'yy', 'uu', 0, NULL, 1, NULL, '2026-03-15 11:50:45', '2026-03-15 11:50:45'),
+	(203, 21, 2, NULL, 'general', 'in_progress', '2026-03-16 23:30:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 1, NULL, '2026-03-16 23:30:26', '2026-03-16 23:30:26');
 
 -- Listage de la structure de table db_cabinet_v2. documents
 CREATE TABLE IF NOT EXISTS `documents` (
@@ -655,9 +654,9 @@ CREATE TABLE IF NOT EXISTS `lab_tests` (
   CONSTRAINT `lab_tests_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `lab_tests_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `lab_tests_patient_id_foreign` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Listage des données de la table db_cabinet_v2.lab_tests : ~79 rows (environ)
+-- Listage des données de la table db_cabinet_v2.lab_tests : ~80 rows (environ)
 DELETE FROM `lab_tests`;
 INSERT INTO `lab_tests` (`id`, `request_number`, `patient_id`, `doctor_id`, `consultation_id`, `requested_at`, `result_date`, `status`, `laboratory_name`, `clinical_info`, `pdf_path`, `doctor_interpretation`, `created_by`, `deleted_at`, `created_at`, `updated_at`) VALUES
 	(1, 'ANA-2025-00001', 38, 5, 1, '2025-04-08', '2025-04-11', 'completed', 'Laboratoire du Centre', NULL, NULL, 'Résultats dans les limites normales. Surveillance à poursuivre.', 5, NULL, '2025-04-08 15:00:00', '2025-04-08 15:00:00'),
@@ -738,7 +737,8 @@ INSERT INTO `lab_tests` (`id`, `request_number`, `patient_id`, `doctor_id`, `con
 	(76, 'ANA-2025-00076', 44, 5, 190, '2025-09-16', '2025-09-21', 'completed', 'Laboratoire Al Andalous', NULL, NULL, 'Résultats dans les limites normales. Surveillance à poursuivre.', 5, NULL, '2025-09-16 09:30:00', '2025-09-16 09:30:00'),
 	(77, 'ANA-2025-00077', 13, 5, 193, '2025-08-15', NULL, 'requested', 'Laboratoire Ibn Sina', 'Bilan de contrôle. Dyslipidémie', NULL, NULL, 5, NULL, '2025-08-15 14:30:00', '2025-08-15 14:30:00'),
 	(78, 'ANA-2026-00078', 22, 6, 194, '2026-01-28', '2026-01-31', 'completed', 'Laboratoire Ibn Sina', NULL, NULL, 'Résultats dans les limites normales. Surveillance à poursuivre.', 6, NULL, '2026-01-28 15:30:00', '2026-01-28 15:30:00'),
-	(79, 'ANA-2026-00079', 18, 5, 195, '2026-02-19', NULL, 'pending', 'Laboratoire Atlas', NULL, NULL, NULL, 5, NULL, '2026-02-19 13:00:00', '2026-02-19 13:00:00');
+	(79, 'ANA-2026-00079', 18, 5, 195, '2026-02-19', NULL, 'pending', 'Laboratoire Atlas', NULL, NULL, NULL, 5, NULL, '2026-02-19 13:00:00', '2026-02-19 13:00:00'),
+	(80, 'BIO-2026-00018', 44, 4, NULL, '2026-03-16', NULL, 'requested', NULL, NULL, NULL, NULL, 1, NULL, '2026-03-16 23:42:57', '2026-03-16 23:42:57');
 
 -- Listage de la structure de table db_cabinet_v2. lab_test_results
 CREATE TABLE IF NOT EXISTS `lab_test_results` (
@@ -759,9 +759,9 @@ CREATE TABLE IF NOT EXISTS `lab_test_results` (
   KEY `lab_test_results_lab_test_type_id_foreign` (`lab_test_type_id`),
   CONSTRAINT `lab_test_results_lab_test_id_foreign` FOREIGN KEY (`lab_test_id`) REFERENCES `lab_tests` (`id`) ON DELETE CASCADE,
   CONSTRAINT `lab_test_results_lab_test_type_id_foreign` FOREIGN KEY (`lab_test_type_id`) REFERENCES `lab_test_types` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=325 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=329 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Listage des données de la table db_cabinet_v2.lab_test_results : ~319 rows (environ)
+-- Listage des données de la table db_cabinet_v2.lab_test_results : ~323 rows (environ)
 DELETE FROM `lab_test_results`;
 INSERT INTO `lab_test_results` (`id`, `lab_test_id`, `lab_test_type_id`, `parameter_name`, `value`, `unit`, `normal_min`, `normal_max`, `flag`, `notes`, `created_at`, `updated_at`) VALUES
 	(1, 1, 6, 'VGM', '60.8', 'fL', 80.000, 100.000, 'low', NULL, '2025-04-08 15:00:00', '2025-04-08 15:00:00'),
@@ -1083,7 +1083,11 @@ INSERT INTO `lab_test_results` (`id`, `lab_test_id`, `lab_test_type_id`, `parame
 	(321, 55, 4, 'Globules Blancs (GB)', '4.72', 'x10^3/µL', 4.000, 10.000, 'normal', NULL, '2026-03-15 02:54:26', '2026-03-15 02:54:26'),
 	(322, 55, 15, 'HDL Cholestérol', '0.3', 'g/L', 0.400, NULL, 'low', NULL, '2026-03-15 02:54:26', '2026-03-15 02:54:26'),
 	(323, 55, 18, 'Potassium (K)', '6.45', 'mEq/L', 3.500, 5.000, 'high', NULL, '2026-03-15 02:54:26', '2026-03-15 02:54:26'),
-	(324, 55, NULL, 'Globules Rouges (GR)', NULL, 'x10^6/µL', 3.800, 5.400, 'normal', NULL, '2026-03-15 02:54:26', '2026-03-15 02:54:26');
+	(324, 55, NULL, 'Globules Rouges (GR)', NULL, 'x10^6/µL', 3.800, 5.400, 'normal', NULL, '2026-03-15 02:54:26', '2026-03-15 02:54:26'),
+	(325, 80, NULL, 'Glycémie à jeun', NULL, 'g/L', 0.700, 1.100, 'normal', NULL, '2026-03-16 23:42:57', '2026-03-16 23:42:57'),
+	(326, 80, NULL, 'HbA1c', NULL, '%', 4.000, 6.000, 'normal', NULL, '2026-03-16 23:42:57', '2026-03-16 23:42:57'),
+	(327, 80, NULL, 'GGT', NULL, 'UI/L', 0.000, 50.000, 'normal', NULL, '2026-03-16 23:42:57', '2026-03-16 23:42:57'),
+	(328, 80, NULL, 'Hémoglobine (Hb)', NULL, 'g/dL', 12.000, 17.500, 'normal', NULL, '2026-03-16 23:42:57', '2026-03-16 23:42:57');
 
 -- Listage de la structure de table db_cabinet_v2. lab_test_types
 CREATE TABLE IF NOT EXISTS `lab_test_types` (
@@ -1151,9 +1155,9 @@ CREATE TABLE IF NOT EXISTS `medical_acts` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `medical_acts_code_unique` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Listage des données de la table db_cabinet_v2.medical_acts : ~10 rows (environ)
+-- Listage des données de la table db_cabinet_v2.medical_acts : ~9 rows (environ)
 DELETE FROM `medical_acts`;
 INSERT INTO `medical_acts` (`id`, `code`, `name`, `description`, `category`, `price`, `duration_minutes`, `is_active`, `created_at`, `updated_at`) VALUES
 	(1, 'CS', 'Consultation générale', NULL, 'Consultation', 150.00, 20, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
@@ -1162,8 +1166,6 @@ INSERT INTO `medical_acts` (`id`, `code`, `name`, `description`, `category`, `pr
 	(4, 'CTL', 'Téléconsultation', NULL, 'Consultation', 100.00, 20, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
 	(5, 'ECG', 'Électrocardiogramme', NULL, 'Examen', 100.00, 15, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
 	(6, 'SPO2', 'Mesure saturation O2', NULL, 'Examen', 30.00, 5, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
-	(7, 'CERT', 'Certificat médical', NULL, 'Administratif', 50.00, 10, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
-	(8, 'ARRW', 'Arrêt de travail', NULL, 'Administratif', 50.00, 10, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
 	(9, 'INJIM', 'Injection intramusculaire', NULL, 'Soin', 80.00, 10, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
 	(10, 'INJIV', 'Perfusion intraveineuse', NULL, 'Soin', 150.00, 30, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47');
 
@@ -1368,9 +1370,9 @@ CREATE TABLE IF NOT EXISTS `medical_images` (
   CONSTRAINT `medical_images_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `medical_images_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `medical_images_patient_id_foreign` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=83 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Listage des données de la table db_cabinet_v2.medical_images : ~80 rows (environ)
+-- Listage des données de la table db_cabinet_v2.medical_images : ~81 rows (environ)
 DELETE FROM `medical_images`;
 INSERT INTO `medical_images` (`id`, `patient_id`, `doctor_id`, `consultation_id`, `category`, `title`, `description`, `file_path`, `file_type`, `file_size`, `radiological_report`, `image_date`, `body_part`, `created_by`, `deleted_at`, `created_at`, `updated_at`) VALUES
 	(1, 3, 5, NULL, 'limb_xray', 'Radiographie membre — 10/2025', 'Image de contrôle.', 'medical-images/demo-placeholder.jpg', 'jpg', 3899053, 'Pas d\'anomalie radiologique décelable. Parenchyme pulmonaire clair.', '2025-10-11', 'Épaule gauche', 5, NULL, '2025-10-10 23:00:00', '2025-10-10 23:00:00'),
@@ -1453,7 +1455,8 @@ INSERT INTO `medical_images` (`id`, `patient_id`, `doctor_id`, `consultation_id`
 	(78, 52, 4, NULL, 'ultrasound', 'Échographie abdominale — 02/2026', NULL, 'medical-images/demo-placeholder.jpg', 'jpg', 1001626, 'Aspect normal pour l\'âge du patient.', '2026-02-16', 'Abdomen', 4, NULL, '2026-02-16 00:00:00', '2026-02-16 00:00:00'),
 	(79, 52, 6, NULL, 'ct_scan', 'Scanner TDM — 12/2025', 'Image de contrôle.', 'medical-images/demo-placeholder.jpg', 'jpg', 2180853, NULL, '2025-12-05', NULL, 6, NULL, '2025-12-04 23:00:00', '2025-12-04 23:00:00'),
 	(80, 52, 4, NULL, 'mri', 'IRM cérébrale — 03/2026', 'Image de contrôle.', 'medical-images/BWZyxS6SdEtwt9G5kkxjtnfztI0xgafubgaP2kj0.jpg', 'jpg', 84470, 'Pas d\'anomalie radiologique décelable. Parenchyme pulmonaire clair.', '2026-03-13', 'Thorax', 1, NULL, '2026-03-13 00:00:00', '2026-03-15 02:43:16'),
-	(81, 53, 2, NULL, 'chest_xray', 'Radio torax', NULL, 'medical-images/4ZNbuYtFpEncIsmrh4JkQWRAqEHv6iHd3ujyLYmE.jpg', 'jpg', 41638, NULL, '2026-03-15', NULL, 1, NULL, '2026-03-15 12:20:06', '2026-03-15 12:20:06');
+	(81, 53, 2, NULL, 'chest_xray', 'Radio torax', NULL, 'medical-images/4ZNbuYtFpEncIsmrh4JkQWRAqEHv6iHd3ujyLYmE.jpg', 'jpg', 41638, NULL, '2026-03-15', NULL, 1, NULL, '2026-03-15 12:20:06', '2026-03-15 12:20:06'),
+	(82, 53, 2, NULL, 'chest_xray', 'test', NULL, 'medical-images/hJSTt3XozqiN8TaTu9cSqhqoWOsUabZ3D4OYhQR0.jpg', 'jpg', 84470, NULL, '2026-03-16', NULL, 1, NULL, '2026-03-16 23:27:51', '2026-03-16 23:27:51');
 
 -- Listage de la structure de table db_cabinet_v2. medical_reports
 CREATE TABLE IF NOT EXISTS `medical_reports` (
@@ -1485,7 +1488,7 @@ CREATE TABLE IF NOT EXISTS `medical_reports` (
   CONSTRAINT `medical_reports_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `medical_reports_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `medical_reports_patient_id_foreign` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Listage des données de la table db_cabinet_v2.medical_reports : ~37 rows (environ)
 DELETE FROM `medical_reports`;
@@ -1494,7 +1497,7 @@ INSERT INTO `medical_reports` (`id`, `report_number`, `patient_id`, `doctor_id`,
 	(2, 'RPT-2025-00002', 22, 5, 19, 'fitness_certificate', 'Certificat d\'aptitude physique', 'Je soussigné, certifie avoir examiné ce jour M./Mme Rachid Berrada.\nL\'examen clinique est satisfaisant. Je le/la déclare apte à la pratique de ses activités habituelles.', '2025-08-07', NULL, NULL, NULL, NULL, 0, 5, NULL, '2025-08-07 12:30:00', '2025-08-07 12:30:00'),
 	(3, 'RPT-2025-00003', 9, 5, 21, 'sick_leave', 'Arrêt de travail', 'Je soussigné, certifie avoir examiné ce jour M./Mme Kawtar Charaf.\nDiagnostic : Arthrose du genou\nAu vu de son état de santé, je lui prescris un arrêt de travail.', '2025-09-18', '2025-09-18', '2025-09-27', 8, NULL, 1, 5, NULL, '2025-09-18 12:00:00', '2025-09-18 12:00:00'),
 	(4, 'RPT-2025-00004', 50, 5, 26, 'sick_leave', 'Arrêt de travail', 'Je soussigné, certifie avoir examiné ce jour M./Mme Leila El Hajji.\nDiagnostic : Infection des voies respiratoires supérieures\nAu vu de son état de santé, je lui prescris un arrêt de travail.', '2025-08-22', '2025-08-22', '2025-08-25', 13, NULL, 0, 5, NULL, '2025-08-22 10:30:00', '2025-08-22 10:30:00'),
-	(5, 'RPT-2026-00005', 27, 6, 27, 'other', 'Document médical', 'Compte-rendu de consultation de M./Mme Siham Amrani.\nMotif : Douleurs abdominales\nDiagnostic : Arthrose du genou\nTraitement : Traitement médical adapté. Repos. Hydratation suffisante. Réévaluation à J+28.', '2026-03-01', NULL, NULL, NULL, NULL, 1, 6, NULL, '2026-03-01 13:15:00', '2026-03-01 13:15:00'),
+	(5, 'RPT-2026-00005', 27, 6, 27, 'referral', 'Document médical', 'Confrère/Consœur,\n\nJ\'ai l\'honneur de vous adresser mon/ma patient(e), [PRÉNOM NOM], né(e) le [DATE NAISSANCE], pour [MOTIF DE LA RÉFÉRENCE].\n\nAntécédents :\n[ANTÉCÉDENTS PERTINENTS]\n\nTraitement en cours :\n[TRAITEMENTS ACTUELS]\n\nJe vous serais reconnaissant(e) de bien vouloir prendre en charge ce/cette patient(e) et de me faire part de vos conclusions.\n\nAvec mes cordiales salutations,\nDr. [NOM]\nFait à [VILLE], le 17/03/2026', '2026-03-01', NULL, NULL, NULL, NULL, 1, 1, NULL, '2026-03-01 13:15:00', '2026-03-17 03:47:53'),
 	(6, 'RPT-2025-00006', 22, 5, 30, 'referral', 'Lettre de référence spécialiste', 'Confrère/Consœur,\nJ\'ai l\'honneur de vous adresser M./Mme Rachid Berrada pour avis et prise en charge.\nDiagnostic : Arthrose du genou\nCordialement.', '2025-06-15', NULL, NULL, NULL, NULL, 0, 5, NULL, '2025-06-15 07:30:00', '2025-06-15 07:30:00'),
 	(7, 'RPT-2025-00007', 39, 6, 34, 'medical_report', 'Compte-rendu de consultation', 'Compte-rendu de consultation de M./Mme Karim Ouazzani.\nMotif : Suivi diabète\nDiagnostic : Migraine sans aura\nTraitement : ', '2025-09-06', NULL, NULL, NULL, NULL, 1, 6, NULL, '2025-09-06 10:15:00', '2025-09-06 10:15:00'),
 	(8, 'RPT-2025-00008', 3, 4, 41, 'referral', 'Lettre de référence spécialiste', 'Confrère/Consœur,\nJ\'ai l\'honneur de vous adresser M./Mme Abdellatif Amrani pour avis et prise en charge.\nDiagnostic : Diabète de type 2\nCordialement.', '2025-07-26', NULL, NULL, NULL, NULL, 1, 4, NULL, '2025-07-26 15:15:00', '2025-07-26 15:15:00'),
@@ -1514,7 +1517,7 @@ INSERT INTO `medical_reports` (`id`, `report_number`, `patient_id`, `doctor_id`,
 	(22, 'RPT-2025-00022', 19, 6, 98, 'other', 'Document médical', 'Compte-rendu de consultation de M./Mme Kawtar Tazi.\nMotif : Rhinorrhée et obstruction nasale\nDiagnostic : Diabète de type 2\nTraitement : ', '2025-04-20', NULL, NULL, NULL, NULL, 0, 6, NULL, '2025-04-20 11:00:00', '2025-04-20 11:00:00'),
 	(23, 'RPT-2025-00023', 3, 6, 101, 'fitness_certificate', 'Certificat d\'aptitude physique', 'Je soussigné, certifie avoir examiné ce jour M./Mme Abdellatif Amrani.\nL\'examen clinique est satisfaisant. Je le/la déclare apte à la pratique de ses activités habituelles.', '2025-07-04', NULL, NULL, NULL, NULL, 0, 6, NULL, '2025-07-04 11:30:00', '2025-07-04 11:30:00'),
 	(24, 'RPT-2025-00024', 50, 4, 115, 'medical_report', 'Compte-rendu de consultation', 'Compte-rendu de consultation de M./Mme Leila El Hajji.\nMotif : Douleurs abdominales\nDiagnostic : Migraine sans aura\nTraitement : Traitement médical adapté. Repos. Hydratation suffisante. Réévaluation à J+18.', '2025-10-19', NULL, NULL, NULL, NULL, 0, 4, NULL, '2025-10-19 07:30:00', '2025-10-19 07:30:00'),
-	(25, 'RPT-2026-00025', 5, 6, 129, 'fitness_certificate', 'Certificat d\'aptitude physique', 'Je soussigné, certifie avoir examiné ce jour M./Mme Meryem Chraibi.\nL\'examen clinique est satisfaisant. Je le/la déclare apte à la pratique de ses activités habituelles.', '2026-02-03', NULL, NULL, NULL, NULL, 0, 6, NULL, '2026-02-03 07:00:00', '2026-02-03 07:00:00'),
+	(25, 'RPT-2026-00025', 5, 6, 129, 'fitness_certificate', 'Certificat d\'aptitude physique', 'Je soussigné, certifie avoir examiné ce jour M./Mme Meryem Chraibi.\nL\'examen clinique est satisfaisant. Je le/la déclare apte à la pratique de ses activités habituelles.', '2026-02-03', NULL, NULL, NULL, NULL, 1, 6, NULL, '2026-02-03 07:00:00', '2026-03-17 03:45:05'),
 	(26, 'RPT-2025-00026', 19, 6, 137, 'medical_report', 'Compte-rendu de consultation', 'Compte-rendu de consultation de M./Mme Kawtar Tazi.\nMotif : Dermatose prurigineuse\nDiagnostic : Reflux gastro-œsophagien\nTraitement : Traitement médical adapté. Repos. Hydratation suffisante. Réévaluation à J+14.', '2025-08-13', NULL, NULL, NULL, NULL, 0, 6, NULL, '2025-08-13 16:15:00', '2025-08-13 16:15:00'),
 	(27, 'RPT-2025-00027', 31, 6, 138, 'medical_report', 'Compte-rendu de consultation', 'Compte-rendu de consultation de M./Mme Siham Guerraoui.\nMotif : Suivi diabète\nDiagnostic : Dyslipidémie\nTraitement : Traitement médical adapté. Repos. Hydratation suffisante. Réévaluation à J+11.', '2025-07-20', NULL, NULL, NULL, NULL, 0, 6, NULL, '2025-07-20 08:15:00', '2025-07-20 08:15:00'),
 	(28, 'RPT-2025-00028', 39, 4, 140, 'fitness_certificate', 'Certificat d\'aptitude physique', 'Je soussigné, certifie avoir examiné ce jour M./Mme Karim Ouazzani.\nL\'examen clinique est satisfaisant. Je le/la déclare apte à la pratique de ses activités habituelles.', '2025-10-23', NULL, NULL, NULL, NULL, 1, 4, NULL, '2025-10-23 11:00:00', '2025-10-23 11:00:00'),
@@ -1526,7 +1529,9 @@ INSERT INTO `medical_reports` (`id`, `report_number`, `patient_id`, `doctor_id`,
 	(34, 'RPT-2025-00034', 24, 5, 168, 'other', 'Document médical', 'Compte-rendu de consultation de M./Mme Soufiane Filali.\nMotif : Suivi diabète\nDiagnostic : Anxiété généralisée\nTraitement : Traitement médical adapté. Repos. Hydratation suffisante. Réévaluation à J+20.', '2025-06-07', NULL, NULL, NULL, NULL, 0, 5, NULL, '2025-06-07 08:30:00', '2025-06-07 08:30:00'),
 	(35, 'RPT-2025-00035', 38, 4, 171, 'referral', 'Lettre de référence spécialiste', 'Confrère/Consœur,\nJ\'ai l\'honneur de vous adresser M./Mme Omar Benaissa pour avis et prise en charge.\nDiagnostic : Gastrite chronique\nCordialement.', '2025-03-16', NULL, NULL, NULL, NULL, 1, 4, NULL, '2025-03-16 11:00:00', '2025-03-16 11:00:00'),
 	(36, 'RPT-2025-00036', 32, 4, 176, 'referral', 'Lettre de référence spécialiste', 'Confrère/Consœur,\nJ\'ai l\'honneur de vous adresser M./Mme Abdellatif Bensouda pour avis et prise en charge.\nDiagnostic : Migraine sans aura\nCordialement.', '2025-08-01', NULL, NULL, NULL, NULL, 0, 4, NULL, '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
-	(37, 'RPT-2026-00037', 32, 4, 178, 'sick_leave', 'Arrêt de travail', 'Je soussigné, certifie avoir examiné ce jour M./Mme Abdellatif Bensouda.\nDiagnostic : Diabète de type 2\nAu vu de son état de santé, je lui prescris un arrêt de travail.', '2026-01-21', '2026-01-21', '2026-01-27', 8, NULL, 0, 4, NULL, '2026-01-21 09:15:00', '2026-01-21 09:15:00');
+	(37, 'RPT-2026-00037', 32, 4, 178, 'sick_leave', 'Arrêt de travail', 'Je soussigné, certifie avoir examiné ce jour M./Mme Abdellatif Bensouda.\nDiagnostic : Diabète de type 2\nAu vu de son état de santé, je lui prescris un arrêt de travail.', '2026-01-21', '2026-01-21', '2026-01-27', 8, NULL, 0, 4, NULL, '2026-01-21 09:15:00', '2026-01-21 09:15:00'),
+	(38, 'RPT-2026-00007', 30, 5, NULL, 'sick_leave', 'iiiii', 'Je soussigné(e), Dr. [NOM], certifie avoir examiné ce jour le/la patient(e) [PRÉNOM NOM].\n\nAu vu de son état de santé actuel, je lui prescris un arrêt de travail de [X] jours, du [DATE DÉBUT] au [DATE FIN] inclus.\n\nFait à [VILLE], le 17/03/2026', '2026-03-17', '2026-03-17', '2026-03-19', 9, NULL, 1, 1, NULL, '2026-03-17 03:45:00', '2026-03-17 14:21:50'),
+	(39, 'RPT-2026-00008', 30, 5, 120, 'fitness_certificate', 'Titre du rappppport', 'Je soussigné(e), Dr. Dr. Fatima El Amrani, certifie avoir examiné ce jour le/la patient(e) Khadija Alaoui, né(e) le 15/02/1960.\n\nÀ l\'issue de cet examen, je le/la déclare :\n\n☑ APTE à [activité / poste / sport]\n\nCette aptitude est valable jusqu\'au 29/03/2026.\n\nFait à TAZA, le 17/03/2026', '2026-03-17', '2026-03-17', '2026-03-29', 6, NULL, 1, 1, NULL, '2026-03-17 14:40:37', '2026-03-17 14:41:01');
 
 -- Listage de la structure de table db_cabinet_v2. medications
 CREATE TABLE IF NOT EXISTS `medications` (
@@ -1544,9 +1549,9 @@ CREATE TABLE IF NOT EXISTS `medications` (
   PRIMARY KEY (`id`),
   KEY `medications_name_generic_name_index` (`name`,`generic_name`),
   FULLTEXT KEY `medications_name_generic_name_fulltext` (`name`,`generic_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Listage des données de la table db_cabinet_v2.medications : ~15 rows (environ)
+-- Listage des données de la table db_cabinet_v2.medications : ~16 rows (environ)
 DELETE FROM `medications`;
 INSERT INTO `medications` (`id`, `name`, `generic_name`, `dosage_form`, `strength`, `manufacturer`, `description`, `contraindications`, `is_active`, `created_at`, `updated_at`) VALUES
 	(1, 'Doliprane 1000mg', 'Paracétamol', 'Comprimé', '1000mg', NULL, NULL, NULL, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
@@ -1563,7 +1568,8 @@ INSERT INTO `medications` (`id`, `name`, `generic_name`, `dosage_form`, `strengt
 	(12, 'Cortancyl 5mg', 'Prednisone', 'Comprimé', '5mg', NULL, NULL, NULL, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
 	(13, 'Levothyrox 50µg', 'Lévothyroxine', 'Comprimé', '50µg', NULL, NULL, NULL, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
 	(14, 'Aspégic 100mg', 'Acide acétylsalicylique', 'Sachet', '100mg', NULL, NULL, NULL, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
-	(15, 'Rivotril 0.5mg', 'Clonazépam', 'Comprimé', '0.5mg', NULL, NULL, NULL, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47');
+	(15, 'Rivotril 0.5mg', 'Clonazépam', 'Comprimé', '0.5mg', NULL, NULL, NULL, 1, '2026-03-14 14:54:47', '2026-03-14 14:54:47'),
+	(16, 'doliprane', 'Paracetamoe', 'Comprimé', NULL, NULL, NULL, NULL, 1, '2026-03-17 01:32:32', '2026-03-17 01:32:32');
 
 -- Listage de la structure de table db_cabinet_v2. migrations
 CREATE TABLE IF NOT EXISTS `migrations` (
@@ -1648,6 +1654,11 @@ CREATE TABLE IF NOT EXISTS `notifications` (
 
 -- Listage des données de la table db_cabinet_v2.notifications : ~0 rows (environ)
 DELETE FROM `notifications`;
+INSERT INTO `notifications` (`id`, `type`, `notifiable_type`, `notifiable_id`, `data`, `read_at`, `created_at`, `updated_at`) VALUES
+	('65a79d80-193b-44a7-b484-d4ab62955d45', 'App\\Notifications\\CabinetNotification', 'App\\Models\\User', 1, '{"type":"appointment","title":"Nouveau rendez-vous","message":"RDV cr\\u00e9\\u00e9 pour Siham Amrani le 27\\/03\\/2026 \\u00e0 17:04","url":"http:\\/\\/127.0.0.1:8000\\/appointments"}', NULL, '2026-03-17 17:04:22', '2026-03-17 17:04:22'),
+	('a32cf08e-cc8c-4f04-ab41-41cc189508aa', 'App\\Notifications\\CabinetNotification', 'App\\Models\\User', 5, '{"type":"appointment","title":"Nouveau rendez-vous","message":"RDV cr\\u00e9\\u00e9 pour Abdellatif Amrani le 12\\/03\\/2026 \\u00e0 17:02","url":"http:\\/\\/127.0.0.1:8000\\/appointments"}', NULL, '2026-03-17 17:02:56', '2026-03-17 17:02:56'),
+	('cfcd420a-71d0-4846-a0ba-66b1a64eb318', 'App\\Notifications\\CabinetNotification', 'App\\Models\\User', 1, '{"type":"appointment","title":"Nouveau rendez-vous","message":"RDV cr\\u00e9\\u00e9 pour Abdellatif Amrani le 12\\/03\\/2026 \\u00e0 17:02","url":"http:\\/\\/127.0.0.1:8000\\/appointments"}', NULL, '2026-03-17 17:02:56', '2026-03-17 17:02:56'),
+	('ee8609c5-64a5-407a-b39f-ae0f4c9a7003', 'App\\Notifications\\CabinetNotification', 'App\\Models\\User', 5, '{"type":"appointment","title":"Nouveau rendez-vous","message":"RDV cr\\u00e9\\u00e9 pour Siham Amrani le 27\\/03\\/2026 \\u00e0 17:04","url":"http:\\/\\/127.0.0.1:8000\\/appointments"}', NULL, '2026-03-17 17:04:22', '2026-03-17 17:04:22');
 
 -- Listage de la structure de table db_cabinet_v2. password_reset_tokens
 CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
@@ -1752,7 +1763,7 @@ INSERT INTO `patients` (`id`, `dossier_number`, `first_name`, `last_name`, `cin`
 	(50, 'PAT-2026-0049', 'Leila', 'El Hajji', NULL, NULL, '1980-08-05', 'female', '0639333010', '0581260753', 'leila.el hajji48@gmail.com', '127, Rue Guerraoui', 'El Jadida', NULL, NULL, NULL, 'Pharmacien', 'Saham Assurance', 'DYH6S9MM', 1, NULL, 6, NULL, '2025-01-01 20:10:32', '2025-01-01 20:10:32'),
 	(51, 'PAT-2026-0050', 'Mohamed', 'Filali', NULL, NULL, '1956-01-21', 'male', '0623178062', '0533629395', 'mohamed.filali49@gmail.com', '944, Rue Fassi', 'Marrakech', NULL, NULL, NULL, 'Sans profession', 'Allianz Maroc', 'AFUC0HM5', 1, NULL, 4, NULL, '2025-05-30 20:10:32', '2025-05-30 20:10:32'),
 	(52, 'PAT-2026-0051', 'Mohamed', 'Ouazzani', NULL, NULL, '1982-09-01', 'male', '0614872396', NULL, 'mohamed.ouazzani50@gmail.com', '766, Rue Belcaid', 'Tanger', NULL, 'Pénicilline', NULL, 'Avocat', 'Saham Assurance', '7E9HY1JJ', 1, NULL, 6, NULL, '2025-06-27 20:10:32', '2025-06-27 20:10:32'),
-	(53, 'DOS-2026-00006', 'Adil', 'KHALKI', NULL, NULL, '2026-03-14', 'male', '+212664427736', NULL, 'ADILKHALKI@GMAIL.COM', 'App 6, 88 Lot LADER Rte Ain chkef', 'Fes', 'O+', NULL, 'patients/photos/P49gvarA3G6EFJaEQKukopUVFnNegkoXcxMwhPHl.jpg', NULL, NULL, NULL, 1, NULL, 1, NULL, '2026-03-15 02:28:39', '2026-03-15 02:28:39');
+	(53, 'DOS-2026-00006', 'Adil', 'KHALKI', NULL, NULL, '2000-02-09', 'male', '+212664427736', NULL, 'ADILKHALKI@GMAIL.COM', 'App 6, 88 Lot LADER Rte Ain chkef', 'Fes', 'O+', NULL, 'patients/photos/P49gvarA3G6EFJaEQKukopUVFnNegkoXcxMwhPHl.jpg', NULL, NULL, NULL, 1, NULL, 1, NULL, '2026-03-15 02:28:39', '2026-03-16 22:30:08');
 
 -- Listage de la structure de table db_cabinet_v2. payments
 CREATE TABLE IF NOT EXISTS `payments` (
@@ -1788,9 +1799,9 @@ CREATE TABLE IF NOT EXISTS `payments` (
   CONSTRAINT `payments_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `payments_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `payments_patient_id_foreign` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=150 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=153 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Listage des données de la table db_cabinet_v2.payments : ~149 rows (environ)
+-- Listage des données de la table db_cabinet_v2.payments : ~150 rows (environ)
 DELETE FROM `payments`;
 INSERT INTO `payments` (`id`, `invoice_number`, `patient_id`, `doctor_id`, `consultation_id`, `status`, `payment_method`, `subtotal`, `discount`, `insurance_coverage`, `total_amount`, `amount_paid`, `amount_due`, `payment_date`, `due_date`, `notes`, `pdf_path`, `created_by`, `deleted_at`, `created_at`, `updated_at`) VALUES
 	(1, 'FAC-2025-00001', 38, 5, 1, 'partial', 'insurance', 80.00, 0.00, 0.00, 80.00, 54.40, 25.60, '2025-04-08', NULL, NULL, NULL, 5, NULL, '2025-04-08 15:00:00', '2025-04-08 15:00:00'),
@@ -1941,7 +1952,10 @@ INSERT INTO `payments` (`id`, `invoice_number`, `patient_id`, `doctor_id`, `cons
 	(146, 'FAC-2025-00146', 8, 4, 197, 'paid', 'mixed', 130.00, 19.50, 0.00, 110.50, 110.50, 0.00, '2025-12-09', NULL, NULL, NULL, 4, NULL, '2025-12-09 11:00:00', '2025-12-09 11:00:00'),
 	(147, 'FAC-2025-00147', 13, 4, 198, 'pending', NULL, 450.00, 0.00, 0.00, 450.00, 0.00, 450.00, NULL, '2025-06-03', NULL, NULL, 4, NULL, '2025-05-04 08:15:00', '2025-05-04 08:15:00'),
 	(148, 'FAC-2025-00148', 12, 6, 199, 'pending', NULL, 180.00, 0.00, 0.00, 180.00, 0.00, 180.00, NULL, '2025-05-16', NULL, NULL, 6, NULL, '2025-04-16 11:15:00', '2025-04-16 11:15:00'),
-	(149, 'FAC-2025-00149', 51, 6, 200, 'partial', 'insurance', 50.00, 3.50, 0.00, 46.50, 25.11, 21.39, '2025-08-14', NULL, NULL, NULL, 6, NULL, '2025-08-14 08:15:00', '2025-08-14 08:15:00');
+	(149, 'FAC-2025-00149', 51, 6, 200, 'partial', 'insurance', 50.00, 3.50, 0.00, 46.50, 25.11, 21.39, '2025-08-14', NULL, NULL, NULL, 6, NULL, '2025-08-14 08:15:00', '2025-08-14 08:15:00'),
+	(150, 'FAC-2026-00037', 25, 2, NULL, 'partial', 'cash', 1500.00, 0.00, 0.00, 1500.00, 1200.00, 300.00, '2026-03-16', NULL, NULL, NULL, 1, NULL, '2026-03-16 23:46:27', '2026-03-16 23:46:27'),
+	(151, 'FAC-2026-00038', 25, 2, NULL, 'partial', 'cash', 1300.00, 0.00, 0.00, 1300.00, 1200.00, 100.00, '2026-03-16', NULL, NULL, NULL, 1, NULL, '2026-03-17 03:50:14', '2026-03-17 03:50:14'),
+	(152, 'FAC-2026-00039', 25, 2, NULL, 'partial', 'cash', 8300.00, 0.00, 0.00, 8300.00, 1500.00, 6800.00, '2026-03-16', NULL, NULL, NULL, 1, NULL, '2026-03-17 03:52:16', '2026-03-17 03:52:16');
 
 -- Listage de la structure de table db_cabinet_v2. payment_lines
 CREATE TABLE IF NOT EXISTS `payment_lines` (
@@ -1959,19 +1973,19 @@ CREATE TABLE IF NOT EXISTS `payment_lines` (
   KEY `payment_lines_medical_act_id_foreign` (`medical_act_id`),
   CONSTRAINT `payment_lines_medical_act_id_foreign` FOREIGN KEY (`medical_act_id`) REFERENCES `medical_acts` (`id`) ON DELETE SET NULL,
   CONSTRAINT `payment_lines_payment_id_foreign` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=290 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=296 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Listage des données de la table db_cabinet_v2.payment_lines : ~289 rows (environ)
+-- Listage des données de la table db_cabinet_v2.payment_lines : ~291 rows (environ)
 DELETE FROM `payment_lines`;
 INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`, `quantity`, `unit_price`, `total_price`, `created_at`, `updated_at`) VALUES
 	(1, 1, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-04-08 15:00:00', '2025-04-08 15:00:00'),
 	(2, 2, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2026-02-16 08:15:00', '2026-02-16 08:15:00'),
 	(3, 2, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2026-02-16 08:15:00', '2026-02-16 08:15:00'),
-	(4, 3, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-20 16:15:00', '2025-12-20 16:15:00'),
-	(5, 4, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2026-01-16 09:15:00', '2026-01-16 09:15:00'),
+	(4, 3, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-20 16:15:00', '2025-12-20 16:15:00'),
+	(5, 4, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2026-01-16 09:15:00', '2026-01-16 09:15:00'),
 	(6, 5, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-05-20 13:15:00', '2025-05-20 13:15:00'),
-	(7, 6, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-10-11 11:15:00', '2025-10-11 11:15:00'),
-	(8, 7, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2026-02-15 09:00:00', '2026-02-15 09:00:00'),
+	(7, 6, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-10-11 11:15:00', '2025-10-11 11:15:00'),
+	(8, 7, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2026-02-15 09:00:00', '2026-02-15 09:00:00'),
 	(9, 7, 1, 'Consultation générale', 1, 150.00, 150.00, '2026-02-15 09:00:00', '2026-02-15 09:00:00'),
 	(10, 8, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-11-13 11:00:00', '2025-11-13 11:00:00'),
 	(11, 8, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-11-13 11:00:00', '2025-11-13 11:00:00'),
@@ -1986,13 +2000,13 @@ INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`
 	(20, 13, 3, 'Consultation urgence', 1, 250.00, 250.00, '2026-03-05 13:00:00', '2026-03-05 13:00:00'),
 	(21, 14, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-10-04 12:30:00', '2025-10-04 12:30:00'),
 	(22, 14, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-10-04 12:30:00', '2025-10-04 12:30:00'),
-	(23, 14, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-10-04 12:30:00', '2025-10-04 12:30:00'),
+	(23, 14, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-10-04 12:30:00', '2025-10-04 12:30:00'),
 	(24, 15, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-08-07 12:30:00', '2025-08-07 12:30:00'),
 	(25, 16, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-09-18 12:00:00', '2025-09-18 12:00:00'),
 	(26, 17, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-07-06 07:15:00', '2025-07-06 07:15:00'),
 	(27, 17, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-07-06 07:15:00', '2025-07-06 07:15:00'),
 	(28, 17, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-07-06 07:15:00', '2025-07-06 07:15:00'),
-	(29, 18, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-05-04 16:00:00', '2025-05-04 16:00:00'),
+	(29, 18, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-05-04 16:00:00', '2025-05-04 16:00:00'),
 	(30, 18, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-05-04 16:00:00', '2025-05-04 16:00:00'),
 	(31, 18, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-05-04 16:00:00', '2025-05-04 16:00:00'),
 	(32, 19, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2026-02-13 15:15:00', '2026-02-13 15:15:00'),
@@ -2005,7 +2019,7 @@ INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`
 	(39, 23, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-05-07 16:00:00', '2025-05-07 16:00:00'),
 	(40, 24, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-09-06 10:15:00', '2025-09-06 10:15:00'),
 	(41, 24, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-09-06 10:15:00', '2025-09-06 10:15:00'),
-	(42, 25, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2026-01-31 08:30:00', '2026-01-31 08:30:00'),
+	(42, 25, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2026-01-31 08:30:00', '2026-01-31 08:30:00'),
 	(43, 25, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2026-01-31 08:30:00', '2026-01-31 08:30:00'),
 	(44, 26, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-10-29 14:00:00', '2025-10-29 14:00:00'),
 	(45, 27, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-04-25 13:00:00', '2025-04-25 13:00:00'),
@@ -2020,9 +2034,9 @@ INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`
 	(54, 32, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-12-27 10:30:00', '2025-12-27 10:30:00'),
 	(55, 32, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-12-27 10:30:00', '2025-12-27 10:30:00'),
 	(56, 33, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-11-19 15:15:00', '2025-11-19 15:15:00'),
-	(57, 33, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-11-19 15:15:00', '2025-11-19 15:15:00'),
+	(57, 33, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-11-19 15:15:00', '2025-11-19 15:15:00'),
 	(58, 33, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-11-19 15:15:00', '2025-11-19 15:15:00'),
-	(59, 34, 7, 'Certificat médical', 1, 50.00, 50.00, '2026-01-20 11:15:00', '2026-01-20 11:15:00'),
+	(59, 34, NULL, 'Certificat médical', 1, 50.00, 50.00, '2026-01-20 11:15:00', '2026-01-20 11:15:00'),
 	(60, 34, 4, 'Téléconsultation', 1, 100.00, 100.00, '2026-01-20 11:15:00', '2026-01-20 11:15:00'),
 	(61, 34, 1, 'Consultation générale', 1, 150.00, 150.00, '2026-01-20 11:15:00', '2026-01-20 11:15:00'),
 	(62, 35, 4, 'Téléconsultation', 1, 100.00, 100.00, '2025-07-27 07:00:00', '2025-07-27 07:00:00'),
@@ -2040,39 +2054,39 @@ INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`
 	(74, 41, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-08-15 10:30:00', '2025-08-15 10:30:00'),
 	(75, 42, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2026-01-09 09:15:00', '2026-01-09 09:15:00'),
 	(76, 42, 4, 'Téléconsultation', 1, 100.00, 100.00, '2026-01-09 09:15:00', '2026-01-09 09:15:00'),
-	(77, 42, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2026-01-09 09:15:00', '2026-01-09 09:15:00'),
+	(77, 42, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2026-01-09 09:15:00', '2026-01-09 09:15:00'),
 	(78, 43, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2026-01-04 13:15:00', '2026-01-04 13:15:00'),
 	(79, 44, 4, 'Téléconsultation', 1, 100.00, 100.00, '2025-12-31 14:15:00', '2025-12-31 14:15:00'),
 	(80, 45, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-06-20 11:30:00', '2025-06-20 11:30:00'),
 	(81, 45, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-06-20 11:30:00', '2025-06-20 11:30:00'),
 	(82, 45, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-06-20 11:30:00', '2025-06-20 11:30:00'),
-	(83, 46, 7, 'Certificat médical', 1, 50.00, 50.00, '2026-03-02 17:00:00', '2026-03-02 17:00:00'),
+	(83, 46, NULL, 'Certificat médical', 1, 50.00, 50.00, '2026-03-02 17:00:00', '2026-03-02 17:00:00'),
 	(84, 46, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2026-03-02 17:00:00', '2026-03-02 17:00:00'),
 	(85, 46, 1, 'Consultation générale', 1, 150.00, 150.00, '2026-03-02 17:00:00', '2026-03-02 17:00:00'),
 	(86, 47, 4, 'Téléconsultation', 1, 100.00, 100.00, '2025-12-31 09:30:00', '2025-12-31 09:30:00'),
-	(87, 48, 7, 'Certificat médical', 1, 50.00, 50.00, '2026-02-20 09:30:00', '2026-02-20 09:30:00'),
+	(87, 48, NULL, 'Certificat médical', 1, 50.00, 50.00, '2026-02-20 09:30:00', '2026-02-20 09:30:00'),
 	(88, 49, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-05-10 07:15:00', '2025-05-10 07:15:00'),
 	(89, 49, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-05-10 07:15:00', '2025-05-10 07:15:00'),
-	(90, 50, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2026-01-01 11:15:00', '2026-01-01 11:15:00'),
+	(90, 50, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2026-01-01 11:15:00', '2026-01-01 11:15:00'),
 	(91, 51, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-04-07 12:30:00', '2025-04-07 12:30:00'),
 	(92, 51, 3, 'Consultation urgence', 1, 250.00, 250.00, '2025-04-07 12:30:00', '2025-04-07 12:30:00'),
-	(93, 51, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-04-07 12:30:00', '2025-04-07 12:30:00'),
+	(93, 51, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-04-07 12:30:00', '2025-04-07 12:30:00'),
 	(94, 52, 3, 'Consultation urgence', 1, 250.00, 250.00, '2025-06-29 13:30:00', '2025-06-29 13:30:00'),
-	(95, 52, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-06-29 13:30:00', '2025-06-29 13:30:00'),
+	(95, 52, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-06-29 13:30:00', '2025-06-29 13:30:00'),
 	(96, 52, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-06-29 13:30:00', '2025-06-29 13:30:00'),
 	(97, 53, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-07-21 12:15:00', '2025-07-21 12:15:00'),
-	(98, 53, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-07-21 12:15:00', '2025-07-21 12:15:00'),
+	(98, 53, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-07-21 12:15:00', '2025-07-21 12:15:00'),
 	(99, 53, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-07-21 12:15:00', '2025-07-21 12:15:00'),
 	(100, 54, 3, 'Consultation urgence', 1, 250.00, 250.00, '2025-08-23 08:15:00', '2025-08-23 08:15:00'),
 	(101, 54, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-08-23 08:15:00', '2025-08-23 08:15:00'),
 	(102, 55, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2026-01-21 07:30:00', '2026-01-21 07:30:00'),
 	(103, 56, 4, 'Téléconsultation', 1, 100.00, 100.00, '2026-01-16 09:00:00', '2026-01-16 09:00:00'),
 	(104, 56, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2026-01-16 09:00:00', '2026-01-16 09:00:00'),
-	(105, 57, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-17 12:15:00', '2025-12-17 12:15:00'),
-	(106, 57, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-17 12:15:00', '2025-12-17 12:15:00'),
+	(105, 57, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-17 12:15:00', '2025-12-17 12:15:00'),
+	(106, 57, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-17 12:15:00', '2025-12-17 12:15:00'),
 	(107, 58, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-05-16 09:00:00', '2025-05-16 09:00:00'),
 	(108, 58, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-05-16 09:00:00', '2025-05-16 09:00:00'),
-	(109, 59, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-03-30 14:30:00', '2025-03-30 14:30:00'),
+	(109, 59, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-03-30 14:30:00', '2025-03-30 14:30:00'),
 	(110, 60, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-03-14 13:30:00', '2025-03-14 13:30:00'),
 	(111, 60, 4, 'Téléconsultation', 1, 100.00, 100.00, '2025-03-14 13:30:00', '2025-03-14 13:30:00'),
 	(112, 60, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-03-14 13:30:00', '2025-03-14 13:30:00'),
@@ -2081,22 +2095,22 @@ INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`
 	(115, 62, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-05-13 07:15:00', '2025-05-13 07:15:00'),
 	(116, 63, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-06-10 14:00:00', '2025-06-10 14:00:00'),
 	(117, 63, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-06-10 14:00:00', '2025-06-10 14:00:00'),
-	(118, 63, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-06-10 14:00:00', '2025-06-10 14:00:00'),
-	(119, 64, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-12-22 13:15:00', '2025-12-22 13:15:00'),
+	(118, 63, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-06-10 14:00:00', '2025-06-10 14:00:00'),
+	(119, 64, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-12-22 13:15:00', '2025-12-22 13:15:00'),
 	(120, 64, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-12-22 13:15:00', '2025-12-22 13:15:00'),
 	(121, 64, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-12-22 13:15:00', '2025-12-22 13:15:00'),
-	(122, 65, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2026-02-25 09:15:00', '2026-02-25 09:15:00'),
+	(122, 65, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2026-02-25 09:15:00', '2026-02-25 09:15:00'),
 	(123, 65, 1, 'Consultation générale', 1, 150.00, 150.00, '2026-02-25 09:15:00', '2026-02-25 09:15:00'),
 	(124, 66, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-11-30 09:00:00', '2025-11-30 09:00:00'),
 	(125, 66, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-11-30 09:00:00', '2025-11-30 09:00:00'),
 	(126, 66, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-11-30 09:00:00', '2025-11-30 09:00:00'),
 	(127, 67, 3, 'Consultation urgence', 1, 250.00, 250.00, '2025-09-20 09:15:00', '2025-09-20 09:15:00'),
 	(128, 67, 4, 'Téléconsultation', 1, 100.00, 100.00, '2025-09-20 09:15:00', '2025-09-20 09:15:00'),
-	(129, 67, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-09-20 09:15:00', '2025-09-20 09:15:00'),
-	(130, 68, 7, 'Certificat médical', 1, 50.00, 50.00, '2026-02-19 15:15:00', '2026-02-19 15:15:00'),
+	(129, 67, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-09-20 09:15:00', '2025-09-20 09:15:00'),
+	(130, 68, NULL, 'Certificat médical', 1, 50.00, 50.00, '2026-02-19 15:15:00', '2026-02-19 15:15:00'),
 	(131, 68, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2026-02-19 15:15:00', '2026-02-19 15:15:00'),
 	(132, 69, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-06-22 13:00:00', '2025-06-22 13:00:00'),
-	(133, 70, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-07-17 08:15:00', '2025-07-17 08:15:00'),
+	(133, 70, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-07-17 08:15:00', '2025-07-17 08:15:00'),
 	(134, 70, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-07-17 08:15:00', '2025-07-17 08:15:00'),
 	(135, 70, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-07-17 08:15:00', '2025-07-17 08:15:00'),
 	(136, 71, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-05-15 10:00:00', '2025-05-15 10:00:00'),
@@ -2107,7 +2121,7 @@ INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`
 	(141, 73, 1, 'Consultation générale', 1, 150.00, 150.00, '2026-01-02 12:30:00', '2026-01-02 12:30:00'),
 	(142, 73, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2026-01-02 12:30:00', '2026-01-02 12:30:00'),
 	(143, 73, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2026-01-02 12:30:00', '2026-01-02 12:30:00'),
-	(144, 74, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-06-07 10:15:00', '2025-06-07 10:15:00'),
+	(144, 74, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-06-07 10:15:00', '2025-06-07 10:15:00'),
 	(145, 75, 4, 'Téléconsultation', 1, 100.00, 100.00, '2025-09-28 14:15:00', '2025-09-28 14:15:00'),
 	(146, 75, 3, 'Consultation urgence', 1, 250.00, 250.00, '2025-09-28 14:15:00', '2025-09-28 14:15:00'),
 	(147, 76, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-07-04 11:30:00', '2025-07-04 11:30:00'),
@@ -2125,37 +2139,37 @@ INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`
 	(159, 82, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-12-05 10:00:00', '2025-12-05 10:00:00'),
 	(160, 83, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-09-22 09:00:00', '2025-09-22 09:00:00'),
 	(161, 83, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-09-22 09:00:00', '2025-09-22 09:00:00'),
-	(162, 83, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-09-22 09:00:00', '2025-09-22 09:00:00'),
+	(162, 83, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-09-22 09:00:00', '2025-09-22 09:00:00'),
 	(163, 84, 3, 'Consultation urgence', 1, 250.00, 250.00, '2025-11-21 09:15:00', '2025-11-21 09:15:00'),
-	(164, 84, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-11-21 09:15:00', '2025-11-21 09:15:00'),
+	(164, 84, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-11-21 09:15:00', '2025-11-21 09:15:00'),
 	(165, 84, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-11-21 09:15:00', '2025-11-21 09:15:00'),
 	(166, 85, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-09-21 14:15:00', '2025-09-21 14:15:00'),
-	(167, 86, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-09-12 16:30:00', '2025-09-12 16:30:00'),
+	(167, 86, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-09-12 16:30:00', '2025-09-12 16:30:00'),
 	(168, 86, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-09-12 16:30:00', '2025-09-12 16:30:00'),
-	(169, 87, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-08-24 12:00:00', '2025-08-24 12:00:00'),
+	(169, 87, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-08-24 12:00:00', '2025-08-24 12:00:00'),
 	(170, 87, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-08-24 12:00:00', '2025-08-24 12:00:00'),
 	(171, 87, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-08-24 12:00:00', '2025-08-24 12:00:00'),
-	(172, 88, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-12-20 14:15:00', '2025-12-20 14:15:00'),
-	(173, 88, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-20 14:15:00', '2025-12-20 14:15:00'),
+	(172, 88, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-12-20 14:15:00', '2025-12-20 14:15:00'),
+	(173, 88, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-20 14:15:00', '2025-12-20 14:15:00'),
 	(174, 88, 3, 'Consultation urgence', 1, 250.00, 250.00, '2025-12-20 14:15:00', '2025-12-20 14:15:00'),
 	(175, 89, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-09-22 08:30:00', '2025-09-22 08:30:00'),
 	(176, 90, 3, 'Consultation urgence', 1, 250.00, 250.00, '2025-12-23 16:00:00', '2025-12-23 16:00:00'),
-	(177, 90, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-23 16:00:00', '2025-12-23 16:00:00'),
-	(178, 91, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-07-20 11:30:00', '2025-07-20 11:30:00'),
-	(179, 91, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-07-20 11:30:00', '2025-07-20 11:30:00'),
+	(177, 90, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-23 16:00:00', '2025-12-23 16:00:00'),
+	(178, 91, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-07-20 11:30:00', '2025-07-20 11:30:00'),
+	(179, 91, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-07-20 11:30:00', '2025-07-20 11:30:00'),
 	(180, 91, 4, 'Téléconsultation', 1, 100.00, 100.00, '2025-07-20 11:30:00', '2025-07-20 11:30:00'),
-	(181, 92, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-09-24 16:15:00', '2025-09-24 16:15:00'),
+	(181, 92, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-09-24 16:15:00', '2025-09-24 16:15:00'),
 	(182, 93, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-10-09 08:30:00', '2025-10-09 08:30:00'),
 	(183, 94, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2026-02-03 07:00:00', '2026-02-03 07:00:00'),
 	(184, 94, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2026-02-03 07:00:00', '2026-02-03 07:00:00'),
 	(185, 95, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-09-06 16:15:00', '2025-09-06 16:15:00'),
 	(186, 95, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-09-06 16:15:00', '2025-09-06 16:15:00'),
 	(187, 96, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-05-30 13:30:00', '2025-05-30 13:30:00'),
-	(188, 97, 7, 'Certificat médical', 1, 50.00, 50.00, '2026-02-28 08:15:00', '2026-02-28 08:15:00'),
-	(189, 97, 7, 'Certificat médical', 1, 50.00, 50.00, '2026-02-28 08:15:00', '2026-02-28 08:15:00'),
+	(188, 97, NULL, 'Certificat médical', 1, 50.00, 50.00, '2026-02-28 08:15:00', '2026-02-28 08:15:00'),
+	(189, 97, NULL, 'Certificat médical', 1, 50.00, 50.00, '2026-02-28 08:15:00', '2026-02-28 08:15:00'),
 	(190, 97, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2026-02-28 08:15:00', '2026-02-28 08:15:00'),
 	(191, 98, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-06-26 08:15:00', '2025-06-26 08:15:00'),
-	(192, 98, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-06-26 08:15:00', '2025-06-26 08:15:00'),
+	(192, 98, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-06-26 08:15:00', '2025-06-26 08:15:00'),
 	(193, 98, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-06-26 08:15:00', '2025-06-26 08:15:00'),
 	(194, 99, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-12-10 10:15:00', '2025-12-10 10:15:00'),
 	(195, 99, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-12-10 10:15:00', '2025-12-10 10:15:00'),
@@ -2175,17 +2189,17 @@ INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`
 	(209, 108, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-03-28 11:00:00', '2025-03-28 11:00:00'),
 	(210, 108, 4, 'Téléconsultation', 1, 100.00, 100.00, '2025-03-28 11:00:00', '2025-03-28 11:00:00'),
 	(211, 109, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-04-22 10:30:00', '2025-04-22 10:30:00'),
-	(212, 109, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-04-22 10:30:00', '2025-04-22 10:30:00'),
+	(212, 109, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-04-22 10:30:00', '2025-04-22 10:30:00'),
 	(213, 109, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-04-22 10:30:00', '2025-04-22 10:30:00'),
-	(214, 110, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-06-28 11:00:00', '2025-06-28 11:00:00'),
-	(215, 111, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2026-03-02 08:00:00', '2026-03-02 08:00:00'),
+	(214, 110, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-06-28 11:00:00', '2025-06-28 11:00:00'),
+	(215, 111, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2026-03-02 08:00:00', '2026-03-02 08:00:00'),
 	(216, 112, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-09-08 15:15:00', '2025-09-08 15:15:00'),
 	(217, 112, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-09-08 15:15:00', '2025-09-08 15:15:00'),
 	(218, 112, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-09-08 15:15:00', '2025-09-08 15:15:00'),
 	(219, 113, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-05-01 16:15:00', '2025-05-01 16:15:00'),
 	(220, 113, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-05-01 16:15:00', '2025-05-01 16:15:00'),
 	(221, 114, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-03-22 17:15:00', '2025-03-22 17:15:00'),
-	(222, 115, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-03-24 08:00:00', '2025-03-24 08:00:00'),
+	(222, 115, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-03-24 08:00:00', '2025-03-24 08:00:00'),
 	(223, 116, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-12-11 16:15:00', '2025-12-11 16:15:00'),
 	(224, 117, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-06-06 08:30:00', '2025-06-06 08:30:00'),
 	(225, 118, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-11-08 12:30:00', '2025-11-08 12:30:00'),
@@ -2193,7 +2207,7 @@ INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`
 	(227, 118, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-11-08 12:30:00', '2025-11-08 12:30:00'),
 	(228, 119, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-11-14 10:00:00', '2025-11-14 10:00:00'),
 	(229, 119, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-11-14 10:00:00', '2025-11-14 10:00:00'),
-	(230, 119, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-11-14 10:00:00', '2025-11-14 10:00:00'),
+	(230, 119, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-11-14 10:00:00', '2025-11-14 10:00:00'),
 	(231, 120, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-07-04 14:15:00', '2025-07-04 14:15:00'),
 	(232, 121, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-07-27 07:00:00', '2025-07-27 07:00:00'),
 	(233, 121, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-07-27 07:00:00', '2025-07-27 07:00:00'),
@@ -2202,7 +2216,7 @@ INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`
 	(236, 122, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-07-02 14:30:00', '2025-07-02 14:30:00'),
 	(237, 122, 4, 'Téléconsultation', 1, 100.00, 100.00, '2025-07-02 14:30:00', '2025-07-02 14:30:00'),
 	(238, 123, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2026-02-28 11:00:00', '2026-02-28 11:00:00'),
-	(239, 124, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-08-09 13:00:00', '2025-08-09 13:00:00'),
+	(239, 124, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-08-09 13:00:00', '2025-08-09 13:00:00'),
 	(240, 125, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2026-02-26 14:30:00', '2026-02-26 14:30:00'),
 	(241, 125, 4, 'Téléconsultation', 1, 100.00, 100.00, '2026-02-26 14:30:00', '2026-02-26 14:30:00'),
 	(242, 126, 3, 'Consultation urgence', 1, 250.00, 250.00, '2025-09-08 16:30:00', '2025-09-08 16:30:00'),
@@ -2216,43 +2230,49 @@ INSERT INTO `payment_lines` (`id`, `payment_id`, `medical_act_id`, `description`
 	(250, 130, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2026-01-16 07:00:00', '2026-01-16 07:00:00'),
 	(251, 130, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2026-01-16 07:00:00', '2026-01-16 07:00:00'),
 	(252, 131, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2026-01-24 12:00:00', '2026-01-24 12:00:00'),
-	(253, 131, 7, 'Certificat médical', 1, 50.00, 50.00, '2026-01-24 12:00:00', '2026-01-24 12:00:00'),
+	(253, 131, NULL, 'Certificat médical', 1, 50.00, 50.00, '2026-01-24 12:00:00', '2026-01-24 12:00:00'),
 	(254, 132, 4, 'Téléconsultation', 1, 100.00, 100.00, '2025-09-12 16:15:00', '2025-09-12 16:15:00'),
 	(255, 132, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-09-12 16:15:00', '2025-09-12 16:15:00'),
 	(256, 132, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-09-12 16:15:00', '2025-09-12 16:15:00'),
 	(257, 133, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2026-03-10 13:30:00', '2026-03-10 13:30:00'),
-	(258, 133, 7, 'Certificat médical', 1, 50.00, 50.00, '2026-03-10 13:30:00', '2026-03-10 13:30:00'),
+	(258, 133, NULL, 'Certificat médical', 1, 50.00, 50.00, '2026-03-10 13:30:00', '2026-03-10 13:30:00'),
 	(259, 133, 1, 'Consultation générale', 1, 150.00, 150.00, '2026-03-10 13:30:00', '2026-03-10 13:30:00'),
-	(260, 134, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-04-07 16:30:00', '2025-04-07 16:30:00'),
-	(261, 134, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-04-07 16:30:00', '2025-04-07 16:30:00'),
-	(262, 135, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-03-19 12:15:00', '2025-03-19 12:15:00'),
+	(260, 134, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-04-07 16:30:00', '2025-04-07 16:30:00'),
+	(261, 134, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-04-07 16:30:00', '2025-04-07 16:30:00'),
+	(262, 135, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-03-19 12:15:00', '2025-03-19 12:15:00'),
 	(263, 135, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-03-19 12:15:00', '2025-03-19 12:15:00'),
 	(264, 135, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-03-19 12:15:00', '2025-03-19 12:15:00'),
 	(265, 136, 1, 'Consultation générale', 1, 150.00, 150.00, '2025-04-20 12:30:00', '2025-04-20 12:30:00'),
-	(266, 136, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-04-20 12:30:00', '2025-04-20 12:30:00'),
+	(266, 136, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-04-20 12:30:00', '2025-04-20 12:30:00'),
 	(267, 137, 5, 'Électrocardiogramme', 1, 100.00, 100.00, '2025-07-20 09:15:00', '2025-07-20 09:15:00'),
 	(268, 138, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2026-02-01 07:15:00', '2026-02-01 07:15:00'),
 	(269, 138, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2026-02-01 07:15:00', '2026-02-01 07:15:00'),
 	(270, 138, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2026-02-01 07:15:00', '2026-02-01 07:15:00'),
 	(271, 139, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-08-14 14:30:00', '2025-08-14 14:30:00'),
-	(272, 139, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-08-14 14:30:00', '2025-08-14 14:30:00'),
-	(273, 140, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-09-16 09:30:00', '2025-09-16 09:30:00'),
+	(272, 139, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-08-14 14:30:00', '2025-08-14 14:30:00'),
+	(273, 140, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-09-16 09:30:00', '2025-09-16 09:30:00'),
 	(274, 141, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-05-03 11:00:00', '2025-05-03 11:00:00'),
 	(275, 142, 1, 'Consultation générale', 1, 150.00, 150.00, '2026-01-09 13:00:00', '2026-01-09 13:00:00'),
 	(276, 142, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2026-01-09 13:00:00', '2026-01-09 13:00:00'),
 	(277, 143, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-08-15 14:30:00', '2025-08-15 14:30:00'),
 	(278, 144, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2026-01-28 15:30:00', '2026-01-28 15:30:00'),
-	(279, 144, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2026-01-28 15:30:00', '2026-01-28 15:30:00'),
+	(279, 144, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2026-01-28 15:30:00', '2026-01-28 15:30:00'),
 	(280, 145, 3, 'Consultation urgence', 1, 250.00, 250.00, '2025-09-29 10:00:00', '2025-09-29 10:00:00'),
 	(281, 145, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-09-29 10:00:00', '2025-09-29 10:00:00'),
 	(282, 146, 9, 'Injection intramusculaire', 1, 80.00, 80.00, '2025-12-09 11:00:00', '2025-12-09 11:00:00'),
-	(283, 146, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-09 11:00:00', '2025-12-09 11:00:00'),
+	(283, 146, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-12-09 11:00:00', '2025-12-09 11:00:00'),
 	(284, 147, 2, 'Consultation spécialisée', 1, 300.00, 300.00, '2025-05-04 08:15:00', '2025-05-04 08:15:00'),
 	(285, 147, 10, 'Perfusion intraveineuse', 1, 150.00, 150.00, '2025-05-04 08:15:00', '2025-05-04 08:15:00'),
 	(286, 148, 6, 'Mesure saturation O2', 1, 30.00, 30.00, '2025-04-16 11:15:00', '2025-04-16 11:15:00'),
 	(287, 148, 4, 'Téléconsultation', 1, 100.00, 100.00, '2025-04-16 11:15:00', '2025-04-16 11:15:00'),
-	(288, 148, 8, 'Arrêt de travail', 1, 50.00, 50.00, '2025-04-16 11:15:00', '2025-04-16 11:15:00'),
-	(289, 149, 7, 'Certificat médical', 1, 50.00, 50.00, '2025-08-14 08:15:00', '2025-08-14 08:15:00');
+	(288, 148, NULL, 'Arrêt de travail', 1, 50.00, 50.00, '2025-04-16 11:15:00', '2025-04-16 11:15:00'),
+	(289, 149, NULL, 'Certificat médical', 1, 50.00, 50.00, '2025-08-14 08:15:00', '2025-08-14 08:15:00'),
+	(290, 150, NULL, 'consultation', 1, 300.00, 300.00, '2026-03-16 23:46:27', '2026-03-16 23:46:27'),
+	(291, 150, NULL, 'petit geste', 1, 1200.00, 1200.00, '2026-03-16 23:46:27', '2026-03-16 23:46:27'),
+	(292, 151, NULL, 'consultation', 1, 300.00, 300.00, '2026-03-17 03:50:14', '2026-03-17 03:50:14'),
+	(293, 151, NULL, 'petit geste', 1, 1000.00, 1000.00, '2026-03-17 03:50:14', '2026-03-17 03:50:14'),
+	(294, 152, NULL, 'consultation', 1, 300.00, 300.00, '2026-03-17 03:52:16', '2026-03-17 03:52:16'),
+	(295, 152, NULL, 'petit geste', 1, 8000.00, 8000.00, '2026-03-17 03:52:16', '2026-03-17 03:52:16');
 
 -- Listage de la structure de table db_cabinet_v2. permissions
 CREATE TABLE IF NOT EXISTS `permissions` (
@@ -2263,7 +2283,7 @@ CREATE TABLE IF NOT EXISTS `permissions` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `permissions_name_guard_name_unique` (`name`,`guard_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Listage des données de la table db_cabinet_v2.permissions : ~27 rows (environ)
 DELETE FROM `permissions`;
@@ -2294,7 +2314,20 @@ INSERT INTO `permissions` (`id`, `name`, `guard_name`, `created_at`, `updated_at
 	(24, 'manage users', 'web', '2026-03-14 14:54:46', '2026-03-14 14:54:46'),
 	(25, 'manage roles', 'web', '2026-03-14 14:54:46', '2026-03-14 14:54:46'),
 	(26, 'manage medications', 'web', '2026-03-14 14:54:46', '2026-03-14 14:54:46'),
-	(27, 'view activity-log', 'web', '2026-03-14 14:54:46', '2026-03-14 14:54:46');
+	(27, 'view activity-log', 'web', '2026-03-14 14:54:46', '2026-03-14 14:54:46'),
+	(28, 'view appointments', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(29, 'create appointments', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(30, 'edit appointments', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(31, 'delete appointments', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(32, 'view medical-images', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(33, 'create medical-images', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(34, 'edit medical-images', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(35, 'delete medical-images', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(36, 'view medical-reports', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(37, 'create medical-reports', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(38, 'edit medical-reports', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(39, 'delete medical-reports', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35'),
+	(40, 'print medical-reports', 'web', '2026-03-17 12:28:35', '2026-03-17 12:28:35');
 
 -- Listage de la structure de table db_cabinet_v2. prescriptions
 CREATE TABLE IF NOT EXISTS `prescriptions` (
@@ -2347,7 +2380,7 @@ INSERT INTO `prescriptions` (`id`, `prescription_number`, `patient_id`, `doctor_
 	(18, 'ORD-2026-00018', 27, 6, 27, '2026-03-01', '2026-04-15', NULL, 0, NULL, 6, NULL, '2026-03-01 13:15:00', '2026-03-01 13:15:00'),
 	(19, 'ORD-2025-00019', 22, 5, 30, '2025-06-15', '2025-08-14', NULL, 1, NULL, 5, NULL, '2025-06-15 07:30:00', '2025-06-15 07:30:00'),
 	(20, 'ORD-2026-00020', 23, 4, 31, '2026-02-04', '2026-05-01', NULL, 0, NULL, 4, NULL, '2026-02-04 12:00:00', '2026-02-04 12:00:00'),
-	(21, 'ORD-2026-00021', 39, 5, 32, '2026-03-11', '2026-04-17', NULL, 0, NULL, 5, NULL, '2026-03-11 08:15:00', '2026-03-11 08:15:00'),
+	(21, 'ORD-2026-00021', 39, 5, 32, '2026-03-11', '2026-04-17', NULL, 1, NULL, 5, NULL, '2026-03-11 08:15:00', '2026-03-17 01:36:09'),
 	(22, 'ORD-2026-00022', 4, 5, 35, '2026-01-31', '2026-04-13', NULL, 1, NULL, 5, NULL, '2026-01-31 08:30:00', '2026-01-31 08:30:00'),
 	(23, 'ORD-2025-00023', 4, 6, 36, '2025-10-29', '2026-01-17', NULL, 0, NULL, 6, NULL, '2025-10-29 14:00:00', '2025-10-29 14:00:00'),
 	(24, 'ORD-2025-00024', 15, 5, 38, '2025-04-25', '2025-06-21', 'À prendre avec les repas. Éviter l\'alcool.', 0, NULL, 5, NULL, '2025-04-25 13:00:00', '2025-04-25 13:00:00'),
@@ -2862,10 +2895,8 @@ INSERT INTO `role_has_permissions` (`permission_id`, `role_id`) VALUES
 	(1, 3),
 	(2, 1),
 	(2, 2),
-	(2, 3),
 	(3, 1),
 	(3, 2),
-	(3, 3),
 	(4, 1),
 	(5, 1),
 	(5, 2),
@@ -2908,7 +2939,35 @@ INSERT INTO `role_has_permissions` (`permission_id`, `role_id`) VALUES
 	(24, 1),
 	(25, 1),
 	(26, 1),
-	(27, 1);
+	(27, 1),
+	(28, 1),
+	(28, 2),
+	(28, 3),
+	(29, 1),
+	(29, 2),
+	(29, 3),
+	(30, 1),
+	(30, 2),
+	(30, 3),
+	(31, 1),
+	(31, 3),
+	(32, 1),
+	(32, 2),
+	(33, 1),
+	(33, 2),
+	(34, 1),
+	(34, 2),
+	(35, 1),
+	(35, 2),
+	(36, 1),
+	(36, 2),
+	(37, 1),
+	(37, 2),
+	(38, 1),
+	(38, 2),
+	(39, 1),
+	(40, 1),
+	(40, 2);
 
 -- Listage de la structure de table db_cabinet_v2. sessions
 CREATE TABLE IF NOT EXISTS `sessions` (
@@ -2926,7 +2985,8 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 -- Listage des données de la table db_cabinet_v2.sessions : ~1 rows (environ)
 DELETE FROM `sessions`;
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-	('s0jtiQjwJAZtcJ7Jq6BsCbRhdCRTGUv0gdJ0jvS4', 1, '192.168.100.72', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiM3NHd3U4VEptclVIbDZUQWVhb1ZoTzZySnU2b0tWTXREVnI0cUJIVSI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjI6e3M6MzoidXJsIjtzOjQ0OiJodHRwOi8vMTkyLjE2OC4xMDAuNzI6ODAwMC9tZWRpY2FsLWltYWdlcy84MSI7czo1OiJyb3V0ZSI7czoxOToibWVkaWNhbC1pbWFnZXMuc2hvdyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7fQ==', 1773586384);
+	('7WL3oR2W4ZXVZd0BemhjEO2TYLTEN3m0ac6Nuj03', 3, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoicjNsc3FDY2k3VEpxUHZ0YzFBVzVoMkR0Y3kxbU9TeFJvTjlpTXpUUSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MTp7aTowO3M6Nzoic3VjY2VzcyI7fXM6MzoibmV3IjthOjA6e319czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjI6e3M6MzoidXJsIjtzOjM0OiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBwb2ludG1lbnRzIjtzOjU6InJvdXRlIjtzOjE4OiJhcHBvaW50bWVudHMuaW5kZXgiO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aTozO30=', 1773767062),
+	('Hupdg0tdmymL0s7e5IertCZs13uZHqqezfvvmVeh', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiSWpmOW9OcXBUZzV5QUYxeXgxUmE2c0ZDZHBlUU02MTZYVUo5S0ZQSCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjI6e3M6MzoidXJsIjtzOjIxOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAiO3M6NToicm91dGUiO3M6NDoiaG9tZSI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7czo0OiJhdXRoIjthOjE6e3M6MjE6InBhc3N3b3JkX2NvbmZpcm1lZF9hdCI7aToxNzczNzYzNjcxO319', 1773767091);
 
 -- Listage de la structure de table db_cabinet_v2. users
 CREATE TABLE IF NOT EXISTS `users` (

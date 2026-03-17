@@ -28,7 +28,7 @@
                        target="_blank" class="btn btn-primary btn-sm m-r-5">
                         <i class="feather icon-printer"></i> Imprimer PDF
                     </a>
-                    <a href="{{ route('prescriptions.index') }}" class="btn btn-default btn-sm">
+                    <a href="{{ url()->previous() }}" class="btn btn-default btn-sm">
                         <i class="feather icon-arrow-left"></i> Retour
                     </a>
                 </div>

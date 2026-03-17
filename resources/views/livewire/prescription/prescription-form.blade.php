@@ -300,7 +300,7 @@
                             <i class="feather icon-save"></i>
                             {{ $isEdit ? 'Mettre à jour l\'ordonnance' : 'Enregistrer l\'ordonnance' }}
                         </button>
-                        <a href="{{ route('prescriptions.index') }}" class="btn btn-default btn-block">
+                        <a href="{{ url()->previous() }}" class="btn btn-default btn-block">
                             <i class="feather icon-x"></i> Annuler
                         </a>
                     </div>

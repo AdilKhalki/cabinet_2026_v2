@@ -7,6 +7,7 @@ use App\Models\LabTestResult;
 use App\Models\LabTestType;
 use App\Models\Patient;
 use App\Models\User;
+use App\Services\NotificationService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -159,6 +160,7 @@ class LabTestForm extends Component
         } else {
             $data['created_by'] = auth()->id();
             $labTest = LabTest::create($data);
+            NotificationService::labTestCreated($labTest->id, $this->patient_id, $this->doctor_id);
             $message = 'Analyse enregistrée.';
         }
 

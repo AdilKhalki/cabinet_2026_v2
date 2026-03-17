@@ -6,6 +6,7 @@ use App\Models\Consultation;
 use App\Models\MedicalReport;
 use App\Models\Patient;
 use App\Models\User;
+use App\Services\NotificationService;
 use Livewire\Component;
 
 class MedicalReportForm extends Component
@@ -158,7 +159,8 @@ class MedicalReportForm extends Component
             MedicalReport::findOrFail($this->reportId)->update($data);
             session()->flash('success', 'Rapport mis à jour.');
         } else {
-            MedicalReport::create($data);
+            $report = MedicalReport::create($data);
+            NotificationService::medicalReportCreated($report->id, $this->patient_id, $this->doctor_id, $this->title);
             session()->flash('success', 'Rapport créé.');
         }
 

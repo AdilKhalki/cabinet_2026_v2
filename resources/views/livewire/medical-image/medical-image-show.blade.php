@@ -11,8 +11,8 @@
         <div class="card-header">
             <h5><i class="feather icon-image"></i> {{ $medicalImage->title }}</h5>
             <div class="card-header-right">
-                <a href="{{ route('medical-images.index') }}" class="btn btn-default btn-sm">
-                    <i class="feather icon-arrow-left"></i> Retour à la liste
+                <a href="{{ url()->previous() }}" class="btn btn-default btn-sm">
+                    <i class="feather icon-arrow-left"></i> Retour
                 </a>
                 @if($medicalImage->file_path)
                     <a href="{{ Storage::url($medicalImage->file_path) }}" download class="btn btn-info btn-sm">

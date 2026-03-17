@@ -230,7 +230,7 @@
                                 <i class="feather icon-loader"></i> Enregistrement...
                             </span>
                         </button>
-                        <a href="{{ route('patients.index') }}" class="btn btn-default btn-block m-t-5">
+                        <a href="{{ url()->previous() }}" class="btn btn-default btn-block m-t-5">
                             <i class="feather icon-x"></i> Annuler
                         </a>
                     </div>

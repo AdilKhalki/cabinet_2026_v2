@@ -5,6 +5,7 @@ namespace App\Livewire\Consultation;
 use App\Models\Consultation;
 use App\Models\Patient;
 use App\Models\User;
+use App\Services\NotificationService;
 use Livewire\Component;
 
 class ConsultationForm extends Component
@@ -150,6 +151,7 @@ class ConsultationForm extends Component
                 \App\Models\Appointment::findOrFail($this->appointment_id)
                     ->update(['status' => 'completed', 'ended_at' => now()]);
             }
+            NotificationService::consultationCreated($consultation->id, $this->patient_id, $this->doctor_id);
             session()->flash('success', 'Consultation créée.');
         }
 

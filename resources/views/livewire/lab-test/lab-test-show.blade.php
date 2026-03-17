@@ -11,7 +11,7 @@
         <div class="card-header">
             <h5><i class="feather icon-activity"></i> Résultat d'Analyse — {{ $labTest->request_number ?? 'N/A' }}</h5>
             <div class="card-header-right">
-                <a href="{{ route('lab-tests.index') }}" class="btn btn-default btn-sm">
+                <a href="{{ url()->previous() }}" class="btn btn-default btn-sm">
                     <i class="feather icon-arrow-left"></i> Retour
                 </a>
                 @if($labTest->pdf_path)

@@ -5,6 +5,7 @@ namespace App\Livewire\Appointment;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
+use App\Services\NotificationService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -91,6 +92,7 @@ class AppointmentIndex extends Component
             session()->flash('success', 'Rendez-vous modifié.');
         } else {
             Appointment::create($data);
+            NotificationService::appointmentCreated($this->patient_id, $this->doctor_id, $this->scheduled_at);
             session()->flash('success', 'Rendez-vous créé.');
         }
 
@@ -101,6 +103,10 @@ class AppointmentIndex extends Component
     {
         $appt = Appointment::findOrFail($id);
         $appt->update(['status' => $status]);
+
+        if ($status === 'cancelled') {
+            NotificationService::appointmentCancelled($appt->patient_id, $appt->doctor_id, $appt->scheduled_at);
+        }
 
         if ($status === 'waiting') {
             $appt->update(['arrived_at' => now()]);

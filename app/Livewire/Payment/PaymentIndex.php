@@ -7,6 +7,7 @@ use App\Models\Patient;
 use App\Models\Payment;
 use App\Models\PaymentLine;
 use App\Models\User;
+use App\Services\NotificationService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -139,6 +140,7 @@ class PaymentIndex extends Component
             ]);
         }
 
+        NotificationService::paymentCreated($payment->id, $this->patient_id, $payment->total_amount, $payment->status);
         session()->flash('success', 'Paiement enregistré.');
         $this->showForm = false;
     }

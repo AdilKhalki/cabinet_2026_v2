@@ -207,7 +207,7 @@
                             <i class="feather icon-save"></i>
                             {{ $isEdit ? 'Mettre à jour' : 'Enregistrer la consultation' }}
                         </button>
-                        <a href="{{ route('consultations.index') }}" class="btn btn-default btn-block">
+                        <a href="{{ url()->previous() }}" class="btn btn-default btn-block">
                             <i class="feather icon-x"></i> Annuler
                         </a>
                     </div>

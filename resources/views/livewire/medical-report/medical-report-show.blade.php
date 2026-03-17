@@ -75,8 +75,8 @@
                        class="btn btn-warning btn-block m-b-10">
                         <i class="feather icon-edit"></i> Modifier
                     </a>
-                    <a href="{{ route('medical-reports.index') }}" class="btn btn-default btn-block">
-                        <i class="feather icon-arrow-left"></i> Retour à la liste
+                    <a href="{{ url()->previous() }}" class="btn btn-default btn-block">
+                        <i class="feather icon-arrow-left"></i> Retour
                     </a>
                 </div>
             </div>

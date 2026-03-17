@@ -45,7 +45,7 @@
                        class="btn btn-warning btn-sm m-r-5">
                         <i class="feather icon-edit"></i> Modifier
                     </a>
-                    <a href="{{ route('consultations.index') }}" class="btn btn-default btn-sm">
+                    <a href="{{ url()->previous() }}" class="btn btn-default btn-sm">
                         <i class="feather icon-arrow-left"></i> Retour
                     </a>
                 </div>

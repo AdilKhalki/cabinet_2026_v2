@@ -13,7 +13,7 @@
                 {{ $reportId ? 'Modifier le Rapport Médical' : 'Nouveau Rapport Médical' }}
             </h5>
             <div class="card-header-right">
-                <a href="{{ route('medical-reports.index') }}" class="btn btn-default btn-sm">
+                <a href="{{ url()->previous() }}" class="btn btn-default btn-sm">
                     <i class="feather icon-arrow-left"></i> Retour
                 </a>
             </div>
@@ -161,7 +161,7 @@
 
                 <div class="row">
                     <div class="col-md-12 text-right">
-                        <a href="{{ route('medical-reports.index') }}" class="btn btn-default">
+                        <a href="{{ url()->previous() }}" class="btn btn-default">
                             <i class="feather icon-x"></i> Annuler
                         </a>
                         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:loading.class="disabled">
