@@ -7,10 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class LabTest extends Model
 {
     use GeneratesSequentialNumber, SoftDeletes;
+
+    /** Disque privé pour le PDF du laboratoire (résultats médicaux). */
+    public const DISK = 'local';
+
+    /** Disque où se trouve réellement le PDF (les anciens fichiers peuvent être sur « public »). */
+    public function pdfDisk(): string
+    {
+        return $this->pdf_path && Storage::disk(self::DISK)->exists($this->pdf_path)
+            ? self::DISK
+            : 'public';
+    }
 
     protected $fillable = [
         'request_number', 'patient_id', 'doctor_id', 'consultation_id',
@@ -43,13 +55,8 @@ class LabTest extends Model
         return $this->hasMany(LabTestResult::class);
     }
 
-    protected static function boot(): void
+    protected function sequentialNumberConfig(): array
     {
-        parent::boot();
-        static::creating(function (self $model) {
-            if (empty($model->request_number)) {
-                $model->request_number = static::nextSequentialNumber('request_number', 'BIO');
-            }
-        });
+        return ['request_number', 'BIO'];
     }
 }

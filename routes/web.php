@@ -42,8 +42,6 @@ use App\Livewire\Reports\CabinetStats;
 use App\Livewire\Reports\FinancialReport;
 use Illuminate\Support\Facades\Route;
 
-// Route::view('/','pages.auth.login2')->name('login2');
-
 // Routes protégées
 Route::middleware(['auth', 'verified'])->group(function () {
 

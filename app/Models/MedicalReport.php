@@ -47,13 +47,8 @@ class MedicalReport extends Model
         return $this->belongsTo(Consultation::class);
     }
 
-    protected static function boot(): void
+    protected function sequentialNumberConfig(): array
     {
-        parent::boot();
-        static::creating(function (self $model) {
-            if (empty($model->report_number)) {
-                $model->report_number = static::nextSequentialNumber('report_number', 'RPT');
-            }
-        });
+        return ['report_number', 'RPT'];
     }
 }

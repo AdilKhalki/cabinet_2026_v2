@@ -50,13 +50,8 @@ class Prescription extends Model
         return $this->hasMany(PrescriptionLine::class)->orderBy('sort_order');
     }
 
-    protected static function boot(): void
+    protected function sequentialNumberConfig(): array
     {
-        parent::boot();
-        static::creating(function (self $model) {
-            if (empty($model->prescription_number)) {
-                $model->prescription_number = static::nextSequentialNumber('prescription_number', 'ORD');
-            }
-        });
+        return ['prescription_number', 'ORD'];
     }
 }

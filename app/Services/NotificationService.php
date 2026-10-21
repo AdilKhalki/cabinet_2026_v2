@@ -17,13 +17,13 @@ class NotificationService
         $notification = new CabinetNotification($type, $title, $message, $url);
         $currentUserId = auth()->id();
 
-        // Notifier tous les admins (sauf l'auteur)
-        User::role('admin')->where('id', '!=', $currentUserId)->get()
+        // Notifier tous les admins actifs (sauf l'auteur)
+        User::role('admin')->active()->where('id', '!=', $currentUserId)->get()
             ->each->notify($notification);
 
         // Notifier le médecin concerné (s'il n'est pas l'auteur et pas admin)
         if ($doctorId && $doctorId !== $currentUserId) {
-            $doctor = User::find($doctorId);
+            $doctor = User::active()->find($doctorId);
             if ($doctor && ! $doctor->hasRole('admin')) {
                 $doctor->notify($notification);
             }
@@ -31,14 +31,26 @@ class NotificationService
     }
 
     /**
-     * Notifier les secrétaires.
+     * Notifier uniquement le médecin concerné (s'il est actif et n'est pas l'auteur).
+     */
+    protected static function notifyDoctor(?int $doctorId, string $type, string $title, string $message, ?string $url = null): void
+    {
+        if (! $doctorId || $doctorId === auth()->id()) {
+            return;
+        }
+
+        User::active()->find($doctorId)?->notify(new CabinetNotification($type, $title, $message, $url));
+    }
+
+    /**
+     * Notifier les secrétaires actives.
      */
     protected static function notifySecretaries(string $type, string $title, string $message, ?string $url = null): void
     {
         $notification = new CabinetNotification($type, $title, $message, $url);
         $currentUserId = auth()->id();
 
-        User::role('secretaire')->where('id', '!=', $currentUserId)->get()
+        User::role('secretaire')->active()->where('id', '!=', $currentUserId)->get()
             ->each->notify($notification);
     }
 
@@ -48,22 +60,17 @@ class NotificationService
     {
         $patient = Patient::find($patientId);
         $patientName = $patient ? $patient->full_name : 'Patient';
-        $date = Carbon::parse($scheduledAt)->format('d/m/Y à H:i');
+        $when = Carbon::parse($scheduledAt);
+        $date = $when->format('d/m/Y à H:i');
+        $message = "RDV créé pour {$patientName} le {$date}";
 
-        self::notifyAdminsAndDoctor(
-            $doctorId,
-            'appointment',
-            'Nouveau rendez-vous',
-            "RDV créé pour {$patientName} le {$date}",
-            route('appointments.index')
-        );
+        // Le médecin est toujours prévenu ; les secrétaires seulement pour un RDV du jour
+        // (sinon des milliers de notifications par an pour l'équipe).
+        self::notifyDoctor($doctorId, 'appointment', 'Nouveau rendez-vous', $message, route('appointments.index'));
 
-        self::notifySecretaries(
-            'appointment',
-            'Nouveau rendez-vous',
-            "RDV créé pour {$patientName} le {$date}",
-            route('appointments.index')
-        );
+        if ($when->isToday()) {
+            self::notifySecretaries('appointment', 'Nouveau rendez-vous aujourd\'hui', $message, route('appointments.index'));
+        }
     }
 
     public static function appointmentCancelled(int $patientId, ?int $doctorId, string $scheduledAt): void
@@ -72,7 +79,7 @@ class NotificationService
         $patientName = $patient ? $patient->full_name : 'Patient';
         $date = Carbon::parse($scheduledAt)->format('d/m/Y à H:i');
 
-        self::notifyAdminsAndDoctor(
+        self::notifyDoctor(
             $doctorId,
             'alert',
             'Rendez-vous annulé',

@@ -70,7 +70,13 @@ Located in `resources/views/pdf/` — used by controllers in `app/Http/Controlle
 
 ### Validation
 
-Form Request classes in `app/Http/Requests/{Module}/` for server-side validation. Livewire components also validate inline.
+Validation is done inline in the Livewire components (`$this->validate()` with rules + French attribute names). There are no Form Request classes. French validation messages live in `lang/fr/`.
+
+Authorization: every Livewire action calls `$this->authorize()` against the policies in `app/Policies` (route middleware alone is not enough — Livewire actions can be called directly). Doctors only access their own records.
+
+Medical files (documents, medical images, lab PDFs) are stored on the private `local` disk; never use `Storage::url()` for them. Use the models' `file_url` (signed URL) or an authorized download action. `php artisan cabinet:secure-files` moves legacy files from the public disk.
+
+Numbering (`DOS-`, `ORD-`, `BIO-`, `RPT-`, `FAC-YYYY-NNNNN`) comes from the `GeneratesSequentialNumber` trait (max existing + 1, retries on a duplicate).
 
 ## Test Accounts (from seeders)
 

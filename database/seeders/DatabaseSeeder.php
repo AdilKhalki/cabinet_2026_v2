@@ -12,12 +12,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Référentiels : nécessaires dans tous les environnements
         $this->call([
             RolesAndPermissionsSeeder::class,
             MedicalActSeeder::class,
             MedicationSeeder::class,
             LabTestTypeSeeder::class,
-            DemoDataSeeder::class,
         ]);
+
+        // Données fictives : jamais en production
+        if (! app()->isProduction()) {
+            $this->call(DemoDataSeeder::class);
+        }
     }
 }

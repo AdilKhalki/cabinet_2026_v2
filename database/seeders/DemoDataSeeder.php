@@ -112,6 +112,12 @@ class DemoDataSeeder extends Seeder
     // ═════════════════════════════════════════════════════════════════════
     public function run(): void
     {
+        if (app()->isProduction()) {
+            $this->command->error('Données fictives refusées en production.');
+
+            return;
+        }
+
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
         $this->command->info('Chargement des données existantes...');

@@ -142,15 +142,9 @@ class Patient extends Model
     }
 
     // ── Boot ──────────────────────────────────────────────────────
-    protected static function boot(): void
+    protected function sequentialNumberConfig(): array
     {
-        parent::boot();
-
-        static::creating(function (Patient $patient) {
-            if (empty($patient->dossier_number)) {
-                $patient->dossier_number = static::generateDossierNumber();
-            }
-        });
+        return ['dossier_number', 'DOS'];
     }
 
     public static function generateDossierNumber(): string

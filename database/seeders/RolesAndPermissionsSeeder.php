@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -76,6 +77,14 @@ class RolesAndPermissionsSeeder extends Seeder
             'view documents', 'upload documents',
         ]);
 
+        // En production : jamais de comptes de démo aux mots de passe connus.
+        // Seul un admin est créé, avec un mot de passe aléatoire affiché une seule fois.
+        if (app()->isProduction()) {
+            $this->createProductionAdmin();
+
+            return;
+        }
+
         // Créer l'admin par défaut
         $adminUser = User::firstOrCreate(
             ['email' => 'admin@cabinet.ma'],
@@ -120,5 +129,29 @@ class RolesAndPermissionsSeeder extends Seeder
                 ['secretaire@cabinet.ma', 'secretaire', 'Secret@2026!'],
             ]
         );
+    }
+
+    private function createProductionAdmin(): void
+    {
+        $email = env('ADMIN_EMAIL', 'admin@cabinet.ma');
+
+        if (User::where('email', $email)->exists()) {
+            $this->command->info("Rôles et permissions mis à jour. L'admin {$email} existe déjà (mot de passe inchangé).");
+
+            return;
+        }
+
+        $password = Str::password(16);
+        $admin = User::create([
+            'name' => 'Administrateur',
+            'email' => $email,
+            'password' => Hash::make($password),
+            'email_verified_at' => now(),
+        ]);
+        $admin->assignRole('admin');
+
+        $this->command->warn('Compte administrateur créé. Notez ce mot de passe, il ne sera plus affiché :');
+        $this->command->table(['Email', 'Mot de passe'], [[$email, $password]]);
+        $this->command->warn('Changez-le dès la première connexion.');
     }
 }

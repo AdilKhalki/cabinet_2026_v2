@@ -42,6 +42,8 @@ class Payment extends Model
 
     public const METHOD_LABELS = [
         'cash' => 'Espèces',
+        'card' => 'Carte bancaire',
+        'cheque' => 'Chèque',
         'bank_transfer' => 'Virement',
         'insurance' => 'Assurance/Mutuelle',
         'mixed' => 'Mixte',
@@ -123,13 +125,8 @@ class Payment extends Model
         return in_array($this->status, self::NON_REVENUE_STATUSES, true);
     }
 
-    protected static function boot(): void
+    protected function sequentialNumberConfig(): array
     {
-        parent::boot();
-        static::creating(function (self $model) {
-            if (empty($model->invoice_number)) {
-                $model->invoice_number = static::nextSequentialNumber('invoice_number', 'FAC');
-            }
-        });
+        return ['invoice_number', 'FAC'];
     }
 }

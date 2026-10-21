@@ -239,7 +239,8 @@ class LabTestForm extends Component
         ];
 
         if ($this->pdf_file) {
-            $data['pdf_path'] = $this->pdf_file->store('lab-tests', 'public');
+            // Stockage privé : résultats médicaux, jamais accessibles par URL publique
+            $data['pdf_path'] = $this->pdf_file->store('lab-tests', LabTest::DISK);
         }
 
         // Les valeurs "0" sont des résultats valides : ne pas utiliser ?: (qui les transformerait en null)

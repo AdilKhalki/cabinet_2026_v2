@@ -119,10 +119,25 @@ class PaymentWorkflowTest extends TestCase
             ->call('save')->assertHasErrors('discount');
         // Montant négatif
         $component->set('discount', '-50')->set('insurance_coverage', '0')->call('save')->assertHasErrors('discount');
-        // Mode de paiement hors enum DB
-        $component->set('discount', '0')->set('payment_method', 'card')->call('save')->assertHasErrors('payment_method');
+        // Mode de paiement hors liste
+        $component->set('discount', '0')->set('payment_method', 'bitcoin')->call('save')->assertHasErrors('payment_method');
 
         $this->assertSame(0, Payment::count());
+    }
+
+    public function test_card_and_cheque_payments_are_accepted(): void
+    {
+        $secretary = $this->secretary();
+        $doctor = $this->doctor();
+
+        foreach (['card', 'cheque'] as $method) {
+            $this->fillInvoiceForm(Livewire::actingAs($secretary)->test(PaymentIndex::class), $this->makePatient()->id, $doctor->id)
+                ->set('payment_method', $method)
+                ->call('save')
+                ->assertHasNoErrors();
+        }
+
+        $this->assertEqualsCanonicalizing(['card', 'cheque'], Payment::pluck('payment_method')->all());
     }
 
     public function test_client_side_line_total_is_recomputed_server_side(): void

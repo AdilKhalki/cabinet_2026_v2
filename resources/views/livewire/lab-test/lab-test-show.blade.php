@@ -15,7 +15,7 @@
                     <i class="feather icon-arrow-left"></i> Retour
                 </a>
                 @if($labTest->pdf_path)
-                    <a href="{{ Storage::url($labTest->pdf_path) }}" target="_blank" class="btn btn-info btn-sm">
+                    <a href="#" wire:click.prevent="downloadLabPdf" class="btn btn-info btn-sm">
                         <i class="feather icon-file"></i> Voir PDF
                     </a>
                 @endif

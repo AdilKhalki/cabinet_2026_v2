@@ -107,6 +107,12 @@ class YearActivitySeeder extends Seeder
     // ═════════════════════════════════════════════════════════════════
     public function run(): void
     {
+        if (app()->isProduction()) {
+            $this->command->error('Données fictives refusées en production.');
+
+            return;
+        }
+
         mt_srand(self::YEAR);
         $this->now = Carbon::now();
 

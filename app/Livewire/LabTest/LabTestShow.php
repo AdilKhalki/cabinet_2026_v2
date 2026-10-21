@@ -5,6 +5,7 @@ namespace App\Livewire\LabTest;
 use App\Models\LabTest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -17,6 +18,17 @@ class LabTestShow extends Component
         $this->authorize('view', $labTest);
 
         $this->labTest = $labTest->load(['patient', 'doctor', 'results.labTestType', 'consultation']);
+    }
+
+    /** Télécharge le PDF du laboratoire après vérification des droits. */
+    public function downloadLabPdf()
+    {
+        $this->authorize('view', $this->labTest);
+
+        $disk = $this->labTest->pdfDisk();
+        abort_unless($this->labTest->pdf_path && Storage::disk($disk)->exists($this->labTest->pdf_path), 404);
+
+        return Storage::disk($disk)->download($this->labTest->pdf_path, 'resultats-'.$this->labTest->request_number.'.pdf');
     }
 
     #[Computed]
