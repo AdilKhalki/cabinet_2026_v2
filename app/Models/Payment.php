@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\GeneratesSequentialNumber;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,7 +12,7 @@ use Spatie\Activitylog\LogOptions;
 
 class Payment extends Model
 {
-    use SoftDeletes, LogsActivity;
+    use GeneratesSequentialNumber, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'invoice_number', 'patient_id', 'doctor_id', 'consultation_id',
@@ -86,9 +87,7 @@ class Payment extends Model
         parent::boot();
         static::creating(function (self $model) {
             if (empty($model->invoice_number)) {
-                $year = date('Y');
-                $count = static::withTrashed()->whereYear('created_at', $year)->count();
-                $model->invoice_number = sprintf('FAC-%s-%05d', $year, $count + 1);
+                $model->invoice_number = static::nextSequentialNumber('invoice_number', 'FAC');
             }
         });
     }

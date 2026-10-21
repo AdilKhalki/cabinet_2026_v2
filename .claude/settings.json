@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/c/xampp/mysql/bin/mysqldump.exe -u root db_cabinet_v2)",
+      "Bash(composer test *)"
+    ]
+  }
+}

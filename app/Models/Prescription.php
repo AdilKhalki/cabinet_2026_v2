@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\GeneratesSequentialNumber;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,7 +12,7 @@ use Spatie\Activitylog\LogOptions;
 
 class Prescription extends Model
 {
-    use SoftDeletes, LogsActivity;
+    use GeneratesSequentialNumber, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'prescription_number', 'patient_id', 'doctor_id', 'consultation_id',
@@ -54,9 +55,7 @@ class Prescription extends Model
         parent::boot();
         static::creating(function (self $model) {
             if (empty($model->prescription_number)) {
-                $year = date('Y');
-                $count = static::withTrashed()->whereYear('created_at', $year)->count();
-                $model->prescription_number = sprintf('ORD-%s-%05d', $year, $count + 1);
+                $model->prescription_number = static::nextSequentialNumber('prescription_number', 'ORD');
             }
         });
     }

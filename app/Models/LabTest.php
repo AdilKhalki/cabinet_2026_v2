@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\GeneratesSequentialNumber;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LabTest extends Model
 {
-    use SoftDeletes;
+    use GeneratesSequentialNumber, SoftDeletes;
 
     protected $fillable = [
         'request_number', 'patient_id', 'doctor_id', 'consultation_id',
@@ -47,9 +48,7 @@ class LabTest extends Model
         parent::boot();
         static::creating(function (self $model) {
             if (empty($model->request_number)) {
-                $year = date('Y');
-                $count = static::withTrashed()->whereYear('created_at', $year)->count();
-                $model->request_number = sprintf('BIO-%s-%05d', $year, $count + 1);
+                $model->request_number = static::nextSequentialNumber('request_number', 'BIO');
             }
         });
     }

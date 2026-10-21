@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\GeneratesSequentialNumber;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +15,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Patient extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity;
+    use GeneratesSequentialNumber, HasFactory, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'dossier_number', 'first_name', 'last_name', 'cin', 'ip_number',
@@ -140,11 +141,6 @@ class Patient extends Model
 
     public static function generateDossierNumber(): string
     {
-        $year = date('Y');
-        $last = static::withTrashed()
-            ->whereYear('created_at', $year)
-            ->count();
-
-        return sprintf('DOS-%s-%05d', $year, $last + 1);
+        return static::nextSequentialNumber('dossier_number', 'DOS');
     }
 }

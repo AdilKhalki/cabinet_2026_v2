@@ -107,4 +107,9 @@ class Consultation extends Model
     {
         return $query->where('patient_id', $patientId);
     }
+
+    public function scopeForDoctor($query, int $doctorId)
+    {
+        return $query->where('doctor_id', $doctorId);
+    }
 }

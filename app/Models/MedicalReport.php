@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\GeneratesSequentialNumber;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MedicalReport extends Model
 {
-    use SoftDeletes;
+    use GeneratesSequentialNumber, SoftDeletes;
 
     protected $fillable = [
         'report_number', 'patient_id', 'doctor_id', 'consultation_id',
@@ -51,9 +52,7 @@ class MedicalReport extends Model
         parent::boot();
         static::creating(function (self $model) {
             if (empty($model->report_number)) {
-                $year = date('Y');
-                $count = static::withTrashed()->whereYear('created_at', $year)->count();
-                $model->report_number = sprintf('RPT-%s-%05d', $year, $count + 1);
+                $model->report_number = static::nextSequentialNumber('report_number', 'RPT');
             }
         });
     }
