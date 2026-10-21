@@ -14,17 +14,22 @@ class PrescriptionIndex extends Component
 
     #[Url]
     public string $search = '';
+
     public int $perPage = 15;
+
     public ?int $confirmingDeleteId = null;
 
-    public function updatingSearch(): void { $this->resetPage(); }
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
 
     #[Computed]
     public function prescriptions()
     {
         return Prescription::with(['patient', 'doctor', 'lines'])
-            ->when($this->search, fn($q) => $q->whereHas('patient', fn($pq) => $pq->search($this->search)))
-            ->when(auth()->user()->isMedecin(), fn($q) => $q->where('doctor_id', auth()->id()))
+            ->when($this->search, fn ($q) => $q->whereHas('patient', fn ($pq) => $pq->search($this->search)))
+            ->when(auth()->user()->isMedecin(), fn ($q) => $q->where('doctor_id', auth()->id()))
             ->orderByDesc('prescribed_at')
             ->paginate($this->perPage);
     }
@@ -34,8 +39,15 @@ class PrescriptionIndex extends Component
         $this->authorize('viewAny', Prescription::class);
     }
 
-    public function confirmDelete(int $id): void { $this->confirmingDeleteId = $id; }
-    public function cancelDelete(): void { $this->confirmingDeleteId = null; }
+    public function confirmDelete(int $id): void
+    {
+        $this->confirmingDeleteId = $id;
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->confirmingDeleteId = null;
+    }
 
     public function delete(): void
     {
@@ -54,10 +66,10 @@ class PrescriptionIndex extends Component
         return view('livewire.prescription.prescription-index', [
             'prescriptions' => $this->prescriptions,
         ])->layout('layouts.cabinet', [
-                'title' => 'Ordonnances',
-                'header' => 'Ordonnances',
-                'headerIcon' => 'icon-file-text',
-                'breadcrumbs' => [['label' => 'Ordonnances']],
-            ]);
+            'title' => 'Ordonnances',
+            'header' => 'Ordonnances',
+            'headerIcon' => 'icon-file-text',
+            'breadcrumbs' => [['label' => 'Ordonnances']],
+        ]);
     }
 }

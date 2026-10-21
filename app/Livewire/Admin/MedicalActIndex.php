@@ -21,9 +21,11 @@ class MedicalActIndex extends Component
     public int $perPage = 15;
 
     public ?int $editingId = null;
+
     public bool $creatingNew = false;
 
     public array $editForm = [];
+
     public array $newForm = [];
 
     /** Vérifiée à chaque requête (rendu initial ET appels d'actions Livewire) */
@@ -32,17 +34,24 @@ class MedicalActIndex extends Component
         abort_unless(auth()->user()?->can('manage medications'), 403);
     }
 
-    public function updatingSearch(): void { $this->resetPage(); }
-    public function updatingCategoryFilter(): void { $this->resetPage(); }
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingCategoryFilter(): void
+    {
+        $this->resetPage();
+    }
 
     #[Computed]
     public function acts()
     {
-        return MedicalAct::when($this->search, fn($q) => $q->where(function ($q) {
-                $q->where('name', 'like', "%{$this->search}%")
-                  ->orWhere('code', 'like', "%{$this->search}%");
-            }))
-            ->when($this->categoryFilter, fn($q) => $q->where('category', $this->categoryFilter))
+        return MedicalAct::when($this->search, fn ($q) => $q->where(function ($q) {
+            $q->where('name', 'like', "%{$this->search}%")
+                ->orWhere('code', 'like', "%{$this->search}%");
+        }))
+            ->when($this->categoryFilter, fn ($q) => $q->where('category', $this->categoryFilter))
             ->orderBy('category')->orderBy('name')
             ->paginate($this->perPage);
     }
@@ -91,21 +100,21 @@ class MedicalActIndex extends Component
     public function save(): void
     {
         $this->validate([
-            'editForm.code'             => 'nullable|string|max:20|unique:medical_acts,code,' . $this->editingId,
-            'editForm.name'             => 'required|string|max:255',
-            'editForm.category'         => 'nullable|string|max:100',
-            'editForm.price'            => 'required|numeric|min:0',
+            'editForm.code' => 'nullable|string|max:20|unique:medical_acts,code,'.$this->editingId,
+            'editForm.name' => 'required|string|max:255',
+            'editForm.category' => 'nullable|string|max:100',
+            'editForm.price' => 'required|numeric|min:0',
             'editForm.duration_minutes' => 'required|integer|min:5',
-            'editForm.is_active'        => 'boolean',
+            'editForm.is_active' => 'boolean',
         ]);
 
         MedicalAct::findOrFail($this->editingId)->update([
-            'code'             => $this->editForm['code'] ?: null,
-            'name'             => $this->editForm['name'],
-            'category'         => $this->editForm['category'] ?: null,
-            'price'            => $this->editForm['price'],
+            'code' => $this->editForm['code'] ?: null,
+            'name' => $this->editForm['name'],
+            'category' => $this->editForm['category'] ?: null,
+            'price' => $this->editForm['price'],
             'duration_minutes' => $this->editForm['duration_minutes'],
-            'is_active'        => $this->editForm['is_active'],
+            'is_active' => $this->editForm['is_active'],
         ]);
 
         session()->flash('success', 'Acte médical mis à jour.');
@@ -116,21 +125,21 @@ class MedicalActIndex extends Component
     public function saveNew(): void
     {
         $this->validate([
-            'newForm.code'             => 'nullable|string|max:20|unique:medical_acts,code',
-            'newForm.name'             => 'required|string|max:255',
-            'newForm.category'         => 'nullable|string|max:100',
-            'newForm.price'            => 'required|numeric|min:0',
+            'newForm.code' => 'nullable|string|max:20|unique:medical_acts,code',
+            'newForm.name' => 'required|string|max:255',
+            'newForm.category' => 'nullable|string|max:100',
+            'newForm.price' => 'required|numeric|min:0',
             'newForm.duration_minutes' => 'required|integer|min:5',
-            'newForm.is_active'        => 'boolean',
+            'newForm.is_active' => 'boolean',
         ]);
 
         MedicalAct::create([
-            'code'             => $this->newForm['code'] ?: null,
-            'name'             => $this->newForm['name'],
-            'category'         => $this->newForm['category'] ?: null,
-            'price'            => $this->newForm['price'],
+            'code' => $this->newForm['code'] ?: null,
+            'name' => $this->newForm['name'],
+            'category' => $this->newForm['category'] ?: null,
+            'price' => $this->newForm['price'],
             'duration_minutes' => $this->newForm['duration_minutes'],
-            'is_active'        => $this->newForm['is_active'],
+            'is_active' => $this->newForm['is_active'],
         ]);
 
         session()->flash('success', 'Acte médical créé.');
@@ -150,12 +159,12 @@ class MedicalActIndex extends Component
     {
         return view('livewire.admin.medical-act-index', [
             'medicalActs' => $this->acts,
-            'categories'  => $this->categories,
-            'editingId'   => $this->editingId,
+            'categories' => $this->categories,
+            'editingId' => $this->editingId,
             'creatingNew' => $this->creatingNew,
         ])->layout('layouts.cabinet', [
-            'title'      => 'Actes Médicaux',
-            'header'     => 'Actes Médicaux',
+            'title' => 'Actes Médicaux',
+            'header' => 'Actes Médicaux',
             'headerIcon' => 'icon-list',
             'breadcrumbs' => [['label' => 'Actes Médicaux']],
         ]);

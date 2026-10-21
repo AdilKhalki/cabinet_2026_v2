@@ -26,19 +26,26 @@ class DocumentIndex extends Component
         $this->authorize('viewAny', Document::class);
     }
 
-    public function updatingSearch(): void { $this->resetPage(); }
-    public function updatingCategoryFilter(): void { $this->resetPage(); }
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingCategoryFilter(): void
+    {
+        $this->resetPage();
+    }
 
     #[Computed]
     public function documents()
     {
         return Document::with(['patient', 'uploadedBy'])
-            ->when($this->search, fn($q) => $q->where(function ($q) {
+            ->when($this->search, fn ($q) => $q->where(function ($q) {
                 $q->where('title', 'like', "%{$this->search}%")
-                  ->orWhereHas('patient', fn($pq) => $pq->search($this->search));
+                    ->orWhereHas('patient', fn ($pq) => $pq->search($this->search));
             }))
             ->when(array_key_exists($this->categoryFilter, Document::CATEGORY_LABELS),
-                fn($q) => $q->where('category', $this->categoryFilter))
+                fn ($q) => $q->where('category', $this->categoryFilter))
             ->orderByDesc('created_at')
             ->paginate($this->perPage);
     }
@@ -70,11 +77,11 @@ class DocumentIndex extends Component
     public function render()
     {
         return view('livewire.document.document-index', [
-            'documents'  => $this->documents,
+            'documents' => $this->documents,
             'categories' => Document::CATEGORY_LABELS,
         ])->layout('layouts.cabinet', [
-            'title'      => 'Documents',
-            'header'     => 'Documents',
+            'title' => 'Documents',
+            'header' => 'Documents',
             'headerIcon' => 'icon-folder',
             'breadcrumbs' => [['label' => 'Documents']],
         ]);

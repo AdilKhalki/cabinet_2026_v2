@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Prescription extends Model
 {
-    use GeneratesSequentialNumber, SoftDeletes, LogsActivity;
+    use GeneratesSequentialNumber, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'prescription_number', 'patient_id', 'doctor_id', 'consultation_id',

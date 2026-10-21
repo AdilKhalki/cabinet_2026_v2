@@ -26,12 +26,12 @@ class Document extends Model
     protected $casts = ['document_date' => 'date'];
 
     public const CATEGORY_LABELS = [
-        'medical_certificate'    => 'Certificat médical',
-        'hospital_report'        => 'Compte-rendu hospitalier',
-        'external_results'       => 'Résultats externes',
-        'insurance'              => 'Assurance / Mutuelle',
-        'prescription_external'  => 'Ordonnance externe',
-        'other'                  => 'Autre',
+        'medical_certificate' => 'Certificat médical',
+        'hospital_report' => 'Compte-rendu hospitalier',
+        'external_results' => 'Résultats externes',
+        'insurance' => 'Assurance / Mutuelle',
+        'prescription_external' => 'Ordonnance externe',
+        'other' => 'Autre',
     ];
 
     /**
@@ -69,9 +69,14 @@ class Document extends Model
     public function getFileSizeFormattedAttribute(): string
     {
         $bytes = $this->file_size ?? 0;
-        if ($bytes >= 1048576) return round($bytes / 1048576, 2) . ' Mo';
-        if ($bytes >= 1024) return round($bytes / 1024, 1) . ' Ko';
-        return $bytes . ' o';
+        if ($bytes >= 1048576) {
+            return round($bytes / 1048576, 2).' Mo';
+        }
+        if ($bytes >= 1024) {
+            return round($bytes / 1024, 1).' Ko';
+        }
+
+        return $bytes.' o';
     }
 
     public function patient(): BelongsTo

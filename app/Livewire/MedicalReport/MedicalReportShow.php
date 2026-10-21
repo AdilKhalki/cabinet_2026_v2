@@ -19,11 +19,11 @@ class MedicalReportShow extends Component
     public function render()
     {
         return view('livewire.medical-report.medical-report-show', [
-            'report'     => $this->medicalReport,
+            'report' => $this->medicalReport,
             'typeLabels' => MedicalReport::TYPE_LABELS,
         ])->layout('layouts.cabinet', [
-            'title'      => 'Rapport Médical',
-            'header'     => $this->medicalReport->title,
+            'title' => 'Rapport Médical',
+            'header' => $this->medicalReport->title,
             'headerIcon' => 'icon-clipboard',
             'breadcrumbs' => [
                 ['label' => 'Rapports Médicaux', 'url' => route('medical-reports.index')],

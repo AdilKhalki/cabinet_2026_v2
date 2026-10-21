@@ -4,6 +4,7 @@ namespace App\Livewire\Reports;
 
 use App\Models\Appointment;
 use App\Models\Consultation;
+use App\Models\LabTestResult;
 use App\Models\Patient;
 use App\Models\Payment;
 use App\Models\PrescriptionLine;
@@ -14,6 +15,7 @@ use Livewire\Component;
 class CabinetStats extends Component
 {
     public int $year;
+
     public int $month;
 
     public function mount(): void
@@ -29,8 +31,8 @@ class CabinetStats extends Component
     {
         return match (DB::connection()->getDriverName()) {
             'sqlite' => "CAST(strftime('%m', {$column}) AS INTEGER)",
-            'pgsql'  => "EXTRACT(MONTH FROM {$column})",
-            default  => "MONTH({$column})",
+            'pgsql' => "EXTRACT(MONTH FROM {$column})",
+            default => "MONTH({$column})",
         };
     }
 
@@ -56,15 +58,15 @@ class CabinetStats extends Component
     public function globalStats(): array
     {
         return [
-            'total_patients'         => Patient::count(),
-            'active_patients'        => Patient::active()->count(),
-            'total_consultations'    => Consultation::count(),
-            'total_appointments'     => Appointment::count(),
-            'total_revenue'          => Payment::revenue()->sum('amount_paid'),
-            'new_patients_this_month'=> Patient::whereYear('created_at', $this->year)
-                                               ->whereMonth('created_at', $this->month)->count(),
+            'total_patients' => Patient::count(),
+            'active_patients' => Patient::active()->count(),
+            'total_consultations' => Consultation::count(),
+            'total_appointments' => Appointment::count(),
+            'total_revenue' => Payment::revenue()->sum('amount_paid'),
+            'new_patients_this_month' => Patient::whereYear('created_at', $this->year)
+                ->whereMonth('created_at', $this->month)->count(),
             'consultations_this_month' => Consultation::whereYear('consultation_date', $this->year)
-                                               ->whereMonth('consultation_date', $this->month)->count(),
+                ->whereMonth('consultation_date', $this->month)->count(),
         ];
     }
 
@@ -85,7 +87,7 @@ class CabinetStats extends Component
 
         return [
             'labels' => $rows->pluck('status')->map(fn ($s) => Appointment::STATUS_LABELS[$s] ?? ucfirst((string) $s))->toArray(),
-            'data'   => $rows->pluck('total')->toArray(),
+            'data' => $rows->pluck('total')->toArray(),
         ];
     }
 
@@ -114,7 +116,7 @@ class CabinetStats extends Component
             'labels' => $rows->pluck('consultation_type')
                 ->map(fn ($t) => Appointment::TYPE_LABELS[$t] ?? ($t ? ucfirst(str_replace('_', ' ', $t)) : 'Non précisé'))
                 ->toArray(),
-            'data'   => $rows->pluck('total')->toArray(),
+            'data' => $rows->pluck('total')->toArray(),
         ];
     }
 
@@ -129,28 +131,28 @@ class CabinetStats extends Component
         }
 
         $cancelledCount = Appointment::where('status', 'cancelled')->count();
-        $totalAppts     = Appointment::count();
+        $totalAppts = Appointment::count();
 
         return view('livewire.reports.cabinet-stats', [
-            'totalPatients'           => $gs['total_patients'],
-            'newPatientsThisMonth'    => $gs['new_patients_this_month'],
-            'consultationsThisMonth'  => $gs['consultations_this_month'],
-            'consultationsThisYear'   => Consultation::whereYear('consultation_date', $this->year)->count(),
-            'appointmentsThisMonth'   => Appointment::whereYear('scheduled_at', $this->year)->whereMonth('scheduled_at', $this->month)->count(),
-            'pendingAppointments'     => Appointment::whereIn('status', ['planned','confirmed','waiting'])->count(),
-            'cancelledAppointments'   => $cancelledCount,
-            'cancellationRate'        => $totalAppts > 0 ? round($cancelledCount / $totalAppts * 100, 1) : 0,
-            'newPatientsPerMonth'     => $npData,
-            'consultationsByType'     => $this->consultationsByType,
-            'topMedications'          => PrescriptionLine::groupBy('medication_name')
+            'totalPatients' => $gs['total_patients'],
+            'newPatientsThisMonth' => $gs['new_patients_this_month'],
+            'consultationsThisMonth' => $gs['consultations_this_month'],
+            'consultationsThisYear' => Consultation::whereYear('consultation_date', $this->year)->count(),
+            'appointmentsThisMonth' => Appointment::whereYear('scheduled_at', $this->year)->whereMonth('scheduled_at', $this->month)->count(),
+            'pendingAppointments' => Appointment::whereIn('status', ['planned', 'confirmed', 'waiting'])->count(),
+            'cancelledAppointments' => $cancelledCount,
+            'cancellationRate' => $totalAppts > 0 ? round($cancelledCount / $totalAppts * 100, 1) : 0,
+            'newPatientsPerMonth' => $npData,
+            'consultationsByType' => $this->consultationsByType,
+            'topMedications' => PrescriptionLine::groupBy('medication_name')
                 ->selectRaw('medication_name, COUNT(*) as total')
                 ->orderByDesc('total')->limit(10)->get(),
-            'topLabTests'             => \App\Models\LabTestResult::groupBy('parameter_name')
+            'topLabTests' => LabTestResult::groupBy('parameter_name')
                 ->selectRaw('parameter_name, COUNT(*) as total')
                 ->orderByDesc('total')->limit(10)->get(),
         ])->layout('layouts.cabinet', [
-            'title'      => 'Statistiques Cabinet',
-            'header'     => 'Statistiques Cabinet',
+            'title' => 'Statistiques Cabinet',
+            'header' => 'Statistiques Cabinet',
             'headerIcon' => 'icon-bar-chart-2',
             'breadcrumbs' => [['label' => 'Statistiques Cabinet']],
         ]);

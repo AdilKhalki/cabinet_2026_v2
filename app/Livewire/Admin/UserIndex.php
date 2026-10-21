@@ -2,7 +2,15 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Appointment;
+use App\Models\Consultation;
+use App\Models\LabTest;
+use App\Models\MedicalImage;
+use App\Models\MedicalReport;
+use App\Models\Payment;
+use App\Models\Prescription;
 use App\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Computed;
@@ -24,26 +32,34 @@ class UserIndex extends Component
     public int $perPage = 15;
 
     public bool $showModal = false;
+
     public ?int $editingId = null;
 
     public string $name = '';
+
     public string $email = '';
+
     public string $password = '';
+
     public string $password_confirmation = '';
+
     public string $role = 'medecin';
+
     public string $phone = '';
+
     public string $speciality = '';
+
     public bool $is_active = true;
 
     /** Relations cliniques supprimées en cascade (FK cascadeOnDelete) si l'utilisateur est supprimé */
     private const CLINICAL_RELATIONS = [
-        'appointments'   => \App\Models\Appointment::class,
-        'consultations'  => \App\Models\Consultation::class,
-        'prescriptions'  => \App\Models\Prescription::class,
-        'lab_tests'      => \App\Models\LabTest::class,
-        'medical_images' => \App\Models\MedicalImage::class,
-        'medical_reports' => \App\Models\MedicalReport::class,
-        'payments'       => \App\Models\Payment::class,
+        'appointments' => Appointment::class,
+        'consultations' => Consultation::class,
+        'prescriptions' => Prescription::class,
+        'lab_tests' => LabTest::class,
+        'medical_images' => MedicalImage::class,
+        'medical_reports' => MedicalReport::class,
+        'payments' => Payment::class,
     ];
 
     /** Vérifiée à chaque requête (rendu initial ET appels d'actions Livewire) */
@@ -66,11 +82,11 @@ class UserIndex extends Component
     public function users()
     {
         return User::with('roles')
-            ->when($this->search, fn($q) => $q->where(function ($q) {
+            ->when($this->search, fn ($q) => $q->where(function ($q) {
                 $q->where('name', 'like', "%{$this->search}%")
-                  ->orWhere('email', 'like', "%{$this->search}%");
+                    ->orWhere('email', 'like', "%{$this->search}%");
             }))
-            ->when($this->roleFilter, fn($q) => $q->role($this->roleFilter))
+            ->when($this->roleFilter, fn ($q) => $q->role($this->roleFilter))
             ->orderBy('name')
             ->paginate($this->perPage);
     }
@@ -116,7 +132,7 @@ class UserIndex extends Component
     {
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email' . ($this->editingId ? ",{$this->editingId}" : ''),
+            'email' => 'required|email|max:255|unique:users,email'.($this->editingId ? ",{$this->editingId}" : ''),
             'role' => 'required|exists:roles,name',
             'phone' => 'nullable|string|max:20',
             'speciality' => 'nullable|string|max:100',
@@ -138,10 +154,12 @@ class UserIndex extends Component
             // Garde-fous : ne pas se retirer soi-même l'accès / ne pas supprimer le dernier admin
             if ($user->is($this->currentUser()) && ! $this->is_active) {
                 $this->addError('is_active', 'Vous ne pouvez pas désactiver votre propre compte.');
+
                 return;
             }
             if ($user->hasRole('admin') && ($this->role !== 'admin' || ! $this->is_active) && $this->isLastActiveAdmin($user)) {
                 $this->addError('role', 'Impossible : il doit rester au moins un administrateur actif.');
+
                 return;
             }
         }
@@ -183,11 +201,13 @@ class UserIndex extends Component
 
         if ($user->is($this->currentUser())) {
             session()->flash('error', 'Vous ne pouvez pas désactiver votre propre compte.');
+
             return;
         }
 
         if ($user->is_active && $user->hasRole('admin') && $this->isLastActiveAdmin($user)) {
             session()->flash('error', 'Impossible : il doit rester au moins un administrateur actif.');
+
             return;
         }
 
@@ -203,11 +223,13 @@ class UserIndex extends Component
 
         if ($user->is($this->currentUser())) {
             session()->flash('error', 'Vous ne pouvez pas supprimer votre propre compte.');
+
             return;
         }
 
         if ($user->hasRole('admin') && $this->isLastActiveAdmin($user)) {
             session()->flash('error', 'Impossible : il doit rester au moins un administrateur actif.');
+
             return;
         }
 
@@ -215,6 +237,7 @@ class UserIndex extends Component
         // on impose la désactivation du compte à la place.
         if ($this->hasClinicalRecords($user)) {
             session()->flash('error', 'Cet utilisateur possède des données médicales ou financières (RDV, consultations, paiements…). Désactivez son compte au lieu de le supprimer.');
+
             return;
         }
 
@@ -241,7 +264,7 @@ class UserIndex extends Component
     {
         foreach (self::CLINICAL_RELATIONS as $model) {
             $query = $model::query()->where('doctor_id', $user->getKey());
-            if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($model))) {
+            if (in_array(SoftDeletes::class, class_uses_recursive($model))) {
                 $query->withTrashed();
             }
             if ($query->exists()) {
@@ -258,8 +281,8 @@ class UserIndex extends Component
             'users' => $this->users,
             'roles' => $this->roles,
         ])->layout('layouts.cabinet', [
-            'title'      => 'Utilisateurs',
-            'header'     => 'Gestion des Utilisateurs',
+            'title' => 'Utilisateurs',
+            'header' => 'Gestion des Utilisateurs',
             'headerIcon' => 'icon-users',
             'breadcrumbs' => [['label' => 'Utilisateurs']],
         ]);

@@ -90,9 +90,9 @@ class WaitingRoom extends Component
             ->pluck('aggregate', 'status');
 
         return [
-            'total'     => (int) $counts->sum(),
+            'total' => (int) $counts->sum(),
             'completed' => (int) ($counts['completed'] ?? 0),
-            'waiting'   => (int) (($counts['waiting'] ?? 0) + ($counts['in_progress'] ?? 0)),
+            'waiting' => (int) (($counts['waiting'] ?? 0) + ($counts['in_progress'] ?? 0)),
             'cancelled' => (int) (($counts['cancelled'] ?? 0) + ($counts['no_show'] ?? 0)),
         ];
     }
@@ -100,17 +100,17 @@ class WaitingRoom extends Component
     public function render()
     {
         return view('livewire.appointment.waiting-room', [
-            'waitingPatients'  => $this->waitingPatients,
+            'waitingPatients' => $this->waitingPatients,
             'expectedPatients' => $this->expectedPatients,
-            'todayStats'       => $this->todayStats,
+            'todayStats' => $this->todayStats,
         ])->layout('layouts.cabinet', [
-                'title' => 'Salle d\'attente',
-                'header' => 'Salle d\'Attente — ' . now()->format('d/m/Y'),
-                'headerIcon' => 'icon-users',
-                'breadcrumbs' => [
-                    ['label' => 'Rendez-vous', 'url' => route('appointments.index')],
-                    ['label' => 'Salle d\'attente'],
-                ],
-            ]);
+            'title' => 'Salle d\'attente',
+            'header' => 'Salle d\'Attente — '.now()->format('d/m/Y'),
+            'headerIcon' => 'icon-users',
+            'breadcrumbs' => [
+                ['label' => 'Rendez-vous', 'url' => route('appointments.index')],
+                ['label' => 'Salle d\'attente'],
+            ],
+        ]);
     }
 }

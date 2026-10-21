@@ -15,7 +15,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Patient extends Model
 {
-    use GeneratesSequentialNumber, HasFactory, SoftDeletes, LogsActivity;
+    use GeneratesSequentialNumber, HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'dossier_number', 'first_name', 'last_name', 'cin', 'ip_number',
@@ -129,12 +129,12 @@ class Patient extends Model
 
             $query->where(function ($q) use ($like) {
                 $q->where('first_name', 'like', $like)
-                  ->orWhere('last_name', 'like', $like)
-                  ->orWhere('phone', 'like', $like)
-                  ->orWhere('phone_secondary', 'like', $like)
-                  ->orWhere('dossier_number', 'like', $like)
-                  ->orWhere('cin', 'like', $like)
-                  ->orWhere('ip_number', 'like', $like);
+                    ->orWhere('last_name', 'like', $like)
+                    ->orWhere('phone', 'like', $like)
+                    ->orWhere('phone_secondary', 'like', $like)
+                    ->orWhere('dossier_number', 'like', $like)
+                    ->orWhere('cin', 'like', $like)
+                    ->orWhere('ip_number', 'like', $like);
             });
         }
 

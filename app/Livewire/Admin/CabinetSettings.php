@@ -11,14 +11,23 @@ class CabinetSettings extends Component
     use WithFileUploads;
 
     public string $cabinet_name = '';
+
     public string $cabinet_address = '';
+
     public string $cabinet_phone = '';
+
     public string $cabinet_email = '';
+
     public string $cabinet_city = '';
+
     public string $doctor_name = '';
+
     public string $doctor_speciality = '';
+
     public string $doctor_license = '';
+
     public string $pdf_footer_text = '';
+
     public int $appointment_reminder_hours = 24;
 
     /** Vérifiée à chaque requête (rendu initial ET appels d'actions Livewire) */

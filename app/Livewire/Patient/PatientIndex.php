@@ -36,6 +36,7 @@ class PatientIndex extends Component
     public int $perPage = 15;
 
     public bool $showDeleteModal = false;
+
     public ?int $deletingId = null;
 
     public function updatedSearch(): void
@@ -125,13 +126,13 @@ class PatientIndex extends Component
         return view('livewire.patient.patient-index', [
             'patients' => $this->patients,
         ])->layout('layouts.cabinet', [
-                'title' => 'Patients',
-                'header' => 'Gestion des Patients',
-                'headerIcon' => 'icon-users',
-                'subHeader' => 'Liste complète des patients du cabinet',
-                'breadcrumbs' => [
-                    ['label' => 'Patients'],
-                ],
-            ]);
+            'title' => 'Patients',
+            'header' => 'Gestion des Patients',
+            'headerIcon' => 'icon-users',
+            'subHeader' => 'Liste complète des patients du cabinet',
+            'breadcrumbs' => [
+                ['label' => 'Patients'],
+            ],
+        ]);
     }
 }

@@ -24,10 +24,10 @@ class CabinetNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'type'    => $this->type,
-            'title'   => $this->title,
+            'type' => $this->type,
+            'title' => $this->title,
             'message' => $this->message,
-            'url'     => $this->url,
+            'url' => $this->url,
         ];
     }
 }

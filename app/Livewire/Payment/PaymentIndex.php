@@ -17,24 +17,38 @@ class PaymentIndex extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $statusFilter = '';
+
     public string $periodFrom = '';
+
     public string $periodTo = '';
+
     public int $perPage = 15;
 
     public bool $showForm = false;
+
     public ?int $editingId = null;
 
     // Champs formulaire
     public int|string $patient_id = '';
+
     public int|string $doctor_id = '';
+
     public int|string $consultation_id = '';
+
     public string $payment_method = 'cash';
+
     public string $discount = '0';
+
     public string $insurance_coverage = '0';
+
     public string $amount_paid = '0';
+
     public string $payment_date = '';
+
     public string $notes = '';
+
     public array $lines = [];
 
     protected $queryString = ['search', 'statusFilter'];
@@ -124,20 +138,20 @@ class PaymentIndex extends Component
         }
 
         $this->validate([
-            'patient_id'             => 'required|exists:patients,id',
-            'doctor_id'              => 'required|exists:users,id',
-            'consultation_id'        => 'nullable|exists:consultations,id',
-            'payment_method'         => 'required|in:'.implode(',', array_keys(Payment::METHOD_LABELS)),
-            'payment_date'           => 'required|date',
-            'discount'               => 'required|numeric|min:0',
-            'insurance_coverage'     => 'required|numeric|min:0',
-            'amount_paid'            => 'required|numeric|min:0',
-            'notes'                  => 'nullable|string|max:500',
-            'lines'                  => 'required|array|min:1',
+            'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => 'required|exists:users,id',
+            'consultation_id' => 'nullable|exists:consultations,id',
+            'payment_method' => 'required|in:'.implode(',', array_keys(Payment::METHOD_LABELS)),
+            'payment_date' => 'required|date',
+            'discount' => 'required|numeric|min:0',
+            'insurance_coverage' => 'required|numeric|min:0',
+            'amount_paid' => 'required|numeric|min:0',
+            'notes' => 'nullable|string|max:500',
+            'lines' => 'required|array|min:1',
             'lines.*.medical_act_id' => 'nullable|exists:medical_acts,id',
-            'lines.*.description'    => 'required|string|max:255',
-            'lines.*.quantity'       => 'required|integer|min:1',
-            'lines.*.unit_price'     => 'required|numeric|min:0',
+            'lines.*.description' => 'required|string|max:255',
+            'lines.*.quantity' => 'required|integer|min:1',
+            'lines.*.unit_price' => 'required|numeric|min:0',
         ], [], [
             'patient_id' => 'patient', 'doctor_id' => 'médecin', 'payment_method' => 'mode de paiement',
             'payment_date' => 'date', 'discount' => 'remise', 'insurance_coverage' => 'couverture assurance',
@@ -162,19 +176,19 @@ class PaymentIndex extends Component
         }
 
         $data = [
-            'patient_id'         => $this->patient_id,
-            'doctor_id'          => $this->doctor_id,
-            'consultation_id'    => $this->consultation_id ?: null,
-            'payment_method'     => $this->payment_method,
-            'subtotal'           => $subtotal,
-            'discount'           => round((float) $this->discount, 2),
+            'patient_id' => $this->patient_id,
+            'doctor_id' => $this->doctor_id,
+            'consultation_id' => $this->consultation_id ?: null,
+            'payment_method' => $this->payment_method,
+            'subtotal' => $subtotal,
+            'discount' => round((float) $this->discount, 2),
             'insurance_coverage' => round((float) $this->insurance_coverage, 2),
-            'total_amount'       => $total,
-            'amount_paid'        => $amountPaid,
-            'amount_due'         => round($total - $amountPaid, 2),
-            'status'             => Payment::statusFor($total, $amountPaid),
-            'payment_date'       => $this->payment_date,
-            'notes'              => $this->notes ?: null,
+            'total_amount' => $total,
+            'amount_paid' => $amountPaid,
+            'amount_due' => round($total - $amountPaid, 2),
+            'status' => Payment::statusFor($total, $amountPaid),
+            'payment_date' => $this->payment_date,
+            'notes' => $this->notes ?: null,
         ];
 
         $isNew = ! $payment;
@@ -190,10 +204,10 @@ class PaymentIndex extends Component
             foreach ($this->lines as $line) {
                 $payment->lines()->create([
                     'medical_act_id' => $line['medical_act_id'] ?: null,
-                    'description'    => $line['description'],
-                    'quantity'       => (int) $line['quantity'],
-                    'unit_price'     => round((float) $line['unit_price'], 2),
-                    'total_price'    => self::lineTotal($line),
+                    'description' => $line['description'],
+                    'quantity' => (int) $line['quantity'],
+                    'unit_price' => round((float) $line['unit_price'], 2),
+                    'total_price' => self::lineTotal($line),
                 ]);
             }
         });
@@ -260,10 +274,10 @@ class PaymentIndex extends Component
         $this->notes = $payment->notes ?? '';
         $this->lines = $payment->lines->map(fn ($l) => [
             'medical_act_id' => $l->medical_act_id ?? '',
-            'description'    => $l->description,
-            'quantity'       => $l->quantity,
-            'unit_price'     => (float) $l->unit_price,
-            'total_price'    => (float) $l->total_price,
+            'description' => $l->description,
+            'quantity' => $l->quantity,
+            'unit_price' => (float) $l->unit_price,
+            'total_price' => (float) $l->total_price,
         ])->toArray();
         if (empty($this->lines)) {
             $this->addLine();
@@ -271,15 +285,25 @@ class PaymentIndex extends Component
         $this->showForm = true;
     }
 
-    public function closeForm(): void { $this->showForm = false; $this->editingId = null; }
+    public function closeForm(): void
+    {
+        $this->showForm = false;
+        $this->editingId = null;
+    }
 
     public ?int $confirmingDeleteId = null;
+
     public function confirmDelete(int $id): void
     {
         $this->authorize('delete', Payment::findOrFail($id));
         $this->confirmingDeleteId = $id;
     }
-    public function cancelDelete(): void { $this->confirmingDeleteId = null; }
+
+    public function cancelDelete(): void
+    {
+        $this->confirmingDeleteId = null;
+    }
+
     public function delete(): void
     {
         if ($this->confirmingDeleteId) {
@@ -321,7 +345,7 @@ class PaymentIndex extends Component
             'patients' => $this->showForm
                 ? Patient::where(fn ($q) => $q->active()->orWhere('id', $this->patient_id ?: 0))->orderBy('last_name')->get()
                 : collect(),
-            'doctors'  => $this->showForm ? User::doctors()->active()->orderBy('name')->get() : collect(),
+            'doctors' => $this->showForm ? User::doctors()->active()->orderBy('name')->get() : collect(),
         ])
             ->layout('layouts.cabinet', [
                 'title' => 'Paiements',

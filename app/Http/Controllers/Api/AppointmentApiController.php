@@ -13,7 +13,7 @@ class AppointmentApiController extends Controller
     /** Couleur par statut (prioritaire sur la couleur libre du RDV pour les statuts terminaux). */
     private const STATUS_EVENT_COLORS = [
         'cancelled' => '#9e9e9e',
-        'no_show'   => '#616161',
+        'no_show' => '#616161',
     ];
 
     /** Fenêtre maximale interrogeable (évite de renvoyer des milliers de RDV d'un coup). */
@@ -25,8 +25,8 @@ class AppointmentApiController extends Controller
         $this->authorize('viewAny', Appointment::class);
 
         $validated = $request->validate([
-            'start'     => ['nullable', 'date'],
-            'end'       => ['nullable', 'date', 'after:start'],
+            'start' => ['nullable', 'date'],
+            'end' => ['nullable', 'date', 'after:start'],
             'doctor_id' => ['nullable', 'integer'],
         ]);
 
@@ -54,21 +54,21 @@ class AppointmentApiController extends Controller
             ->orderBy('scheduled_at')
             ->get()
             ->map(fn (Appointment $appt) => [
-                'id'              => $appt->id,
-                'title'           => $appt->patient?->full_name ?? 'Patient',
+                'id' => $appt->id,
+                'title' => $appt->patient?->full_name ?? 'Patient',
                 // Sans décalage horaire : FullCalendar les affiche tels quels (heure du cabinet)
-                'start'           => $appt->scheduled_at->format('Y-m-d\TH:i:s'),
-                'end'             => $appt->scheduled_end?->format('Y-m-d\TH:i:s'),
+                'start' => $appt->scheduled_at->format('Y-m-d\TH:i:s'),
+                'end' => $appt->scheduled_end?->format('Y-m-d\TH:i:s'),
                 'backgroundColor' => self::STATUS_EVENT_COLORS[$appt->status] ?? ($appt->color ?: '#01a9ac'),
-                'borderColor'     => self::STATUS_EVENT_COLORS[$appt->status] ?? ($appt->color ?: '#01a9ac'),
-                'url'             => route('patients.show', $appt->patient_id),
-                'extendedProps'   => [
-                    'status'       => $appt->status,
+                'borderColor' => self::STATUS_EVENT_COLORS[$appt->status] ?? ($appt->color ?: '#01a9ac'),
+                'url' => route('patients.show', $appt->patient_id),
+                'extendedProps' => [
+                    'status' => $appt->status,
                     'status_label' => $appt->status_label,
-                    'doctor'       => $appt->doctor?->name,
-                    'type'         => Appointment::TYPE_LABELS[$appt->consultation_type] ?? '',
-                    'dossier'      => $appt->patient?->dossier_number,
-                    'phone'        => $appt->patient?->phone,
+                    'doctor' => $appt->doctor?->name,
+                    'type' => Appointment::TYPE_LABELS[$appt->consultation_type] ?? '',
+                    'dossier' => $appt->patient?->dossier_number,
+                    'phone' => $appt->patient?->phone,
                 ],
             ]);
 

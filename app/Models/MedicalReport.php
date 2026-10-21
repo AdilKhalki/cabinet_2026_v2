@@ -26,10 +26,10 @@ class MedicalReport extends Model
 
     public const TYPE_LABELS = [
         'fitness_certificate' => 'Certificat d\'aptitude',
-        'sick_leave'          => 'Arrêt de travail',
-        'medical_report'      => 'Compte-rendu médical',
-        'referral'            => 'Lettre de référence',
-        'other'               => 'Autre',
+        'sick_leave' => 'Arrêt de travail',
+        'medical_report' => 'Compte-rendu médical',
+        'referral' => 'Lettre de référence',
+        'other' => 'Autre',
     ];
 
     public function patient(): BelongsTo

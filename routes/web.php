@@ -1,5 +1,17 @@
 <?php
 
+use App\Http\Controllers\Api\AppointmentApiController;
+use App\Http\Controllers\Api\MedicationApiController;
+use App\Http\Controllers\LabTestController;
+use App\Http\Controllers\MedicalReportController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PrescriptionController;
+use App\Livewire\Admin\ActivityLog;
+use App\Livewire\Admin\CabinetSettings;
+use App\Livewire\Admin\MedicalActIndex;
+use App\Livewire\Admin\MedicationIndex;
+use App\Livewire\Admin\RoleIndex;
+use App\Livewire\Admin\UserIndex;
 use App\Livewire\Appointment\AppointmentCalendar;
 use App\Livewire\Appointment\AppointmentIndex;
 use App\Livewire\Appointment\WaitingRoom;
@@ -7,14 +19,30 @@ use App\Livewire\Consultation\ConsultationForm;
 use App\Livewire\Consultation\ConsultationIndex;
 use App\Livewire\Consultation\ConsultationShow;
 use App\Livewire\Dashboard\DashboardStats;
+use App\Livewire\Document\DocumentForm;
+use App\Livewire\Document\DocumentIndex;
+use App\Livewire\LabTest\LabTestForm;
+use App\Livewire\LabTest\LabTestIndex;
+use App\Livewire\LabTest\LabTestShow;
+use App\Livewire\MedicalImage\MedicalImageForm;
+use App\Livewire\MedicalImage\MedicalImageIndex;
+use App\Livewire\MedicalImage\MedicalImageShow;
+use App\Livewire\MedicalReport\MedicalReportForm;
+use App\Livewire\MedicalReport\MedicalReportIndex;
+use App\Livewire\MedicalReport\MedicalReportShow;
+use App\Livewire\Notification\NotificationIndex;
 use App\Livewire\Patient\PatientForm;
 use App\Livewire\Patient\PatientIndex;
 use App\Livewire\Patient\PatientShow;
 use App\Livewire\Payment\PaymentIndex;
+use App\Livewire\Prescription\PrescriptionForm;
+use App\Livewire\Prescription\PrescriptionIndex;
+use App\Livewire\Prescription\PrescriptionShow;
+use App\Livewire\Reports\CabinetStats;
+use App\Livewire\Reports\FinancialReport;
 use Illuminate\Support\Facades\Route;
 
-
-//Route::view('/','pages.auth.login2')->name('login2');
+// Route::view('/','pages.auth.login2')->name('login2');
 
 // Routes protégées
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -50,82 +78,82 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Ordonnances ────────────────────────────────────────
     Route::prefix('prescriptions')->name('prescriptions.')->middleware('permission:view prescriptions')->group(function () {
-        Route::get('/', \App\Livewire\Prescription\PrescriptionIndex::class)->name('index');
-        Route::get('/create', \App\Livewire\Prescription\PrescriptionForm::class)->name('create')->middleware('permission:create prescriptions');
-        Route::get('/{prescription}/edit', \App\Livewire\Prescription\PrescriptionForm::class)->name('edit')->middleware('permission:create prescriptions');
-        Route::get('/{prescription}/pdf', [\App\Http\Controllers\PrescriptionController::class, 'pdf'])->name('pdf')->middleware('permission:print prescriptions');
-        Route::get('/{prescription}', \App\Livewire\Prescription\PrescriptionShow::class)->name('show');
+        Route::get('/', PrescriptionIndex::class)->name('index');
+        Route::get('/create', PrescriptionForm::class)->name('create')->middleware('permission:create prescriptions');
+        Route::get('/{prescription}/edit', PrescriptionForm::class)->name('edit')->middleware('permission:create prescriptions');
+        Route::get('/{prescription}/pdf', [PrescriptionController::class, 'pdf'])->name('pdf')->middleware('permission:print prescriptions');
+        Route::get('/{prescription}', PrescriptionShow::class)->name('show');
     });
 
     // ── Analyses ───────────────────────────────────────────
     Route::prefix('lab-tests')->name('lab-tests.')->middleware('permission:view lab-tests')->group(function () {
-        Route::get('/', \App\Livewire\LabTest\LabTestIndex::class)->name('index');
-        Route::get('/create', \App\Livewire\LabTest\LabTestForm::class)->name('create')->middleware('permission:create lab-tests');
-        Route::get('/{labTest}/edit', \App\Livewire\LabTest\LabTestForm::class)->name('edit')->middleware('permission:edit lab-tests');
-        Route::get('/{labTest}/pdf', [\App\Http\Controllers\LabTestController::class, 'pdf'])->name('pdf');
-        Route::get('/{labTest}', \App\Livewire\LabTest\LabTestShow::class)->name('show');
+        Route::get('/', LabTestIndex::class)->name('index');
+        Route::get('/create', LabTestForm::class)->name('create')->middleware('permission:create lab-tests');
+        Route::get('/{labTest}/edit', LabTestForm::class)->name('edit')->middleware('permission:edit lab-tests');
+        Route::get('/{labTest}/pdf', [LabTestController::class, 'pdf'])->name('pdf');
+        Route::get('/{labTest}', LabTestShow::class)->name('show');
     });
 
     // ── Imagerie ───────────────────────────────────────────
     Route::prefix('medical-images')->name('medical-images.')->middleware('permission:view medical-images')->group(function () {
-        Route::get('/', \App\Livewire\MedicalImage\MedicalImageIndex::class)->name('index');
-        Route::get('/create', \App\Livewire\MedicalImage\MedicalImageForm::class)->name('create')->middleware('permission:create medical-images');
-        Route::get('/{medicalImage}/edit', \App\Livewire\MedicalImage\MedicalImageForm::class)->name('edit')->middleware('permission:edit medical-images');
-        Route::get('/{medicalImage}', \App\Livewire\MedicalImage\MedicalImageShow::class)->name('show');
+        Route::get('/', MedicalImageIndex::class)->name('index');
+        Route::get('/create', MedicalImageForm::class)->name('create')->middleware('permission:create medical-images');
+        Route::get('/{medicalImage}/edit', MedicalImageForm::class)->name('edit')->middleware('permission:edit medical-images');
+        Route::get('/{medicalImage}', MedicalImageShow::class)->name('show');
     });
 
     // ── Documents ──────────────────────────────────────────
     Route::prefix('documents')->name('documents.')->middleware('permission:view documents')->group(function () {
-        Route::get('/', \App\Livewire\Document\DocumentIndex::class)->name('index');
-        Route::get('/create', \App\Livewire\Document\DocumentForm::class)->name('create')->middleware('permission:upload documents');
-        Route::get('/{document}/edit', \App\Livewire\Document\DocumentForm::class)->name('edit')->middleware('permission:upload documents');
+        Route::get('/', DocumentIndex::class)->name('index');
+        Route::get('/create', DocumentForm::class)->name('create')->middleware('permission:upload documents');
+        Route::get('/{document}/edit', DocumentForm::class)->name('edit')->middleware('permission:upload documents');
     });
 
     // ── Rapports médicaux ──────────────────────────────────
     Route::prefix('medical-reports')->name('medical-reports.')->middleware('permission:view medical-reports')->group(function () {
-        Route::get('/', \App\Livewire\MedicalReport\MedicalReportIndex::class)->name('index');
-        Route::get('/create', \App\Livewire\MedicalReport\MedicalReportForm::class)->name('create')->middleware('permission:create medical-reports');
-        Route::get('/{medicalReport}/edit', \App\Livewire\MedicalReport\MedicalReportForm::class)->name('edit')->middleware('permission:edit medical-reports');
-        Route::get('/{medicalReport}/pdf', [\App\Http\Controllers\MedicalReportController::class, 'pdf'])->name('pdf')->middleware('permission:print medical-reports');
-        Route::get('/{medicalReport}', \App\Livewire\MedicalReport\MedicalReportShow::class)->name('show');
+        Route::get('/', MedicalReportIndex::class)->name('index');
+        Route::get('/create', MedicalReportForm::class)->name('create')->middleware('permission:create medical-reports');
+        Route::get('/{medicalReport}/edit', MedicalReportForm::class)->name('edit')->middleware('permission:edit medical-reports');
+        Route::get('/{medicalReport}/pdf', [MedicalReportController::class, 'pdf'])->name('pdf')->middleware('permission:print medical-reports');
+        Route::get('/{medicalReport}', MedicalReportShow::class)->name('show');
     });
 
     // ── Paiements ──────────────────────────────────────────
     Route::prefix('payments')->name('payments.')->middleware('permission:view payments')->group(function () {
         Route::get('/', PaymentIndex::class)->name('index');
-        Route::get('/{payment}/pdf', [\App\Http\Controllers\PaymentController::class, 'pdf'])->name('pdf');
+        Route::get('/{payment}/pdf', [PaymentController::class, 'pdf'])->name('pdf');
     });
 
     // ── Rapports & statistiques ────────────────────────────
     Route::prefix('reports')->name('reports.')->middleware('permission:view reports')->group(function () {
-        Route::get('/financial', \App\Livewire\Reports\FinancialReport::class)->name('financial');
-        Route::get('/stats', \App\Livewire\Reports\CabinetStats::class)->name('stats');
+        Route::get('/financial', FinancialReport::class)->name('financial');
+        Route::get('/stats', CabinetStats::class)->name('stats');
     });
 
     // ── Notifications ──────────────────────────────────────
-    Route::get('/notifications', \App\Livewire\Notification\NotificationIndex::class)->name('notifications.index');
+    Route::get('/notifications', NotificationIndex::class)->name('notifications.index');
 
     // ── Actes Médicaux ─────────────────────────────────────
-    Route::get('/medical-acts', \App\Livewire\Admin\MedicalActIndex::class)->name('medical-acts.index')->middleware('permission:manage medications');
+    Route::get('/medical-acts', MedicalActIndex::class)->name('medical-acts.index')->middleware('permission:manage medications');
 
     // ── Médicaments ────────────────────────────────────────
-    Route::get('/medications', \App\Livewire\Admin\MedicationIndex::class)->name('medications.index')->middleware('permission:manage medications');
+    Route::get('/medications', MedicationIndex::class)->name('medications.index')->middleware('permission:manage medications');
 
     // ── Administration ─────────────────────────────────────
     Route::prefix('admin')->name('admin.')->middleware('permission:manage users')->group(function () {
-        Route::get('/users', \App\Livewire\Admin\UserIndex::class)->name('users.index');
-        Route::get('/roles', \App\Livewire\Admin\RoleIndex::class)->name('roles.index')->middleware('permission:manage roles');
-        Route::get('/activity-log', \App\Livewire\Admin\ActivityLog::class)->name('activity-log')->middleware('permission:view activity-log');
-        Route::get('/settings', \App\Livewire\Admin\CabinetSettings::class)->name('settings');
+        Route::get('/users', UserIndex::class)->name('users.index');
+        Route::get('/roles', RoleIndex::class)->name('roles.index')->middleware('permission:manage roles');
+        Route::get('/activity-log', ActivityLog::class)->name('activity-log')->middleware('permission:view activity-log');
+        Route::get('/settings', CabinetSettings::class)->name('settings');
     });
 
     // ── API interne ────────────────────────────────────────
     Route::prefix('api')->name('api.')->group(function () {
-        Route::get('/appointments/calendar', [\App\Http\Controllers\Api\AppointmentApiController::class, 'calendar'])
+        Route::get('/appointments/calendar', [AppointmentApiController::class, 'calendar'])
             ->name('appointments.calendar')->middleware('permission:view appointments');
-        Route::get('/medications/search', [\App\Http\Controllers\Api\MedicationApiController::class, 'search'])
+        Route::get('/medications/search', [MedicationApiController::class, 'search'])
             ->name('medications.search')->middleware('permission:create prescriptions|manage medications');
     });
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

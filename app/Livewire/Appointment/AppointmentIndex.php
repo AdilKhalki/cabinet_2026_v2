@@ -17,36 +17,52 @@ class AppointmentIndex extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $statusFilter = '';
+
     public string $doctorFilter = '';
+
     public string $dateFilter = '';
+
     public int $perPage = 15;
 
     public bool $showForm = false;
+
     public bool $showDeleteModal = false;
+
     public bool $showCancelModal = false;
+
     public ?int $editingId = null;
+
     public ?int $deletingId = null;
+
     public ?int $cancellingId = null;
+
     public string $cancellation_reason = '';
 
     // Champs formulaire
     public int|string $patient_id = '';
+
     public int|string $doctor_id = '';
+
     public string $scheduled_at = '';
+
     public int $duration_minutes = 30;
+
     public string $consultation_type = 'general';
+
     public string $notes = '';
+
     public string $color = '#01a9ac';
 
     protected $queryString = ['search', 'statusFilter', 'doctorFilter', 'dateFilter'];
 
     protected array $validationAttributes = [
-        'patient_id'          => 'patient',
-        'doctor_id'           => 'médecin',
-        'scheduled_at'        => 'date et heure',
-        'duration_minutes'    => 'durée',
-        'consultation_type'   => 'type',
+        'patient_id' => 'patient',
+        'doctor_id' => 'médecin',
+        'scheduled_at' => 'date et heure',
+        'duration_minutes' => 'durée',
+        'consultation_type' => 'type',
         'cancellation_reason' => "motif d'annulation",
     ];
 
@@ -130,17 +146,17 @@ class AppointmentIndex extends Component
         }
 
         $this->validate([
-            'patient_id'        => 'required|exists:patients,id',
-            'doctor_id'         => ['required', Rule::in(User::doctors()->active()->pluck('id')->all())],
-            'scheduled_at'      => $appt ? 'required|date' : 'required|date|after_or_equal:today',
-            'duration_minutes'  => 'required|integer|min:5|max:'.Appointment::MAX_DURATION,
+            'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => ['required', Rule::in(User::doctors()->active()->pluck('id')->all())],
+            'scheduled_at' => $appt ? 'required|date' : 'required|date|after_or_equal:today',
+            'duration_minutes' => 'required|integer|min:5|max:'.Appointment::MAX_DURATION,
             'consultation_type' => 'required|in:'.implode(',', array_keys(Appointment::TYPE_LABELS)),
-            'notes'             => 'nullable|string|max:500',
-            'color'             => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'notes' => 'nullable|string|max:500',
+            'color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ], [
-            'doctor_id.in'                => 'Veuillez sélectionner un médecin actif.',
+            'doctor_id.in' => 'Veuillez sélectionner un médecin actif.',
             'scheduled_at.after_or_equal' => 'Impossible de créer un rendez-vous dans le passé.',
-            'color.regex'                 => 'Couleur invalide.',
+            'color.regex' => 'Couleur invalide.',
         ]);
 
         // Anti double-réservation : le créneau du médecin doit être libre
@@ -157,13 +173,13 @@ class AppointmentIndex extends Component
         }
 
         $data = [
-            'patient_id'        => $this->patient_id,
-            'doctor_id'         => $this->doctor_id,
-            'scheduled_at'      => $this->scheduled_at,
-            'duration_minutes'  => $this->duration_minutes,
+            'patient_id' => $this->patient_id,
+            'doctor_id' => $this->doctor_id,
+            'scheduled_at' => $this->scheduled_at,
+            'duration_minutes' => $this->duration_minutes,
             'consultation_type' => $this->consultation_type,
-            'notes'             => $this->notes ?: null,
-            'color'             => $this->color ?: '#01a9ac',
+            'notes' => $this->notes ?: null,
+            'color' => $this->color ?: '#01a9ac',
         ];
 
         if ($appt) {
@@ -298,14 +314,14 @@ class AppointmentIndex extends Component
     {
         return view('livewire.appointment.appointment-index', [
             'appointments' => $this->appointments,
-            'doctors'      => $this->doctors,
+            'doctors' => $this->doctors,
             // La liste complète des patients n'est chargée que si le formulaire est ouvert
-            'patients'     => $this->showForm ? $this->patients : collect(),
+            'patients' => $this->showForm ? $this->patients : collect(),
         ])->layout('layouts.cabinet', [
-                'title' => 'Rendez-vous',
-                'header' => 'Gestion des Rendez-vous',
-                'headerIcon' => 'icon-calendar',
-                'breadcrumbs' => [['label' => 'Rendez-vous']],
-            ]);
+            'title' => 'Rendez-vous',
+            'header' => 'Gestion des Rendez-vous',
+            'headerIcon' => 'icon-calendar',
+            'breadcrumbs' => [['label' => 'Rendez-vous']],
+        ]);
     }
 }

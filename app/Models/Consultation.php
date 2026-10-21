@@ -12,7 +12,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Consultation extends Model
 {
-    use SoftDeletes, LogsActivity;
+    use LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'patient_id', 'doctor_id', 'appointment_id', 'consultation_type',
@@ -33,8 +33,8 @@ class Consultation extends Model
 
     public const STATUS_LABELS = [
         'in_progress' => 'En cours',
-        'completed'   => 'Terminée',
-        'archived'    => 'Archivée',
+        'completed' => 'Terminée',
+        'archived' => 'Archivée',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -47,8 +47,10 @@ class Consultation extends Model
     {
         if ($this->weight_kg && $this->height_cm) {
             $heightM = $this->height_cm / 100;
+
             return round($this->weight_kg / ($heightM * $heightM), 1);
         }
+
         return null;
     }
 

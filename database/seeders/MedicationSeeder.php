@@ -31,6 +31,6 @@ class MedicationSeeder extends Seeder
             Medication::firstOrCreate(['name' => $med['name']], $med);
         }
 
-        $this->command->info('Médicaments créés : ' . count($medications));
+        $this->command->info('Médicaments créés : '.count($medications));
     }
 }

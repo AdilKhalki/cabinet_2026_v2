@@ -24,20 +24,20 @@ class MedicalHistory extends Model
     ];
 
     public const TYPE_LABELS = [
-        'medical'          => 'Antécédent médical',
-        'surgical'         => 'Antécédent chirurgical',
-        'hospitalization'  => 'Hospitalisation',
-        'family'           => 'Antécédent familial',
-        'allergy'          => 'Allergie',
-        'vaccination'      => 'Vaccination',
-        'habit'            => 'Habitude de vie',
+        'medical' => 'Antécédent médical',
+        'surgical' => 'Antécédent chirurgical',
+        'hospitalization' => 'Hospitalisation',
+        'family' => 'Antécédent familial',
+        'allergy' => 'Allergie',
+        'vaccination' => 'Vaccination',
+        'habit' => 'Habitude de vie',
     ];
 
     public const HABIT_LABELS = [
-        'smoking'           => 'Tabac',
-        'alcohol'           => 'Alcool',
+        'smoking' => 'Tabac',
+        'alcohol' => 'Alcool',
         'physical_activity' => 'Activité physique',
-        'other'             => 'Autre',
+        'other' => 'Autre',
     ];
 
     public function patient(): BelongsTo

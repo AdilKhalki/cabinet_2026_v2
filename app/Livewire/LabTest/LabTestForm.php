@@ -18,17 +18,27 @@ class LabTestForm extends Component
     use WithFileUploads;
 
     public ?int $labTestId = null;
+
     public bool $isEdit = false;
 
     public int|string $patient_id = '';
+
     public int|string $doctor_id = '';
+
     public int|string $consultation_id = '';
+
     public string $requested_at = '';
+
     public string $result_date = '';
+
     public string $status = 'requested';
+
     public string $laboratory_name = '';
+
     public string $clinical_info = '';
+
     public string $doctor_interpretation = '';
+
     public $pdf_file = null;
 
     public array $results = [];
@@ -36,34 +46,34 @@ class LabTestForm extends Component
     protected function rules(): array
     {
         return [
-            'patient_id'           => 'required|exists:patients,id',
-            'doctor_id'            => 'required|exists:users,id',
-            'consultation_id'      => 'nullable|exists:consultations,id',
-            'requested_at'         => 'required|date',
-            'result_date'          => 'nullable|date|after_or_equal:requested_at',
-            'status'               => 'required|in:requested,pending,completed,cancelled',
-            'laboratory_name'      => 'nullable|string|max:150',
-            'clinical_info'        => 'nullable|string|max:500',
-            'doctor_interpretation'=> 'nullable|string|max:2000',
-            'pdf_file'             => 'nullable|file|mimes:pdf|max:5120',
+            'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => 'required|exists:users,id',
+            'consultation_id' => 'nullable|exists:consultations,id',
+            'requested_at' => 'required|date',
+            'result_date' => 'nullable|date|after_or_equal:requested_at',
+            'status' => 'required|in:requested,pending,completed,cancelled',
+            'laboratory_name' => 'nullable|string|max:150',
+            'clinical_info' => 'nullable|string|max:500',
+            'doctor_interpretation' => 'nullable|string|max:2000',
+            'pdf_file' => 'nullable|file|mimes:pdf|max:5120',
             'results.*.parameter_name' => 'required|string|max:150',
-            'results.*.value'          => 'nullable|string|max:100',
+            'results.*.value' => 'nullable|string|max:100',
             'results.*.lab_test_type_id' => 'nullable|exists:lab_test_types,id',
-            'results.*.unit'           => 'nullable|string|max:50',
-            'results.*.normal_min'     => 'nullable|numeric',
-            'results.*.normal_max'     => 'nullable|numeric',
-            'results.*.flag'           => 'nullable|in:normal,low,high,critical',
-            'results.*.notes'          => 'nullable|string|max:1000',
+            'results.*.unit' => 'nullable|string|max:50',
+            'results.*.normal_min' => 'nullable|numeric',
+            'results.*.normal_max' => 'nullable|numeric',
+            'results.*.flag' => 'nullable|in:normal,low,high,critical',
+            'results.*.notes' => 'nullable|string|max:1000',
         ];
     }
 
     protected function messages(): array
     {
         return [
-            'result_date.after_or_equal'        => 'La date du résultat doit être postérieure ou égale à la date de demande.',
+            'result_date.after_or_equal' => 'La date du résultat doit être postérieure ou égale à la date de demande.',
             'results.*.parameter_name.required' => 'Le nom du paramètre est obligatoire.',
-            'results.*.normal_min.numeric'      => 'La valeur normale minimale doit être numérique.',
-            'results.*.normal_max.numeric'      => 'La valeur normale maximale doit être numérique.',
+            'results.*.normal_min.numeric' => 'La valeur normale minimale doit être numérique.',
+            'results.*.normal_max.numeric' => 'La valeur normale maximale doit être numérique.',
         ];
     }
 
@@ -89,25 +99,25 @@ class LabTestForm extends Component
 
             $this->labTestId = $record->id;
             $this->isEdit = true;
-            $this->patient_id         = $record->patient_id;
-            $this->doctor_id          = $record->doctor_id ?? '';
-            $this->consultation_id    = $record->consultation_id ?? '';
-            $this->requested_at       = $record->requested_at?->format('Y-m-d') ?? today()->format('Y-m-d');
-            $this->result_date        = $record->result_date?->format('Y-m-d') ?? '';
-            $this->status             = $record->status ?? 'requested';
-            $this->laboratory_name    = $record->laboratory_name ?? '';
-            $this->clinical_info      = $record->clinical_info ?? '';
+            $this->patient_id = $record->patient_id;
+            $this->doctor_id = $record->doctor_id ?? '';
+            $this->consultation_id = $record->consultation_id ?? '';
+            $this->requested_at = $record->requested_at?->format('Y-m-d') ?? today()->format('Y-m-d');
+            $this->result_date = $record->result_date?->format('Y-m-d') ?? '';
+            $this->status = $record->status ?? 'requested';
+            $this->laboratory_name = $record->laboratory_name ?? '';
+            $this->clinical_info = $record->clinical_info ?? '';
             $this->doctor_interpretation = $record->doctor_interpretation ?? '';
             $this->results = $record->results->map(fn ($r) => [
-                'id'             => $r->id,
+                'id' => $r->id,
                 'lab_test_type_id' => $r->lab_test_type_id,
                 'parameter_name' => $r->parameter_name,
-                'value'          => $r->value,
-                'unit'           => $r->unit,
-                'normal_min'     => $r->normal_min,
-                'normal_max'     => $r->normal_max,
-                'flag'           => $r->flag,
-                'notes'          => $r->notes,
+                'value' => $r->value,
+                'unit' => $r->unit,
+                'normal_min' => $r->normal_min,
+                'normal_max' => $r->normal_max,
+                'flag' => $r->flag,
+                'notes' => $r->notes,
             ])->toArray();
         } else {
             $this->authorize('create', LabTest::class);
@@ -217,15 +227,15 @@ class LabTestForm extends Component
         $this->validate();
 
         $data = [
-            'patient_id'           => $this->patient_id,
-            'doctor_id'            => $this->doctor_id,
-            'consultation_id'      => $this->consultation_id ?: null,
-            'requested_at'         => $this->requested_at,
-            'result_date'          => $this->result_date ?: null,
-            'status'               => $this->status,
-            'laboratory_name'      => $this->laboratory_name ?: null,
-            'clinical_info'        => $this->clinical_info ?: null,
-            'doctor_interpretation'=> $this->doctor_interpretation ?: null,
+            'patient_id' => $this->patient_id,
+            'doctor_id' => $this->doctor_id,
+            'consultation_id' => $this->consultation_id ?: null,
+            'requested_at' => $this->requested_at,
+            'result_date' => $this->result_date ?: null,
+            'status' => $this->status,
+            'laboratory_name' => $this->laboratory_name ?: null,
+            'clinical_info' => $this->clinical_info ?: null,
+            'doctor_interpretation' => $this->doctor_interpretation ?: null,
         ];
 
         if ($this->pdf_file) {
@@ -247,20 +257,20 @@ class LabTestForm extends Component
 
             foreach ($this->results as $r) {
                 $value = $blankToNull($r['value'] ?? null);
-                $min   = $blankToNull($r['normal_min'] ?? null);
-                $max   = $blankToNull($r['normal_max'] ?? null);
+                $min = $blankToNull($r['normal_min'] ?? null);
+                $max = $blankToNull($r['normal_max'] ?? null);
 
                 LabTestResult::create([
-                    'lab_test_id'      => $labTest->id,
+                    'lab_test_id' => $labTest->id,
                     'lab_test_type_id' => ($r['lab_test_type_id'] ?? '') ?: null,
-                    'parameter_name'   => $r['parameter_name'],
-                    'value'            => $value,
-                    'unit'             => $blankToNull($r['unit'] ?? null),
-                    'normal_min'       => $min,
-                    'normal_max'       => $max,
+                    'parameter_name' => $r['parameter_name'],
+                    'value' => $value,
+                    'unit' => $blankToNull($r['unit'] ?? null),
+                    'normal_min' => $min,
+                    'normal_max' => $max,
                     // Recalcul côté serveur : le statut ne dépend pas d'un événement JS
-                    'flag'             => static::computeFlag($value, $min, $max) ?? (($r['flag'] ?? '') ?: 'normal'),
-                    'notes'            => $blankToNull($r['notes'] ?? null),
+                    'flag' => static::computeFlag($value, $min, $max) ?? (($r['flag'] ?? '') ?: 'normal'),
+                    'notes' => $blankToNull($r['notes'] ?? null),
                 ]);
             }
 
@@ -287,10 +297,10 @@ class LabTestForm extends Component
     public function render()
     {
         return view('livewire.lab-test.lab-test-form', [
-            'patients'     => Patient::active()->orderBy('last_name')->get(),
-            'doctors'      => User::doctors()->active()->get(),
+            'patients' => Patient::active()->orderBy('last_name')->get(),
+            'doctors' => User::doctors()->active()->get(),
             'labTestTypes' => $this->labTestTypes,
-            'isEdit'       => $this->isEdit,
+            'isEdit' => $this->isEdit,
         ])->layout('layouts.cabinet', [
             'title' => $this->isEdit ? 'Modifier Analyse' : 'Nouvelle Analyse',
             'header' => $this->isEdit ? 'Modifier l\'Analyse' : 'Nouvelle Analyse',

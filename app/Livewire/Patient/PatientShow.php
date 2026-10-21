@@ -5,12 +5,14 @@ namespace App\Livewire\Patient;
 use App\Models\MedicalHistory;
 use App\Models\Patient;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class PatientShow extends Component
 {
     public Patient $patient;
+
     public string $activeTab = 'overview';
 
     /**
@@ -19,42 +21,53 @@ class PatientShow extends Component
      * permet pas d'afficher un onglet non autorisé.
      */
     public const TABS = [
-        'overview'      => ['icon' => 'icon-eye',         'label' => "Vue d'ensemble",  'permission' => null],
+        'overview' => ['icon' => 'icon-eye',         'label' => "Vue d'ensemble",  'permission' => null],
         'consultations' => ['icon' => 'icon-activity',    'label' => 'Consultations',   'permission' => 'view consultations'],
         'prescriptions' => ['icon' => 'icon-file-text',   'label' => 'Ordonnances',     'permission' => 'view prescriptions'],
-        'lab-tests'     => ['icon' => 'icon-thermometer', 'label' => 'Analyses',        'permission' => 'view lab-tests'],
-        'images'        => ['icon' => 'icon-image',       'label' => 'Imagerie',        'permission' => 'view medical-images'],
-        'reports'       => ['icon' => 'icon-clipboard',   'label' => 'Rapports',        'permission' => 'view medical-reports'],
-        'history'       => ['icon' => 'icon-clock',       'label' => 'Antécédents',     'permission' => 'view consultations'],
-        'documents'     => ['icon' => 'icon-folder',      'label' => 'Documents',       'permission' => 'view documents'],
-        'acts'          => ['icon' => 'icon-list',        'label' => 'Actes Médicaux',  'permission' => 'view payments'],
-        'payments'      => ['icon' => 'icon-credit-card', 'label' => 'Paiements',       'permission' => 'view payments'],
+        'lab-tests' => ['icon' => 'icon-thermometer', 'label' => 'Analyses',        'permission' => 'view lab-tests'],
+        'images' => ['icon' => 'icon-image',       'label' => 'Imagerie',        'permission' => 'view medical-images'],
+        'reports' => ['icon' => 'icon-clipboard',   'label' => 'Rapports',        'permission' => 'view medical-reports'],
+        'history' => ['icon' => 'icon-clock',       'label' => 'Antécédents',     'permission' => 'view consultations'],
+        'documents' => ['icon' => 'icon-folder',      'label' => 'Documents',       'permission' => 'view documents'],
+        'acts' => ['icon' => 'icon-list',        'label' => 'Actes Médicaux',  'permission' => 'view payments'],
+        'payments' => ['icon' => 'icon-credit-card', 'label' => 'Paiements',       'permission' => 'view payments'],
     ];
 
     /** Relation comptée affichée dans le libellé de l'onglet */
     private const TAB_COUNTS = [
         'consultations' => 'consultations',
         'prescriptions' => 'prescriptions',
-        'lab-tests'     => 'labTests',
-        'images'        => 'medicalImages',
-        'reports'       => 'medicalReports',
-        'history'       => 'medicalHistories',
-        'documents'     => 'documents',
-        'payments'      => 'payments',
+        'lab-tests' => 'labTests',
+        'images' => 'medicalImages',
+        'reports' => 'medicalReports',
+        'history' => 'medicalHistories',
+        'documents' => 'documents',
+        'payments' => 'payments',
     ];
 
     // ── Formulaire d'antécédent ────────────────────────────────────
     public bool $showHistoryForm = false;
+
     public string $history_type = 'medical';
+
     public string $history_title = '';
+
     public string $history_description = '';
+
     public string $history_date_occurred = '';
+
     public string $history_relation = '';
+
     public string $history_habit_type = '';
+
     public string $history_habit_frequency = '';
+
     public string $history_vaccine_name = '';
+
     public string $history_vaccine_date = '';
+
     public string $history_vaccine_next_date = '';
+
     public string $history_vaccine_batch = '';
 
     public function mount(Patient $patient): void
@@ -113,32 +126,32 @@ class PatientShow extends Component
         abort_unless($this->canManageHistory(), 403);
 
         $validated = $this->validate([
-            'history_type'              => ['required', Rule::in(array_keys(MedicalHistory::TYPE_LABELS))],
-            'history_title'             => 'required|string|max:200',
-            'history_description'       => 'nullable|string|max:2000',
-            'history_date_occurred'     => 'nullable|date|before_or_equal:today',
-            'history_relation'          => 'nullable|string|max:50',
-            'history_habit_type'        => ['nullable', Rule::in(array_keys(MedicalHistory::HABIT_LABELS))],
-            'history_habit_frequency'   => 'nullable|string|max:100',
-            'history_vaccine_name'      => 'nullable|string|max:150',
-            'history_vaccine_date'      => 'nullable|date',
+            'history_type' => ['required', Rule::in(array_keys(MedicalHistory::TYPE_LABELS))],
+            'history_title' => 'required|string|max:200',
+            'history_description' => 'nullable|string|max:2000',
+            'history_date_occurred' => 'nullable|date|before_or_equal:today',
+            'history_relation' => 'nullable|string|max:50',
+            'history_habit_type' => ['nullable', Rule::in(array_keys(MedicalHistory::HABIT_LABELS))],
+            'history_habit_frequency' => 'nullable|string|max:100',
+            'history_vaccine_name' => 'nullable|string|max:150',
+            'history_vaccine_date' => 'nullable|date',
             'history_vaccine_next_date' => 'nullable|date|after_or_equal:history_vaccine_date',
-            'history_vaccine_batch'     => 'nullable|string|max:50',
+            'history_vaccine_batch' => 'nullable|string|max:50',
         ], [], [
-            'history_type'              => 'type',
-            'history_title'             => 'intitulé',
-            'history_date_occurred'     => 'date',
+            'history_type' => 'type',
+            'history_title' => 'intitulé',
+            'history_date_occurred' => 'date',
             'history_vaccine_next_date' => 'date de rappel',
-            'history_vaccine_date'      => 'date de vaccination',
+            'history_vaccine_date' => 'date de vaccination',
         ]);
 
         $type = $validated['history_type'];
         $data = [
-            'type'          => $type,
-            'title'         => $validated['history_title'],
-            'description'   => $validated['history_description'] ?: null,
+            'type' => $type,
+            'title' => $validated['history_title'],
+            'description' => $validated['history_description'] ?: null,
             'date_occurred' => $validated['history_date_occurred'] ?: null,
-            'created_by'    => auth()->id(),
+            'created_by' => auth()->id(),
         ];
 
         // Ne conserver que les champs spécifiques au type choisi
@@ -197,7 +210,7 @@ class PatientShow extends Component
         ]);
 
         match ($this->activeTab) {
-            'overview'      => $patient->setRelation(
+            'overview' => $patient->setRelation(
                 'consultations',
                 $this->canSeeTab('consultations')
                     ? $patient->consultations()->latest('consultation_date')->limit(1)->get()
@@ -205,14 +218,14 @@ class PatientShow extends Component
             ),
             'consultations' => $patient->load(['consultations' => fn ($q) => $q->with('doctor')->latest('consultation_date')]),
             'prescriptions' => $patient->load(['prescriptions' => fn ($q) => $q->with(['lines', 'doctor'])->latest('prescribed_at')]),
-            'lab-tests'     => $patient->load(['labTests' => fn ($q) => $q->withCount('results')->latest('requested_at')]),
-            'images'        => $patient->load(['medicalImages' => fn ($q) => $q->with('doctor')->latest('image_date')]),
-            'reports'       => $patient->load(['medicalReports' => fn ($q) => $q->with('doctor')->latest('report_date')]),
-            'history'       => $patient->load(['medicalHistories' => fn ($q) => $q->latest('date_occurred')->latest()]),
-            'documents'     => $patient->load(['documents' => fn ($q) => $q->with('uploadedBy')->latest('document_date')]),
-            'acts'          => $patient->load(['payments' => fn ($q) => $q->with('lines.medicalAct')->latest('payment_date')]),
-            'payments'      => $patient->load(['payments' => fn ($q) => $q->latest('payment_date')]),
-            default         => null,
+            'lab-tests' => $patient->load(['labTests' => fn ($q) => $q->withCount('results')->latest('requested_at')]),
+            'images' => $patient->load(['medicalImages' => fn ($q) => $q->with('doctor')->latest('image_date')]),
+            'reports' => $patient->load(['medicalReports' => fn ($q) => $q->with('doctor')->latest('report_date')]),
+            'history' => $patient->load(['medicalHistories' => fn ($q) => $q->latest('date_occurred')->latest()]),
+            'documents' => $patient->load(['documents' => fn ($q) => $q->with('uploadedBy')->latest('document_date')]),
+            'acts' => $patient->load(['payments' => fn ($q) => $q->with('lines.medicalAct')->latest('payment_date')]),
+            'payments' => $patient->load(['payments' => fn ($q) => $q->latest('payment_date')]),
+            default => null,
         };
     }
 
@@ -238,14 +251,14 @@ class PatientShow extends Component
             ->map(function ($info, $tab) {
                 $relation = self::TAB_COUNTS[$tab] ?? null;
                 if ($relation && $tab !== 'history') {
-                    $info['label'] .= ' ('.($this->patient->{\Illuminate\Support\Str::snake($relation).'_count'} ?? 0).')';
+                    $info['label'] .= ' ('.($this->patient->{Str::snake($relation).'_count'} ?? 0).')';
                 }
 
                 return $info;
             });
 
         return view('livewire.patient.patient-show', [
-            'tabs'             => $tabs,
+            'tabs' => $tabs,
             'canManageHistory' => $this->canManageHistory(),
         ])
             ->layout('layouts.cabinet', [

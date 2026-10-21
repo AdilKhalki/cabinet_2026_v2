@@ -14,70 +14,93 @@ use Livewire\Component;
 class ConsultationForm extends Component
 {
     public ?int $consultationId = null;
+
     public ?int $appointmentId = null;
+
     public bool $isEdit = false;
+
     public string $status = 'in_progress';
 
     // Champs
     public int|string $patient_id = '';
+
     public int|string $doctor_id = '';
+
     public int|string|null $appointment_id = null;
+
     public string $consultation_type = 'general';
+
     public string $consultation_date = '';
+
     public string $reason = '';
+
     public string $symptoms = '';
+
     public string $clinical_exam = '';
+
     public string $weight_kg = '';
+
     public string $height_cm = '';
+
     public string $blood_pressure = '';
+
     public string $heart_rate = '';
+
     public string $temperature = '';
+
     public string $spo2 = '';
+
     public string $diagnosis = '';
+
     public string $icd10_code = '';
+
     public string $treatment_plan = '';
+
     public string $doctor_notes = '';
+
     public string $summary = '';
+
     public bool $followup_required = false;
+
     public string $followup_date = '';
 
     protected array $validationAttributes = [
-        'patient_id'        => 'patient',
-        'doctor_id'         => 'médecin',
+        'patient_id' => 'patient',
+        'doctor_id' => 'médecin',
         'consultation_date' => 'date de consultation',
-        'weight_kg'         => 'poids',
-        'height_cm'         => 'taille',
-        'heart_rate'        => 'fréquence cardiaque',
-        'temperature'       => 'température',
-        'spo2'              => 'SpO2',
-        'followup_date'     => 'date de suivi',
+        'weight_kg' => 'poids',
+        'height_cm' => 'taille',
+        'heart_rate' => 'fréquence cardiaque',
+        'temperature' => 'température',
+        'spo2' => 'SpO2',
+        'followup_date' => 'date de suivi',
     ];
 
     protected function rules(): array
     {
         return [
-            'patient_id'        => 'required|exists:patients,id',
-            'doctor_id'         => ['required', Rule::in(User::doctors()->pluck('id')->all())],
-            'appointment_id'    => 'nullable|exists:appointments,id',
+            'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => ['required', Rule::in(User::doctors()->pluck('id')->all())],
+            'appointment_id' => 'nullable|exists:appointments,id',
             'consultation_type' => 'required|in:'.implode(',', array_keys(Appointment::TYPE_LABELS)),
             'consultation_date' => 'required|date',
-            'reason'            => 'nullable|string|max:500',
-            'symptoms'          => 'nullable|string|max:2000',
-            'clinical_exam'     => 'nullable|string|max:3000',
-            'weight_kg'         => 'nullable|numeric|min:0|max:500',
-            'height_cm'         => 'nullable|numeric|min:0|max:300',
-            'blood_pressure'    => ['nullable', 'string', 'max:20', 'regex:/^\d{2,3}\s*\/\s*\d{2,3}$/'],
-            'heart_rate'        => 'nullable|integer|min:0|max:300',
-            'temperature'       => 'nullable|numeric|min:30|max:45',
-            'spo2'              => 'nullable|integer|min:0|max:100',
-            'diagnosis'         => 'nullable|string|max:3000',
-            'icd10_code'        => 'nullable|string|max:20',
-            'treatment_plan'    => 'nullable|string|max:3000',
-            'doctor_notes'      => 'nullable|string|max:3000',
-            'summary'           => 'nullable|string|max:3000',
+            'reason' => 'nullable|string|max:500',
+            'symptoms' => 'nullable|string|max:2000',
+            'clinical_exam' => 'nullable|string|max:3000',
+            'weight_kg' => 'nullable|numeric|min:0|max:500',
+            'height_cm' => 'nullable|numeric|min:0|max:300',
+            'blood_pressure' => ['nullable', 'string', 'max:20', 'regex:/^\d{2,3}\s*\/\s*\d{2,3}$/'],
+            'heart_rate' => 'nullable|integer|min:0|max:300',
+            'temperature' => 'nullable|numeric|min:30|max:45',
+            'spo2' => 'nullable|integer|min:0|max:100',
+            'diagnosis' => 'nullable|string|max:3000',
+            'icd10_code' => 'nullable|string|max:20',
+            'treatment_plan' => 'nullable|string|max:3000',
+            'doctor_notes' => 'nullable|string|max:3000',
+            'summary' => 'nullable|string|max:3000',
             'followup_required' => 'boolean',
             // Sur une consultation existante, une date de suivi passée reste acceptée
-            'followup_date'     => $this->isEdit
+            'followup_date' => $this->isEdit
                 ? 'nullable|required_if:followup_required,true|date'
                 : 'nullable|required_if:followup_required,true|date|after:today',
         ];
@@ -86,10 +109,10 @@ class ConsultationForm extends Component
     protected function messages(): array
     {
         return [
-            'doctor_id.in'                => 'Veuillez sélectionner un médecin.',
-            'blood_pressure.regex'        => 'Format de tension attendu : 120/80.',
-            'followup_date.required_if'   => 'La date de suivi est obligatoire lorsque le suivi est requis.',
-            'followup_date.after'         => 'La date de suivi doit être postérieure à aujourd\'hui.',
+            'doctor_id.in' => 'Veuillez sélectionner un médecin.',
+            'blood_pressure.regex' => 'Format de tension attendu : 120/80.',
+            'followup_date.required_if' => 'La date de suivi est obligatoire lorsque le suivi est requis.',
+            'followup_date.after' => 'La date de suivi doit être postérieure à aujourd\'hui.',
         ];
     }
 
@@ -215,28 +238,28 @@ class ConsultationForm extends Component
         $status = $finish ? 'completed' : ($record?->status ?? 'in_progress');
 
         $data = [
-            'patient_id'        => $this->patient_id,
-            'doctor_id'         => $this->doctor_id,
-            'appointment_id'    => $this->appointment_id ?: null,
+            'patient_id' => $this->patient_id,
+            'doctor_id' => $this->doctor_id,
+            'appointment_id' => $this->appointment_id ?: null,
             'consultation_type' => $this->consultation_type,
-            'status'            => $status,
+            'status' => $status,
             'consultation_date' => $this->consultation_date,
-            'reason'            => $this->reason ?: null,
-            'symptoms'          => $this->symptoms ?: null,
-            'clinical_exam'     => $this->clinical_exam ?: null,
-            'weight_kg'         => $this->nullableNumber($this->weight_kg),
-            'height_cm'         => $this->nullableNumber($this->height_cm),
-            'blood_pressure'    => $this->blood_pressure ?: null,
-            'heart_rate'        => $this->nullableNumber($this->heart_rate),
-            'temperature'       => $this->nullableNumber($this->temperature),
-            'spo2'              => $this->nullableNumber($this->spo2),
-            'diagnosis'         => $this->diagnosis ?: null,
-            'icd10_code'        => $this->icd10_code ? strtoupper(trim($this->icd10_code)) : null,
-            'treatment_plan'    => $this->treatment_plan ?: null,
-            'doctor_notes'      => $this->doctor_notes ?: null,
-            'summary'           => $this->summary ?: null,
+            'reason' => $this->reason ?: null,
+            'symptoms' => $this->symptoms ?: null,
+            'clinical_exam' => $this->clinical_exam ?: null,
+            'weight_kg' => $this->nullableNumber($this->weight_kg),
+            'height_cm' => $this->nullableNumber($this->height_cm),
+            'blood_pressure' => $this->blood_pressure ?: null,
+            'heart_rate' => $this->nullableNumber($this->heart_rate),
+            'temperature' => $this->nullableNumber($this->temperature),
+            'spo2' => $this->nullableNumber($this->spo2),
+            'diagnosis' => $this->diagnosis ?: null,
+            'icd10_code' => $this->icd10_code ? strtoupper(trim($this->icd10_code)) : null,
+            'treatment_plan' => $this->treatment_plan ?: null,
+            'doctor_notes' => $this->doctor_notes ?: null,
+            'summary' => $this->summary ?: null,
             'followup_required' => $this->followup_required,
-            'followup_date'     => $this->followup_required ? $this->followup_date : null,
+            'followup_date' => $this->followup_required ? $this->followup_date : null,
         ];
 
         $consultation = DB::transaction(function () use ($record, $data, $appt, $status) {
@@ -286,7 +309,7 @@ class ConsultationForm extends Component
 
         return view('livewire.consultation.consultation-form', [
             'patients' => $patients,
-            'doctors'  => User::doctors()->active()->get(),
+            'doctors' => User::doctors()->active()->get(),
         ])
             ->layout('layouts.cabinet', [
                 'title' => $this->isEdit ? 'Modifier Consultation' : 'Nouvelle Consultation',

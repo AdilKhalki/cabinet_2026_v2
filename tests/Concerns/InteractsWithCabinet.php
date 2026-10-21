@@ -5,6 +5,7 @@ namespace Tests\Concerns;
 use App\Models\Patient;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
@@ -22,7 +23,7 @@ trait InteractsWithCabinet
     /** Crée un utilisateur avec le rôle donné : admin | medecin | secretaire */
     protected function userWithRole(string $role, array $attributes = []): User
     {
-        if (! \Spatie\Permission\Models\Role::where('name', $role)->exists()) {
+        if (! Role::where('name', $role)->exists()) {
             $this->seedRoles();
         }
 

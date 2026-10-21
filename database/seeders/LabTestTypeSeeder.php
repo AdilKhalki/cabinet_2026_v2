@@ -56,7 +56,7 @@ class LabTestTypeSeeder extends Seeder
 
             // Inflammation
             ['name' => 'CRP (Protéine C Réactive)',    'unit' => 'mg/L',     'normal_min' => null,  'normal_max' => 6.0,   'category' => 'Inflammation'],
-            ['name' => 'Vitesse de Sédimentation (VS)','unit' => 'mm/h',     'normal_min' => null,  'normal_max' => null,  'category' => 'Inflammation'],
+            ['name' => 'Vitesse de Sédimentation (VS)', 'unit' => 'mm/h',     'normal_min' => null,  'normal_max' => null,  'category' => 'Inflammation'],
             ['name' => 'Fibrinogène',                  'unit' => 'g/L',      'normal_min' => 2.0,   'normal_max' => 4.0,   'category' => 'Inflammation'],
 
             // Urinaire

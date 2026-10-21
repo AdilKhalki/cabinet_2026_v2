@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Date;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Appointment extends Model
 {
-    use SoftDeletes, LogsActivity;
+    use LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'patient_id', 'doctor_id', 'created_by', 'scheduled_at',
@@ -30,31 +31,31 @@ class Appointment extends Model
 
     // Labels pour l'affichage
     public const STATUS_LABELS = [
-        'planned'     => 'Planifié',
-        'confirmed'   => 'Confirmé',
-        'waiting'     => 'En attente',
+        'planned' => 'Planifié',
+        'confirmed' => 'Confirmé',
+        'waiting' => 'En attente',
         'in_progress' => 'En cours',
-        'completed'   => 'Terminé',
-        'cancelled'   => 'Annulé',
-        'no_show'     => 'Absent',
+        'completed' => 'Terminé',
+        'cancelled' => 'Annulé',
+        'no_show' => 'Absent',
     ];
 
     public const STATUS_COLORS = [
-        'planned'     => 'label-primary',
-        'confirmed'   => 'label-info',
-        'waiting'     => 'label-warning',
+        'planned' => 'label-primary',
+        'confirmed' => 'label-info',
+        'waiting' => 'label-warning',
         'in_progress' => 'bg-c-blue',
-        'completed'   => 'label-success',
-        'cancelled'   => 'label-danger',
-        'no_show'     => 'label-default',
+        'completed' => 'label-success',
+        'cancelled' => 'label-danger',
+        'no_show' => 'label-default',
     ];
 
     public const TYPE_LABELS = [
-        'general'         => 'Consultation générale',
-        'specialized'     => 'Consultation spécialisée',
-        'followup'        => 'Suivi',
-        'emergency'       => 'Urgence',
-        'control'         => 'Contrôle',
+        'general' => 'Consultation générale',
+        'specialized' => 'Consultation spécialisée',
+        'followup' => 'Suivi',
+        'emergency' => 'Urgence',
+        'control' => 'Contrôle',
         'teleconsultation' => 'Téléconsultation',
     ];
 
@@ -62,13 +63,13 @@ class Appointment extends Model
      * Transitions de statut autorisées (statut actuel => statuts cibles).
      */
     public const STATUS_TRANSITIONS = [
-        'planned'     => ['confirmed', 'waiting', 'in_progress', 'cancelled', 'no_show'],
-        'confirmed'   => ['planned', 'waiting', 'in_progress', 'cancelled', 'no_show'],
-        'waiting'     => ['in_progress', 'completed', 'cancelled', 'no_show'],
+        'planned' => ['confirmed', 'waiting', 'in_progress', 'cancelled', 'no_show'],
+        'confirmed' => ['planned', 'waiting', 'in_progress', 'cancelled', 'no_show'],
+        'waiting' => ['in_progress', 'completed', 'cancelled', 'no_show'],
         'in_progress' => ['waiting', 'completed'],
-        'completed'   => [],
-        'cancelled'   => ['planned'],
-        'no_show'     => ['planned'],
+        'completed' => [],
+        'cancelled' => ['planned'],
+        'no_show' => ['planned'],
     ];
 
     /** Statuts qui n'occupent plus le créneau du médecin. */
@@ -139,7 +140,7 @@ class Appointment extends Model
      */
     public static function overlapping(int $doctorId, $start, int $durationMinutes, ?int $ignoreId = null)
     {
-        $start = \Illuminate\Support\Facades\Date::parse($start);
+        $start = Date::parse($start);
         $end = $start->addMinutes($durationMinutes);
 
         // Pré-filtrage SQL portable (indexé sur doctor_id + scheduled_at), puis calcul exact en PHP
@@ -187,13 +188,13 @@ class Appointment extends Model
     public function scopeUpcoming($query)
     {
         return $query->where('scheduled_at', '>=', now())
-                     ->whereIn('status', ['planned', 'confirmed']);
+            ->whereIn('status', ['planned', 'confirmed']);
     }
 
     public function scopeWaitingRoom($query)
     {
         return $query->whereIn('status', ['waiting', 'in_progress'])
-                     ->whereBetween('scheduled_at', [today(), today()->endOfDay()]);
+            ->whereBetween('scheduled_at', [today(), today()->endOfDay()]);
     }
 
     public function scopeForDoctor($query, int $doctorId)
@@ -205,6 +206,6 @@ class Appointment extends Model
     public function scopeForCalendar($query, $start, $end)
     {
         return $query->where('scheduled_at', '>=', $start)
-                     ->where('scheduled_at', '<', $end);
+            ->where('scheduled_at', '<', $end);
     }
 }

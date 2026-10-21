@@ -7,6 +7,8 @@ use App\Models\MedicalReport;
 use App\Models\Patient;
 use App\Models\User;
 use App\Services\NotificationService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
 class MedicalReportForm extends Component
@@ -15,20 +17,29 @@ class MedicalReportForm extends Component
 
     // Form fields (snake_case matches wire:model in blade)
     public int|string $patient_id = '';
+
     public int|string $doctor_id = '';
+
     public int|string $consultation_id = '';
+
     public string $type = 'medical_report';
+
     public string $title = '';
+
     public string $content = '';
+
     public string $report_date = '';
+
     public string $valid_from = '';
+
     public string $valid_until = '';
+
     public int|string|null $sick_leave_days = null; // string : champ number vidé côté navigateur
 
     public function mount($medicalReport = null, ?int $patientId = null): void
     {
         $this->report_date = now()->format('Y-m-d');
-        $this->doctor_id   = auth()->user()->isMedecin() ? auth()->id() : '';
+        $this->doctor_id = auth()->user()->isMedecin() ? auth()->id() : '';
 
         if ($patientId) {
             $this->patient_id = $patientId;
@@ -49,15 +60,15 @@ class MedicalReportForm extends Component
 
             $this->authorize('update', $report);
             $this->reportId = $report->id;
-            $this->patient_id      = $report->patient_id;
-            $this->doctor_id       = $report->doctor_id ?? '';
+            $this->patient_id = $report->patient_id;
+            $this->doctor_id = $report->doctor_id ?? '';
             $this->consultation_id = $report->consultation_id ?? '';
-            $this->type            = $report->type;
-            $this->title           = $report->title;
-            $this->content         = $report->content ?? '';
-            $this->report_date     = $report->report_date?->format('Y-m-d') ?? now()->format('Y-m-d');
-            $this->valid_from      = $report->valid_from?->format('Y-m-d') ?? '';
-            $this->valid_until     = $report->valid_until?->format('Y-m-d') ?? '';
+            $this->type = $report->type;
+            $this->title = $report->title;
+            $this->content = $report->content ?? '';
+            $this->report_date = $report->report_date?->format('Y-m-d') ?? now()->format('Y-m-d');
+            $this->valid_from = $report->valid_from?->format('Y-m-d') ?? '';
+            $this->valid_until = $report->valid_until?->format('Y-m-d') ?? '';
             $this->sick_leave_days = $report->sick_leave_days;
         } else {
             $this->authorize('create', MedicalReport::class);
@@ -77,7 +88,7 @@ class MedicalReportForm extends Component
 
     public function updatedType(): void
     {
-        if ($this->type === 'sick_leave' && !$this->valid_from) {
+        if ($this->type === 'sick_leave' && ! $this->valid_from) {
             $this->valid_from = now()->format('Y-m-d');
         }
     }
@@ -99,18 +110,18 @@ class MedicalReportForm extends Component
         // Certains modèles n'ont pas de type dédié : les rattacher à un type existant (enum en base)
         $templateTypes = [
             'medical_certificate' => 'other',
-            'surgery_report'      => 'medical_report',
+            'surgery_report' => 'medical_report',
         ];
         $templateTitles = [
-            'sick_leave'          => 'Certificat d\'arrêt de travail',
+            'sick_leave' => 'Certificat d\'arrêt de travail',
             'fitness_certificate' => 'Certificat d\'aptitude',
             'medical_certificate' => 'Certificat médical',
-            'referral'            => 'Lettre de liaison',
-            'surgery_report'      => 'Compte-rendu opératoire',
+            'referral' => 'Lettre de liaison',
+            'surgery_report' => 'Compte-rendu opératoire',
         ];
 
         if (isset($templates[$type])) {
-            $this->type    = $templateTypes[$type] ?? $type;
+            $this->type = $templateTypes[$type] ?? $type;
             $this->content = $this->replacePlaceholders($templates[$type]);
             if ($this->title === '') {
                 $this->title = $templateTitles[$type];
@@ -133,22 +144,22 @@ class MedicalReportForm extends Component
 
         // Cabinet city from settings
         $ville = '[VILLE]';
-        if (\Illuminate\Support\Facades\Storage::exists('cabinet_settings.json')) {
-            $settings = json_decode(\Illuminate\Support\Facades\Storage::get('cabinet_settings.json'), true) ?? [];
+        if (Storage::exists('cabinet_settings.json')) {
+            $settings = json_decode(Storage::get('cabinet_settings.json'), true) ?? [];
             $ville = $settings['cabinet_city'] ?? '[VILLE]';
         }
 
         // Dates
         $dateRapport = $this->report_date
-            ? \Carbon\Carbon::parse($this->report_date)->format('d/m/Y')
+            ? Carbon::parse($this->report_date)->format('d/m/Y')
             : now()->format('d/m/Y');
 
         $dateDebut = $this->valid_from
-            ? \Carbon\Carbon::parse($this->valid_from)->format('d/m/Y')
+            ? Carbon::parse($this->valid_from)->format('d/m/Y')
             : '[DATE_DEBUT]';
 
         $dateFin = $this->valid_until
-            ? \Carbon\Carbon::parse($this->valid_until)->format('d/m/Y')
+            ? Carbon::parse($this->valid_until)->format('d/m/Y')
             : '[DATE_FIN]';
 
         $joursArret = $this->sick_leave_days
@@ -174,11 +185,11 @@ class MedicalReportForm extends Component
         // Arrêt de travail : compléter la date de fin ou le nombre de jours à partir de l'autre
         if ($isSickLeave && $this->valid_from) {
             try {
-                $from = \Carbon\Carbon::parse($this->valid_from)->startOfDay();
+                $from = Carbon::parse($this->valid_from)->startOfDay();
                 if (is_numeric($this->sick_leave_days) && (int) $this->sick_leave_days > 0 && ! $this->valid_until) {
                     $this->valid_until = $from->copy()->addDays((int) $this->sick_leave_days - 1)->format('Y-m-d');
                 } elseif (! $this->sick_leave_days && $this->valid_until) {
-                    $days = (int) $from->diffInDays(\Carbon\Carbon::parse($this->valid_until)->startOfDay(), false) + 1;
+                    $days = (int) $from->diffInDays(Carbon::parse($this->valid_until)->startOfDay(), false) + 1;
                     $this->sick_leave_days = $days > 0 ? $days : null;
                 }
             } catch (\Throwable) {
@@ -187,8 +198,8 @@ class MedicalReportForm extends Component
         }
 
         $this->validate([
-            'patient_id'      => 'required|exists:patients,id',
-            'doctor_id'       => 'required|exists:users,id',
+            'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => 'required|exists:users,id',
             'consultation_id' => [
                 'nullable',
                 'exists:consultations,id',
@@ -198,12 +209,12 @@ class MedicalReportForm extends Component
                     }
                 },
             ],
-            'type'            => 'required|in:' . implode(',', array_keys(MedicalReport::TYPE_LABELS)),
-            'title'           => 'required|string|max:200',
-            'content'         => 'required|string|max:20000',
-            'report_date'     => 'required|date',
-            'valid_from'      => ($isSickLeave ? 'required' : 'nullable') . '|date',
-            'valid_until'     => ($isSickLeave ? 'required' : 'nullable') . '|date|after_or_equal:valid_from',
+            'type' => 'required|in:'.implode(',', array_keys(MedicalReport::TYPE_LABELS)),
+            'title' => 'required|string|max:200',
+            'content' => 'required|string|max:20000',
+            'report_date' => 'required|date',
+            'valid_from' => ($isSickLeave ? 'required' : 'nullable').'|date',
+            'valid_until' => ($isSickLeave ? 'required' : 'nullable').'|date|after_or_equal:valid_from',
             'sick_leave_days' => [
                 $isSickLeave ? 'required' : 'nullable',
                 'integer',
@@ -214,8 +225,8 @@ class MedicalReportForm extends Component
                         return;
                     }
                     try {
-                        $expected = (int) \Carbon\Carbon::parse($this->valid_from)->startOfDay()
-                            ->diffInDays(\Carbon\Carbon::parse($this->valid_until)->startOfDay(), false) + 1;
+                        $expected = (int) Carbon::parse($this->valid_from)->startOfDay()
+                            ->diffInDays(Carbon::parse($this->valid_until)->startOfDay(), false) + 1;
                     } catch (\Throwable) {
                         return;
                     }
@@ -225,22 +236,22 @@ class MedicalReportForm extends Component
                 },
             ],
         ], [
-            'valid_from.required'       => 'La date de début de l\'arrêt est obligatoire.',
-            'valid_until.required'      => 'La date de fin de l\'arrêt est obligatoire.',
+            'valid_from.required' => 'La date de début de l\'arrêt est obligatoire.',
+            'valid_until.required' => 'La date de fin de l\'arrêt est obligatoire.',
             'valid_until.after_or_equal' => 'La date de fin doit être postérieure ou égale à la date de début.',
-            'sick_leave_days.required'  => 'Le nombre de jours d\'arrêt est obligatoire.',
+            'sick_leave_days.required' => 'Le nombre de jours d\'arrêt est obligatoire.',
         ]);
 
         $data = [
-            'patient_id'      => $this->patient_id,
-            'doctor_id'       => $this->doctor_id,
+            'patient_id' => $this->patient_id,
+            'doctor_id' => $this->doctor_id,
             'consultation_id' => $this->consultation_id ?: null,
-            'type'            => $this->type,
-            'title'           => $this->title,
-            'content'         => $this->content,
-            'report_date'     => $this->report_date,
-            'valid_from'      => $this->valid_from ?: null,
-            'valid_until'     => $this->valid_until ?: null,
+            'type' => $this->type,
+            'title' => $this->title,
+            'content' => $this->content,
+            'report_date' => $this->report_date,
+            'valid_from' => $this->valid_from ?: null,
+            'valid_until' => $this->valid_until ?: null,
             'sick_leave_days' => $isSickLeave && $this->sick_leave_days !== '' ? (int) $this->sick_leave_days : null,
         ];
 
@@ -261,18 +272,18 @@ class MedicalReportForm extends Component
     public function render()
     {
         return view('livewire.medical-report.medical-report-form', [
-            'patients'      => Patient::active()->orderBy('last_name')->get(['id', 'first_name', 'last_name', 'dossier_number', 'cin', 'ip_number', 'birth_date']),
-            'doctors'       => User::doctors()->active()->orderBy('name')->get(),
+            'patients' => Patient::active()->orderBy('last_name')->get(['id', 'first_name', 'last_name', 'dossier_number', 'cin', 'ip_number', 'birth_date']),
+            'doctors' => User::doctors()->active()->orderBy('name')->get(),
             'consultations' => Consultation::with('patient')
-                ->when($this->patient_id, fn($q) => $q->where('patient_id', $this->patient_id))
+                ->when($this->patient_id, fn ($q) => $q->where('patient_id', $this->patient_id))
                 ->orderByDesc('consultation_date')
                 ->take(50)
                 ->get(),
-            'types'    => MedicalReport::TYPE_LABELS,
+            'types' => MedicalReport::TYPE_LABELS,
             'reportId' => $this->reportId,
         ])->layout('layouts.cabinet', [
-            'title'      => $this->reportId ? 'Modifier Rapport' : 'Nouveau Rapport',
-            'header'     => $this->reportId ? 'Modifier Rapport Médical' : 'Nouveau Rapport Médical',
+            'title' => $this->reportId ? 'Modifier Rapport' : 'Nouveau Rapport',
+            'header' => $this->reportId ? 'Modifier Rapport Médical' : 'Nouveau Rapport Médical',
             'headerIcon' => 'icon-clipboard',
             'breadcrumbs' => [
                 ['label' => 'Rapports Médicaux', 'url' => route('medical-reports.index')],

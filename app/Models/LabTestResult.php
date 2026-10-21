@@ -35,10 +35,10 @@ class LabTestResult extends Model
     public function getFlagColorAttribute(): string
     {
         return match ($this->flag) {
-            'low'      => 'text-info',
-            'high'     => 'text-warning',
+            'low' => 'text-info',
+            'high' => 'text-warning',
             'critical' => 'text-danger',
-            default    => 'text-success',
+            default => 'text-success',
         };
     }
 }

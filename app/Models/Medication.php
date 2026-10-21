@@ -28,7 +28,7 @@ class Medication extends Model
     {
         return $query->where(function ($q) use ($search) {
             $q->where('name', 'like', "%{$search}%")
-              ->orWhere('generic_name', 'like', "%{$search}%");
+                ->orWhere('generic_name', 'like', "%{$search}%");
         });
     }
 }

@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('doctor_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('appointment_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('consultation_type', [
-                'general', 'specialized', 'followup', 'emergency', 'control', 'teleconsultation'
+                'general', 'specialized', 'followup', 'emergency', 'control', 'teleconsultation',
             ])->default('general');
             $table->enum('status', ['in_progress', 'completed', 'archived'])->default('in_progress');
             $table->dateTime('consultation_date');

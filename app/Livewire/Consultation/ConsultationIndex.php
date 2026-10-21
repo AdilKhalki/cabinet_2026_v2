@@ -12,12 +12,20 @@ class ConsultationIndex extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $statusFilter = '';
+
     public int $perPage = 15;
 
-    public function updatedSearch(): void { $this->resetPage(); }
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
 
-    public function updatedStatusFilter(): void { $this->resetPage(); }
+    public function updatedStatusFilter(): void
+    {
+        $this->resetPage();
+    }
 
     #[Computed]
     public function consultations()
@@ -35,10 +43,10 @@ class ConsultationIndex extends Component
         return view('livewire.consultation.consultation-index', [
             'consultations' => $this->consultations,
         ])->layout('layouts.cabinet', [
-                'title' => 'Consultations',
-                'header' => 'Consultations',
-                'headerIcon' => 'icon-activity',
-                'breadcrumbs' => [['label' => 'Consultations']],
-            ]);
+            'title' => 'Consultations',
+            'header' => 'Consultations',
+            'headerIcon' => 'icon-activity',
+            'breadcrumbs' => [['label' => 'Consultations']],
+        ]);
     }
 }

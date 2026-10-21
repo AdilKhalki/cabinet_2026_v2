@@ -4,19 +4,22 @@ namespace App\Livewire\MedicalImage;
 
 use App\Models\MedicalImage;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class MedicalImageShow extends Component
 {
     public MedicalImage $medicalImage;
+
     public bool $editing = false;
+
     public string $radiologicalReport = '';
 
     public function mount(MedicalImage $medicalImage): void
     {
         $this->authorize('view', $medicalImage);
 
-        $this->medicalImage      = $medicalImage->load(['patient', 'doctor', 'consultation']);
+        $this->medicalImage = $medicalImage->load(['patient', 'doctor', 'consultation']);
         $this->radiologicalReport = $medicalImage->radiological_report ?? '';
     }
 
@@ -51,7 +54,7 @@ class MedicalImageShow extends Component
         $disk = $image->storageDisk();
         abort_unless($image->file_path && Storage::disk($disk)->exists($image->file_path), 404);
 
-        $name = \Illuminate\Support\Str::slug($image->title ?: 'imagerie').'.'.($image->file_type ?: pathinfo($image->file_path, PATHINFO_EXTENSION));
+        $name = Str::slug($image->title ?: 'imagerie').'.'.($image->file_type ?: pathinfo($image->file_path, PATHINFO_EXTENSION));
 
         return Storage::disk($disk)->download($image->file_path, $name);
     }
@@ -59,12 +62,12 @@ class MedicalImageShow extends Component
     public function render()
     {
         return view('livewire.medical-image.medical-image-show', [
-            'medicalImage'   => $this->medicalImage,
+            'medicalImage' => $this->medicalImage,
             'categoryLabels' => MedicalImage::CATEGORY_LABELS,
-            'editing'        => $this->editing,
+            'editing' => $this->editing,
         ])->layout('layouts.cabinet', [
-            'title'      => $this->medicalImage->title,
-            'header'     => 'Image Médicale',
+            'title' => $this->medicalImage->title,
+            'header' => 'Image Médicale',
             'headerIcon' => 'icon-image',
             'breadcrumbs' => [
                 ['label' => 'Imagerie Médicale', 'url' => route('medical-images.index')],

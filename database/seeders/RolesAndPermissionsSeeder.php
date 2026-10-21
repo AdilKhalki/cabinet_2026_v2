@@ -7,17 +7,18 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
         // Reset cached roles & permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Créer les rôles
-        $admin      = Role::firstOrCreate(['name' => 'admin']);
-        $medecin    = Role::firstOrCreate(['name' => 'medecin']);
+        $admin = Role::firstOrCreate(['name' => 'admin']);
+        $medecin = Role::firstOrCreate(['name' => 'medecin']);
         $secretaire = Role::firstOrCreate(['name' => 'secretaire']);
 
         // Créer les permissions
@@ -79,9 +80,9 @@ class RolesAndPermissionsSeeder extends Seeder
         $adminUser = User::firstOrCreate(
             ['email' => 'admin@cabinet.ma'],
             [
-                'name'     => 'Administrateur',
+                'name' => 'Administrateur',
                 'password' => Hash::make('Admin@2026!'),
-                'phone'    => '0600000000',
+                'phone' => '0600000000',
             ]
         );
         $adminUser->assignRole('admin');
@@ -90,10 +91,10 @@ class RolesAndPermissionsSeeder extends Seeder
         $doctor = User::firstOrCreate(
             ['email' => 'medecin@cabinet.ma'],
             [
-                'name'           => 'Dr. Mohamed Alami',
-                'password'       => Hash::make('Medecin@2026!'),
-                'phone'          => '0600000001',
-                'speciality'     => 'Médecine Générale',
+                'name' => 'Dr. Mohamed Alami',
+                'password' => Hash::make('Medecin@2026!'),
+                'phone' => '0600000001',
+                'speciality' => 'Médecine Générale',
                 'license_number' => 'RPPS123456',
             ]
         );
@@ -103,9 +104,9 @@ class RolesAndPermissionsSeeder extends Seeder
         $secretary = User::firstOrCreate(
             ['email' => 'secretaire@cabinet.ma'],
             [
-                'name'     => 'Fatima Secrétaire',
+                'name' => 'Fatima Secrétaire',
                 'password' => Hash::make('Secret@2026!'),
-                'phone'    => '0600000002',
+                'phone' => '0600000002',
             ]
         );
         $secretary->assignRole('secretaire');

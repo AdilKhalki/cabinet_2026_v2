@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Patient;
 use App\Models\User;
 use App\Notifications\CabinetNotification;
+use Carbon\Carbon;
 
 class NotificationService
 {
@@ -23,7 +24,7 @@ class NotificationService
         // Notifier le médecin concerné (s'il n'est pas l'auteur et pas admin)
         if ($doctorId && $doctorId !== $currentUserId) {
             $doctor = User::find($doctorId);
-            if ($doctor && !$doctor->hasRole('admin')) {
+            if ($doctor && ! $doctor->hasRole('admin')) {
                 $doctor->notify($notification);
             }
         }
@@ -47,7 +48,7 @@ class NotificationService
     {
         $patient = Patient::find($patientId);
         $patientName = $patient ? $patient->full_name : 'Patient';
-        $date = \Carbon\Carbon::parse($scheduledAt)->format('d/m/Y à H:i');
+        $date = Carbon::parse($scheduledAt)->format('d/m/Y à H:i');
 
         self::notifyAdminsAndDoctor(
             $doctorId,
@@ -69,7 +70,7 @@ class NotificationService
     {
         $patient = Patient::find($patientId);
         $patientName = $patient ? $patient->full_name : 'Patient';
-        $date = \Carbon\Carbon::parse($scheduledAt)->format('d/m/Y à H:i');
+        $date = Carbon::parse($scheduledAt)->format('d/m/Y à H:i');
 
         self::notifyAdminsAndDoctor(
             $doctorId,
@@ -148,7 +149,7 @@ class NotificationService
             null,
             'payment',
             'Nouveau paiement',
-            "Paiement de " . number_format($amount, 2) . " MAD ({$statusLabel}) pour {$patientName}",
+            'Paiement de '.number_format($amount, 2)." MAD ({$statusLabel}) pour {$patientName}",
             route('payments.index')
         );
     }

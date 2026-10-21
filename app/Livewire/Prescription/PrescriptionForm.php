@@ -9,20 +9,28 @@ use App\Models\Prescription;
 use App\Models\PrescriptionLine;
 use App\Models\User;
 use App\Services\NotificationService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class PrescriptionForm extends Component
 {
     public ?int $prescriptionId = null;
+
     public bool $isEdit = false;
 
     public int|string $patient_id = '';
+
     public int|string $doctor_id = '';
+
     public int|string $consultation_id = '';
+
     public string $prescribed_at = '';
+
     public string $valid_until = '';
+
     public string $notes = '';
+
     public array $lines = [];
 
     public function mount($prescription = null): void
@@ -60,21 +68,21 @@ class PrescriptionForm extends Component
             $this->patient_id = $record->patient_id;
             $this->doctor_id = $record->doctor_id;
             $this->consultation_id = $record->consultation_id ?? '';
-            $this->prescribed_at = $record->prescribed_at ? \Carbon\Carbon::parse($record->prescribed_at)->format('Y-m-d') : today()->format('Y-m-d');
-            $this->valid_until = $record->valid_until ? \Carbon\Carbon::parse($record->valid_until)->format('Y-m-d') : '';
+            $this->prescribed_at = $record->prescribed_at ? Carbon::parse($record->prescribed_at)->format('Y-m-d') : today()->format('Y-m-d');
+            $this->valid_until = $record->valid_until ? Carbon::parse($record->valid_until)->format('Y-m-d') : '';
             $this->notes = $record->notes ?? '';
 
             $this->lines = [];
             foreach ($record->lines()->orderBy('sort_order')->get() as $line) {
                 $this->lines[] = [
-                    'medication_id'   => $line->medication_id ?? '',
+                    'medication_id' => $line->medication_id ?? '',
                     'medication_name' => $line->medication_name ?? '',
-                    'dosage'          => $line->dosage ?? '',
-                    'frequency'       => $line->frequency ?? '',
-                    'duration_days'   => $line->duration_days ?? '',
-                    'route'           => $line->route ?? 'Oral',
-                    'instructions'    => $line->instructions ?? '',
-                    'quantity'        => $line->quantity ?? '',
+                    'dosage' => $line->dosage ?? '',
+                    'frequency' => $line->frequency ?? '',
+                    'duration_days' => $line->duration_days ?? '',
+                    'route' => $line->route ?? 'Oral',
+                    'instructions' => $line->instructions ?? '',
+                    'quantity' => $line->quantity ?? '',
                 ];
             }
 
@@ -130,7 +138,9 @@ class PrescriptionForm extends Component
             $med = Medication::find((int) $medicationId);
             if ($med) {
                 $name = $med->name;
-                if ($med->strength) $name .= ' ' . $med->strength;
+                if ($med->strength) {
+                    $name .= ' '.$med->strength;
+                }
                 $this->lines[$index]['medication_name'] = $name;
             }
         } else {
@@ -146,8 +156,8 @@ class PrescriptionForm extends Component
         $this->enforceOwnDoctor();
 
         $this->validate([
-            'patient_id'      => 'required|exists:patients,id',
-            'doctor_id'       => 'required|exists:users,id',
+            'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => 'required|exists:users,id',
             'consultation_id' => [
                 'nullable',
                 'exists:consultations,id',
@@ -157,34 +167,34 @@ class PrescriptionForm extends Component
                     }
                 },
             ],
-            'prescribed_at'   => 'required|date',
-            'valid_until'     => 'nullable|date|after_or_equal:prescribed_at',
-            'notes'           => 'nullable|string|max:5000',
-            'lines'           => 'required|array|min:1',
-            'lines.*.medication_id'   => 'nullable|exists:medications,id',
+            'prescribed_at' => 'required|date',
+            'valid_until' => 'nullable|date|after_or_equal:prescribed_at',
+            'notes' => 'nullable|string|max:5000',
+            'lines' => 'required|array|min:1',
+            'lines.*.medication_id' => 'nullable|exists:medications,id',
             'lines.*.medication_name' => 'required|string|max:200',
-            'lines.*.dosage'          => 'nullable|string|max:150',
-            'lines.*.frequency'       => 'nullable|string|max:100',
-            'lines.*.duration_days'   => 'nullable|integer|min:1|max:3650',
-            'lines.*.route'           => 'nullable|string|max:80',
-            'lines.*.instructions'    => 'nullable|string|max:1000',
-            'lines.*.quantity'        => 'nullable|integer|min:1|max:999',
+            'lines.*.dosage' => 'nullable|string|max:150',
+            'lines.*.frequency' => 'nullable|string|max:100',
+            'lines.*.duration_days' => 'nullable|integer|min:1|max:3650',
+            'lines.*.route' => 'nullable|string|max:80',
+            'lines.*.instructions' => 'nullable|string|max:1000',
+            'lines.*.quantity' => 'nullable|integer|min:1|max:999',
         ], [
-            'lines.required'                   => 'Ajoutez au moins un médicament.',
-            'lines.min'                        => 'Ajoutez au moins un médicament.',
+            'lines.required' => 'Ajoutez au moins un médicament.',
+            'lines.min' => 'Ajoutez au moins un médicament.',
             'lines.*.medication_name.required' => 'Le nom du médicament est obligatoire.',
-            'lines.*.duration_days.integer'    => 'La durée doit être un nombre de jours.',
-            'lines.*.quantity.integer'         => 'La quantité doit être un nombre entier (nombre de boîtes).',
-            'valid_until.after_or_equal'       => 'La date de validité doit être postérieure ou égale à la date de prescription.',
+            'lines.*.duration_days.integer' => 'La durée doit être un nombre de jours.',
+            'lines.*.quantity.integer' => 'La quantité doit être un nombre entier (nombre de boîtes).',
+            'valid_until.after_or_equal' => 'La date de validité doit être postérieure ou égale à la date de prescription.',
         ]);
 
         $data = [
-            'patient_id'      => $this->patient_id,
-            'doctor_id'       => $this->doctor_id,
+            'patient_id' => $this->patient_id,
+            'doctor_id' => $this->doctor_id,
             'consultation_id' => $this->consultation_id ?: null,
-            'prescribed_at'   => $this->prescribed_at,
-            'valid_until'     => $this->valid_until ?: null,
-            'notes'           => $this->notes ?: null,
+            'prescribed_at' => $this->prescribed_at,
+            'valid_until' => $this->valid_until ?: null,
+            'notes' => $this->notes ?: null,
         ];
 
         $prescription = DB::transaction(function () use ($existing, $data) {
@@ -201,15 +211,15 @@ class PrescriptionForm extends Component
             foreach (array_values($this->lines) as $i => $line) {
                 PrescriptionLine::create([
                     'prescription_id' => $prescription->id,
-                    'medication_id'   => ($line['medication_id'] ?? '') ?: null,
+                    'medication_id' => ($line['medication_id'] ?? '') ?: null,
                     'medication_name' => trim($line['medication_name']),
-                    'dosage'          => ($line['dosage'] ?? '') ?: null,
-                    'frequency'       => ($line['frequency'] ?? '') ?: null,
-                    'duration_days'   => ($line['duration_days'] ?? '') ?: null,
-                    'route'           => ($line['route'] ?? '') ?: null,
-                    'instructions'    => ($line['instructions'] ?? '') ?: null,
-                    'quantity'        => ($line['quantity'] ?? '') ?: null,
-                    'sort_order'      => $i,
+                    'dosage' => ($line['dosage'] ?? '') ?: null,
+                    'frequency' => ($line['frequency'] ?? '') ?: null,
+                    'duration_days' => ($line['duration_days'] ?? '') ?: null,
+                    'route' => ($line['route'] ?? '') ?: null,
+                    'instructions' => ($line['instructions'] ?? '') ?: null,
+                    'quantity' => ($line['quantity'] ?? '') ?: null,
+                    'sort_order' => $i,
                 ]);
             }
 
@@ -232,8 +242,8 @@ class PrescriptionForm extends Component
         $title = $this->isEdit ? 'Modifier l\'Ordonnance' : 'Nouvelle Ordonnance';
 
         return view('livewire.prescription.prescription-form', [
-            'patients'    => Patient::active()->orderBy('last_name')->get(),
-            'doctors'     => User::doctors()->active()->get(),
+            'patients' => Patient::active()->orderBy('last_name')->get(),
+            'doctors' => User::doctors()->active()->get(),
             'medications' => Medication::active()->orderBy('name')->get(),
             'patientAllergies' => $this->patient_id
                 ? Patient::whereKey($this->patient_id)->value('known_allergies')

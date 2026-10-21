@@ -25,23 +25,30 @@ class MedicalImageIndex extends Component
         $this->authorize('viewAny', MedicalImage::class);
     }
 
-    public function updatingSearch(): void { $this->resetPage(); }
-    public function updatingCategoryFilter(): void { $this->resetPage(); }
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingCategoryFilter(): void
+    {
+        $this->resetPage();
+    }
 
     #[Computed]
     public function medicalImages()
     {
         return MedicalImage::with(['patient', 'doctor'])
-            ->when($this->search, fn($q) => $q->where(function ($q) {
+            ->when($this->search, fn ($q) => $q->where(function ($q) {
                 $q->where('title', 'like', "%{$this->search}%")
-                  ->orWhere('body_part', 'like', "%{$this->search}%")
-                  ->orWhereHas('patient', fn($pq) => $pq->search($this->search));
+                    ->orWhere('body_part', 'like', "%{$this->search}%")
+                    ->orWhereHas('patient', fn ($pq) => $pq->search($this->search));
             }))
             ->when(array_key_exists($this->categoryFilter, MedicalImage::CATEGORY_LABELS),
-                fn($q) => $q->where('category', $this->categoryFilter))
+                fn ($q) => $q->where('category', $this->categoryFilter))
             // Un médecin ne voit dans la liste globale que ses propres examens
             // (le dossier patient affiche l'intégralité de l'imagerie du patient).
-            ->when(auth()->user()->isMedecin(), fn($q) => $q->where('doctor_id', auth()->id()))
+            ->when(auth()->user()->isMedecin(), fn ($q) => $q->where('doctor_id', auth()->id()))
             ->orderByDesc('image_date')
             ->orderByDesc('id')
             ->paginate($this->perPage);
@@ -63,10 +70,10 @@ class MedicalImageIndex extends Component
     {
         return view('livewire.medical-image.medical-image-index', [
             'medicalImages' => $this->medicalImages,
-            'categories'    => MedicalImage::CATEGORY_LABELS,
+            'categories' => MedicalImage::CATEGORY_LABELS,
         ])->layout('layouts.cabinet', [
-            'title'      => 'Imagerie Médicale',
-            'header'     => 'Imagerie Médicale',
+            'title' => 'Imagerie Médicale',
+            'header' => 'Imagerie Médicale',
             'headerIcon' => 'icon-image',
             'breadcrumbs' => [['label' => 'Imagerie Médicale']],
         ]);

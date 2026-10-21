@@ -25,13 +25,13 @@ class MedicalImage extends Model
     protected $casts = ['image_date' => 'date'];
 
     public const CATEGORY_LABELS = [
-        'chest_xray'    => 'Radiographie Thorax',
-        'abdominal_xray'=> 'Radiographie Abdomen',
-        'limb_xray'     => 'Radiographie Membres',
-        'ct_scan'       => 'Scanner (TDM)',
-        'mri'           => 'IRM',
-        'ultrasound'    => 'Échographie',
-        'other'         => 'Autre',
+        'chest_xray' => 'Radiographie Thorax',
+        'abdominal_xray' => 'Radiographie Abdomen',
+        'limb_xray' => 'Radiographie Membres',
+        'ct_scan' => 'Scanner (TDM)',
+        'mri' => 'IRM',
+        'ultrasound' => 'Échographie',
+        'other' => 'Autre',
     ];
 
     /** Disque où se trouve le fichier (les anciens fichiers sont sur le disque public). */

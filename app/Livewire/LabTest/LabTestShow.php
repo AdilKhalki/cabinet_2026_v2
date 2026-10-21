@@ -3,7 +3,7 @@
 namespace App\Livewire\LabTest;
 
 use App\Models\LabTest;
-use App\Models\Patient;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -42,31 +42,32 @@ class LabTestShow extends Component
 
             if ($history->count() > 1) {
                 $data[$result->parameter_name] = [
-                    'labels' => $history->pluck('date')->map(fn ($d) => \Carbon\Carbon::parse($d)->format('d/m/Y'))->toArray(),
+                    'labels' => $history->pluck('date')->map(fn ($d) => Carbon::parse($d)->format('d/m/Y'))->toArray(),
                     'values' => $history->pluck('value')->map(fn ($v) => (float) str_replace(',', '.', (string) $v))->toArray(),
-                    'unit'   => $result->unit,
+                    'unit' => $result->unit,
                     'normal_min' => $result->normal_min,
                     'normal_max' => $result->normal_max,
                 ];
             }
         }
+
         return $data;
     }
 
     public function render()
     {
         return view('livewire.lab-test.lab-test-show', [
-            'labTest'       => $this->labTest,
+            'labTest' => $this->labTest,
             'evolutionData' => $this->evolutionData,
         ])->layout('layouts.cabinet', [
-                'title' => "Analyse {$this->labTest->request_number}",
-                'header' => "Résultats : {$this->labTest->request_number}",
-                'headerIcon' => 'icon-thermometer',
-                'subHeader' => "Patient : {$this->labTest->patient->full_name}",
-                'breadcrumbs' => [
-                    ['label' => 'Analyses', 'url' => route('lab-tests.index')],
-                    ['label' => $this->labTest->request_number],
-                ],
-            ]);
+            'title' => "Analyse {$this->labTest->request_number}",
+            'header' => "Résultats : {$this->labTest->request_number}",
+            'headerIcon' => 'icon-thermometer',
+            'subHeader' => "Patient : {$this->labTest->patient->full_name}",
+            'breadcrumbs' => [
+                ['label' => 'Analyses', 'url' => route('lab-tests.index')],
+                ['label' => $this->labTest->request_number],
+            ],
+        ]);
     }
 }

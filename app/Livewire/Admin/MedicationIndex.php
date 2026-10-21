@@ -21,14 +21,20 @@ class MedicationIndex extends Component
 
     // Modal state
     public bool $showModal = false;
+
     public ?int $editingId = null;
 
     // Form fields (flat properties — no array)
     public string $name = '';
+
     public string $generic_name = '';
+
     public string $dosage_form = '';
+
     public string $strength = '';
+
     public string $description = '';
+
     public bool $is_active = true;
 
     /** Vérifiée à chaque requête (rendu initial ET appels d'actions Livewire) */
@@ -37,8 +43,15 @@ class MedicationIndex extends Component
         abort_unless(auth()->user()?->can('manage medications'), 403);
     }
 
-    public function updatingSearch(): void { $this->resetPage(); }
-    public function updatingStatusFilter(): void { $this->resetPage(); }
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingStatusFilter(): void
+    {
+        $this->resetPage();
+    }
 
     public function openCreate(): void
     {
@@ -65,21 +78,21 @@ class MedicationIndex extends Component
     public function save(): void
     {
         $this->validate([
-            'name'         => 'required|string|max:255|unique:medications,name' . ($this->editingId ? ",{$this->editingId}" : ''),
+            'name' => 'required|string|max:255|unique:medications,name'.($this->editingId ? ",{$this->editingId}" : ''),
             'generic_name' => 'nullable|string|max:255',
-            'dosage_form'  => 'nullable|string|max:100',
-            'strength'     => 'nullable|string|max:100',
-            'description'  => 'nullable|string|max:1000',
-            'is_active'    => 'boolean',
+            'dosage_form' => 'nullable|string|max:100',
+            'strength' => 'nullable|string|max:100',
+            'description' => 'nullable|string|max:1000',
+            'is_active' => 'boolean',
         ]);
 
         $data = [
-            'name'         => $this->name,
+            'name' => $this->name,
             'generic_name' => $this->generic_name ?: null,
-            'dosage_form'  => $this->dosage_form ?: null,
-            'strength'     => $this->strength ?: null,
-            'description'  => $this->description ?: null,
-            'is_active'    => $this->is_active,
+            'dosage_form' => $this->dosage_form ?: null,
+            'strength' => $this->strength ?: null,
+            'description' => $this->description ?: null,
+            'is_active' => $this->is_active,
         ];
 
         if ($this->editingId) {
@@ -119,16 +132,16 @@ class MedicationIndex extends Component
 
     public function render()
     {
-        $medications = Medication::when($this->search, fn($q) => $q->search($this->search))
-            ->when($this->statusFilter !== '', fn($q) => $q->where('is_active', (bool) $this->statusFilter))
+        $medications = Medication::when($this->search, fn ($q) => $q->search($this->search))
+            ->when($this->statusFilter !== '', fn ($q) => $q->where('is_active', (bool) $this->statusFilter))
             ->orderBy('name')
             ->paginate($this->perPage);
 
         return view('livewire.admin.medication-index', [
             'medications' => $medications,
         ])->layout('layouts.cabinet', [
-            'title'      => 'Médicaments',
-            'header'     => 'Médicaments',
+            'title' => 'Médicaments',
+            'header' => 'Médicaments',
             'headerIcon' => 'icon-package',
             'breadcrumbs' => [['label' => 'Médicaments']],
         ]);

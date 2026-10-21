@@ -12,12 +12,20 @@ class LabTestIndex extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $statusFilter = '';
+
     public int $perPage = 15;
 
-    public function updatedSearch(): void { $this->resetPage(); }
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
 
-    public function updatedStatusFilter(): void { $this->resetPage(); }
+    public function updatedStatusFilter(): void
+    {
+        $this->resetPage();
+    }
 
     public function updateStatus(int $id, string $status): void
     {
@@ -58,14 +66,14 @@ class LabTestIndex extends Component
     {
         return view('livewire.lab-test.lab-test-index', [
             'labTests' => $this->labTests,
-            'colors'   => [
-                'pending'   => 'warning',
+            'colors' => [
+                'pending' => 'warning',
                 'completed' => 'success',
                 'cancelled' => 'default',
             ],
         ])->layout('layouts.cabinet', [
-            'title'      => 'Analyses',
-            'header'     => 'Analyses & Résultats de Laboratoire',
+            'title' => 'Analyses',
+            'header' => 'Analyses & Résultats de Laboratoire',
             'headerIcon' => 'icon-thermometer',
             'breadcrumbs' => [['label' => 'Analyses']],
         ]);

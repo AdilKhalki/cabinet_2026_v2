@@ -10,27 +10,30 @@ use Spatie\Permission\Models\Role;
 class RoleIndex extends Component
 {
     public bool $showForm = false;
+
     public bool $showDeleteModal = false;
 
     public ?int $editingId = null;
+
     public ?int $deletingId = null;
 
     public string $name = '';
+
     public array $selectedPermissions = [];
 
     // Groupes de permissions pour l'affichage
     public const PERMISSION_GROUPS = [
-        'Patients'        => ['view patients', 'create patients', 'edit patients', 'delete patients'],
-        'Rendez-vous'     => ['view appointments', 'create appointments', 'edit appointments', 'delete appointments'],
-        'Consultations'   => ['view consultations', 'create consultations', 'edit consultations', 'delete consultations'],
-        'Ordonnances'     => ['view prescriptions', 'create prescriptions', 'print prescriptions'],
-        'Analyses'        => ['view lab-tests', 'create lab-tests', 'edit lab-tests'],
-        'Imagerie'        => ['view medical-images', 'create medical-images', 'edit medical-images', 'delete medical-images'],
-        'Rapports Méd.'   => ['view medical-reports', 'create medical-reports', 'edit medical-reports', 'delete medical-reports', 'print medical-reports'],
-        'Paiements'       => ['view payments', 'create payments', 'edit payments', 'delete payments'],
-        'Documents'       => ['view documents', 'upload documents', 'delete documents'],
-        'Rapports Fin.'   => ['view reports', 'generate reports'],
-        'Administration'  => ['manage users', 'manage roles', 'manage medications', 'view activity-log'],
+        'Patients' => ['view patients', 'create patients', 'edit patients', 'delete patients'],
+        'Rendez-vous' => ['view appointments', 'create appointments', 'edit appointments', 'delete appointments'],
+        'Consultations' => ['view consultations', 'create consultations', 'edit consultations', 'delete consultations'],
+        'Ordonnances' => ['view prescriptions', 'create prescriptions', 'print prescriptions'],
+        'Analyses' => ['view lab-tests', 'create lab-tests', 'edit lab-tests'],
+        'Imagerie' => ['view medical-images', 'create medical-images', 'edit medical-images', 'delete medical-images'],
+        'Rapports Méd.' => ['view medical-reports', 'create medical-reports', 'edit medical-reports', 'delete medical-reports', 'print medical-reports'],
+        'Paiements' => ['view payments', 'create payments', 'edit payments', 'delete payments'],
+        'Documents' => ['view documents', 'upload documents', 'delete documents'],
+        'Rapports Fin.' => ['view reports', 'generate reports'],
+        'Administration' => ['manage users', 'manage roles', 'manage medications', 'view activity-log'],
     ];
 
     /** Rôles utilisés en dur dans le code (hasRole, scopes…) : ni renommables ni supprimables */
@@ -79,7 +82,7 @@ class RoleIndex extends Component
     public function save(): void
     {
         $this->validate([
-            'name' => 'required|string|max:50|regex:/^[\pL\pN _-]+$/u|unique:roles,name' . ($this->editingId ? ",{$this->editingId}" : ''),
+            'name' => 'required|string|max:50|regex:/^[\pL\pN _-]+$/u|unique:roles,name'.($this->editingId ? ",{$this->editingId}" : ''),
             'selectedPermissions' => 'array',
             'selectedPermissions.*' => 'string|exists:permissions,name',
         ], [], ['name' => 'nom du rôle']);
@@ -90,6 +93,7 @@ class RoleIndex extends Component
             // Protéger les rôles système (utilisés en dur dans le code)
             if (in_array($role->name, self::SYSTEM_ROLES) && $this->name !== $role->name) {
                 $this->addError('name', "Le rôle système « {$role->name} » ne peut pas être renommé.");
+
                 return;
             }
 
@@ -132,6 +136,7 @@ class RoleIndex extends Component
         $role = Role::findOrFail($id);
         if ($error = $this->deletionError($role)) {
             session()->flash('error', $error);
+
             return;
         }
         $this->deletingId = $id;
@@ -146,6 +151,7 @@ class RoleIndex extends Component
             session()->flash('error', $error);
             $this->showDeleteModal = false;
             $this->deletingId = null;
+
             return;
         }
         $roleName = $role->name;
@@ -180,12 +186,12 @@ class RoleIndex extends Component
     public function render()
     {
         return view('livewire.admin.role-index', [
-            'roles'          => $this->roles,
+            'roles' => $this->roles,
             'allPermissions' => $this->allPermissions,
-            'groups'         => self::PERMISSION_GROUPS,
+            'groups' => self::PERMISSION_GROUPS,
         ])->layout('layouts.cabinet', [
-            'title'      => 'Rôles & Permissions',
-            'header'     => 'Rôles & Permissions',
+            'title' => 'Rôles & Permissions',
+            'header' => 'Rôles & Permissions',
             'headerIcon' => 'icon-shield',
             'breadcrumbs' => [
                 ['label' => 'Administration'],

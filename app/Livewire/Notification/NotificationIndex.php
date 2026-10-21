@@ -11,21 +11,30 @@ class NotificationIndex extends Component
     use WithPagination;
 
     public string $filter = 'all';
+
     public string $typeFilter = '';
+
     public int $perPage = 20;
 
     public const TYPES = ['appointment', 'payment', 'lab_result', 'prescription', 'alert', 'reminder', 'system'];
 
-    public function updatingFilter(): void { $this->resetPage(); }
-    public function updatingTypeFilter(): void { $this->resetPage(); }
+    public function updatingFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingTypeFilter(): void
+    {
+        $this->resetPage();
+    }
 
     #[Computed]
     public function notifications()
     {
         $query = match ($this->filter) {
             'unread' => auth()->user()->unreadNotifications(),
-            'read'   => auth()->user()->readNotifications(),
-            default  => auth()->user()->notifications(),
+            'read' => auth()->user()->readNotifications(),
+            default => auth()->user()->notifications(),
         };
 
         return $query
@@ -62,20 +71,20 @@ class NotificationIndex extends Component
     public function render()
     {
         return view('livewire.notification.notification-index', [
-            'notifications'  => $this->notifications,
-            'unreadCount'    => $this->unreadCount,
+            'notifications' => $this->notifications,
+            'unreadCount' => $this->unreadCount,
             'availableTypes' => [
-                'appointment'  => 'Rendez-vous',
-                'payment'      => 'Paiement',
-                'lab_result'   => 'Analyse',
+                'appointment' => 'Rendez-vous',
+                'payment' => 'Paiement',
+                'lab_result' => 'Analyse',
                 'prescription' => 'Ordonnance',
-                'alert'        => 'Alerte',
-                'reminder'     => 'Rappel',
-                'system'       => 'Système',
+                'alert' => 'Alerte',
+                'reminder' => 'Rappel',
+                'system' => 'Système',
             ],
         ])->layout('layouts.cabinet', [
-            'title'      => 'Notifications',
-            'header'     => 'Notifications',
+            'title' => 'Notifications',
+            'header' => 'Notifications',
             'headerIcon' => 'icon-bell',
             'breadcrumbs' => [['label' => 'Notifications']],
         ]);

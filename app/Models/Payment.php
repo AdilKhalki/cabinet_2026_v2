@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Payment extends Model
 {
-    use GeneratesSequentialNumber, SoftDeletes, LogsActivity;
+    use GeneratesSequentialNumber, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'invoice_number', 'patient_id', 'doctor_id', 'consultation_id',
@@ -33,18 +33,18 @@ class Payment extends Model
     ];
 
     public const STATUS_LABELS = [
-        'pending'   => 'En attente',
-        'paid'      => 'Payé',
-        'partial'   => 'Partiel',
+        'pending' => 'En attente',
+        'paid' => 'Payé',
+        'partial' => 'Partiel',
         'cancelled' => 'Annulé',
-        'refunded'  => 'Remboursé',
+        'refunded' => 'Remboursé',
     ];
 
     public const METHOD_LABELS = [
-        'cash'          => 'Espèces',
+        'cash' => 'Espèces',
         'bank_transfer' => 'Virement',
-        'insurance'     => 'Assurance/Mutuelle',
-        'mixed'         => 'Mixte',
+        'insurance' => 'Assurance/Mutuelle',
+        'mixed' => 'Mixte',
     ];
 
     public function getActivitylogOptions(): LogOptions

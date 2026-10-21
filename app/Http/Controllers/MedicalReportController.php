@@ -16,7 +16,7 @@ class MedicalReportController extends Controller
 
         $medicalReport->load(['patient', 'doctor']);
 
-        $report  = $medicalReport;
+        $report = $medicalReport;
         $patient = $medicalReport->patient;
 
         $settings = [];

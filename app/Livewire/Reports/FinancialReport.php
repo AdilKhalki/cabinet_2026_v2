@@ -13,17 +13,20 @@ use Maatwebsite\Excel\Facades\Excel;
 class FinancialReport extends Component
 {
     public string $periodType = 'month';
+
     public string $dateFrom = '';
+
     public string $dateTo = '';
+
     public string $doctorFilter = '';
 
     public const PERIOD_LABELS = [
-        'today'   => "Aujourd'hui",
-        'week'    => 'Cette semaine',
-        'month'   => 'Ce mois',
+        'today' => "Aujourd'hui",
+        'week' => 'Cette semaine',
+        'month' => 'Ce mois',
         'quarter' => 'Ce trimestre',
-        'year'    => 'Cette année',
-        'custom'  => 'Personnalisée',
+        'year' => 'Cette année',
+        'custom' => 'Personnalisée',
     ];
 
     public function mount(): void
@@ -64,12 +67,12 @@ class FinancialReport extends Component
     {
         $now = now();
         [$from, $to] = match ($type) {
-            'today'   => [$now->copy()->startOfDay(), $now->copy()->endOfDay()],
-            'week'    => [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()],
+            'today' => [$now->copy()->startOfDay(), $now->copy()->endOfDay()],
+            'week' => [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()],
             'quarter' => [$now->copy()->startOfQuarter(), $now->copy()->endOfQuarter()],
-            'year'    => [$now->copy()->startOfYear(), $now->copy()->endOfYear()],
-            'custom'  => [null, null],
-            default   => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
+            'year' => [$now->copy()->startOfYear(), $now->copy()->endOfYear()],
+            'custom' => [null, null],
+            default => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
         };
 
         $this->periodType = array_key_exists($type, self::PERIOD_LABELS) ? $type : 'month';
@@ -126,13 +129,13 @@ class FinancialReport extends Component
             ->first();
 
         return [
-            'total_revenue'   => round((float) $row->total_revenue, 2),
-            'total_pending'   => round((float) $row->total_pending, 2),
-            'total_invoices'  => (int) $row->total_invoices,
-            'paid_count'      => (int) $row->paid_count,
-            'partial_count'   => (int) $row->partial_count,
-            'pending_count'   => (int) $row->pending_count,
-            'avg_invoice'     => round((float) $row->avg_invoice, 2),
+            'total_revenue' => round((float) $row->total_revenue, 2),
+            'total_pending' => round((float) $row->total_pending, 2),
+            'total_invoices' => (int) $row->total_invoices,
+            'paid_count' => (int) $row->paid_count,
+            'partial_count' => (int) $row->partial_count,
+            'pending_count' => (int) $row->pending_count,
+            'avg_invoice' => round((float) $row->avg_invoice, 2),
             'total_insurance' => round((float) $row->total_insurance, 2),
         ];
     }
@@ -187,8 +190,8 @@ class FinancialReport extends Component
                 fn ($k) => $monthly ? Carbon::createFromFormat('Y-m', $k)->translatedFormat('M Y') : Carbon::parse($k)->format('d/m'),
                 array_keys($series)
             ),
-            'data'   => array_map(fn ($v) => round($v, 2), array_values($series)),
-            'unit'   => $monthly ? 'mois' : 'jour',
+            'data' => array_map(fn ($v) => round($v, 2), array_values($series)),
+            'unit' => $monthly ? 'mois' : 'jour',
         ];
     }
 
@@ -230,22 +233,22 @@ class FinancialReport extends Component
         $doctorScope = fn ($q) => $q->when($this->doctorFilter, fn ($q) => $q->where('doctor_id', $this->doctorFilter));
 
         return view('livewire.reports.financial-report', [
-            'stats'             => $stats,
-            'periodLabel'       => $from->format('d/m/Y').' — '.$to->format('d/m/Y'),
-            'caYear'            => (float) Payment::revenue()->whereYear('payment_date', now()->year)->tap($doctorScope)->sum('amount_paid'),
-            'totalInvoices'     => Payment::revenue()->tap($doctorScope)->count(),
-            'recentPayments'    => $this->recentPayments,
-            'paymentsByMethod'  => $this->paymentsByMethod,
-            'revenueSeries'     => $this->revenueSeries,
-            'statusColors'      => ['paid' => 'label-success', 'partial' => 'label-warning', 'pending' => 'label-danger', 'cancelled' => 'label-default', 'refunded' => 'label-info'],
-            'statusLabels'      => ['paid' => 'Payé', 'partial' => 'Partiel', 'pending' => 'Impayé', 'cancelled' => 'Annulé', 'refunded' => 'Remboursé'],
-            'doctors'           => Payment::restrictedToOwn(auth()->user())
+            'stats' => $stats,
+            'periodLabel' => $from->format('d/m/Y').' — '.$to->format('d/m/Y'),
+            'caYear' => (float) Payment::revenue()->whereYear('payment_date', now()->year)->tap($doctorScope)->sum('amount_paid'),
+            'totalInvoices' => Payment::revenue()->tap($doctorScope)->count(),
+            'recentPayments' => $this->recentPayments,
+            'paymentsByMethod' => $this->paymentsByMethod,
+            'revenueSeries' => $this->revenueSeries,
+            'statusColors' => ['paid' => 'label-success', 'partial' => 'label-warning', 'pending' => 'label-danger', 'cancelled' => 'label-default', 'refunded' => 'label-info'],
+            'statusLabels' => ['paid' => 'Payé', 'partial' => 'Partiel', 'pending' => 'Impayé', 'cancelled' => 'Annulé', 'refunded' => 'Remboursé'],
+            'doctors' => Payment::restrictedToOwn(auth()->user())
                 ? User::whereKey(auth()->id())->get()
                 : User::doctors()->active()->orderBy('name')->get(),
-            'canExport'         => auth()->user()->can('generate reports'),
+            'canExport' => auth()->user()->can('generate reports'),
         ])->layout('layouts.cabinet', [
-            'title'      => 'Rapport Financier',
-            'header'     => 'Rapport Financier',
+            'title' => 'Rapport Financier',
+            'header' => 'Rapport Financier',
             'headerIcon' => 'icon-trending-up',
             'breadcrumbs' => [['label' => 'Rapport Financier']],
         ]);
