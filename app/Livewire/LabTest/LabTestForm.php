@@ -8,6 +8,7 @@ use App\Models\LabTestType;
 use App\Models\Patient;
 use App\Models\User;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -37,7 +38,9 @@ class LabTestForm extends Component
         return [
             'patient_id'           => 'required|exists:patients,id',
             'doctor_id'            => 'required|exists:users,id',
+            'consultation_id'      => 'nullable|exists:consultations,id',
             'requested_at'         => 'required|date',
+            'result_date'          => 'nullable|date|after_or_equal:requested_at',
             'status'               => 'required|in:requested,pending,completed,cancelled',
             'laboratory_name'      => 'nullable|string|max:150',
             'clinical_info'        => 'nullable|string|max:500',
@@ -45,6 +48,22 @@ class LabTestForm extends Component
             'pdf_file'             => 'nullable|file|mimes:pdf|max:5120',
             'results.*.parameter_name' => 'required|string|max:150',
             'results.*.value'          => 'nullable|string|max:100',
+            'results.*.lab_test_type_id' => 'nullable|exists:lab_test_types,id',
+            'results.*.unit'           => 'nullable|string|max:50',
+            'results.*.normal_min'     => 'nullable|numeric',
+            'results.*.normal_max'     => 'nullable|numeric',
+            'results.*.flag'           => 'nullable|in:normal,low,high,critical',
+            'results.*.notes'          => 'nullable|string|max:1000',
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'result_date.after_or_equal'        => 'La date du résultat doit être postérieure ou égale à la date de demande.',
+            'results.*.parameter_name.required' => 'Le nom du paramètre est obligatoire.',
+            'results.*.normal_min.numeric'      => 'La valeur normale minimale doit être numérique.',
+            'results.*.normal_max.numeric'      => 'La valeur normale maximale doit être numérique.',
         ];
     }
 
@@ -57,10 +76,16 @@ class LabTestForm extends Component
             $this->patient_id = (int) $patientId;
         }
 
+        if ($consultationId = request()->query('consultation')) {
+            $this->consultation_id = (int) $consultationId;
+        }
+
         if ($labTest) {
             $record = $labTest instanceof LabTest
                 ? $labTest->load('results')
                 : LabTest::with('results')->findOrFail($labTest);
+
+            $this->authorize('update', $record);
 
             $this->labTestId = $record->id;
             $this->isEdit = true;
@@ -84,6 +109,19 @@ class LabTestForm extends Component
                 'flag'           => $r->flag,
                 'notes'          => $r->notes,
             ])->toArray();
+        } else {
+            $this->authorize('create', LabTest::class);
+        }
+
+        $this->enforceOwnDoctor();
+    }
+
+    /** Un médecin (non admin) demande toujours les analyses en son propre nom. */
+    protected function enforceOwnDoctor(): void
+    {
+        $user = auth()->user();
+        if ($user->isMedecin() && ! $user->isAdmin()) {
+            $this->doctor_id = $user->id;
         }
     }
 
@@ -102,9 +140,15 @@ class LabTestForm extends Component
         $this->results = array_values($this->results);
     }
 
-    public function fillFromType(int $index, int $typeId): void
+    public function fillFromType(int $index, $typeId = ''): void
     {
-        $type = LabTestType::find($typeId);
+        if (! array_key_exists($index, $this->results)) {
+            return;
+        }
+
+        $this->results[$index]['lab_test_type_id'] = $typeId ? (int) $typeId : '';
+
+        $type = $typeId ? LabTestType::find((int) $typeId) : null;
         if ($type) {
             $this->results[$index]['parameter_name'] = $type->name;
             $this->results[$index]['unit'] = $type->unit;
@@ -115,25 +159,61 @@ class LabTestForm extends Component
 
     public function autoFlag(int $index): void
     {
-        $r = $this->results[$index];
-        $val = (float) $r['value'];
-        if ($r['value'] !== '' && $r['normal_min'] !== '' && $r['normal_max'] !== '') {
-            $min = (float) $r['normal_min'];
-            $max = (float) $r['normal_max'];
-            if ($val < $min * 0.7 || $val > $max * 1.5) {
-                $this->results[$index]['flag'] = 'critical';
-            } elseif ($val < $min) {
-                $this->results[$index]['flag'] = 'low';
-            } elseif ($val > $max) {
-                $this->results[$index]['flag'] = 'high';
-            } else {
-                $this->results[$index]['flag'] = 'normal';
-            }
+        if (! array_key_exists($index, $this->results)) {
+            return;
         }
+
+        $flag = static::computeFlag(
+            $this->results[$index]['value'] ?? null,
+            $this->results[$index]['normal_min'] ?? null,
+            $this->results[$index]['normal_max'] ?? null,
+        );
+
+        if ($flag !== null) {
+            $this->results[$index]['flag'] = $flag;
+        }
+    }
+
+    /**
+     * Calcule le statut d'un résultat numérique par rapport aux valeurs normales.
+     * Retourne null si le calcul est impossible (valeur non numérique ou aucune borne) :
+     * le statut saisi manuellement est alors conservé.
+     */
+    public static function computeFlag($value, $min, $max): ?string
+    {
+        $value = is_string($value) ? str_replace(',', '.', trim($value)) : $value;
+        $hasMin = $min !== null && $min !== '' && is_numeric($min);
+        $hasMax = $max !== null && $max !== '' && is_numeric($max);
+
+        if ($value === null || $value === '' || ! is_numeric($value) || (! $hasMin && ! $hasMax)) {
+            return null;
+        }
+
+        $val = (float) $value;
+        $min = $hasMin ? (float) $min : null;
+        $max = $hasMax ? (float) $max : null;
+
+        // Seuils critiques : < 70 % du min ou > 150 % du max
+        if (($min !== null && $val < $min * 0.7) || ($max !== null && $val > $max * 1.5)) {
+            return 'critical';
+        }
+        if ($min !== null && $val < $min) {
+            return 'low';
+        }
+        if ($max !== null && $val > $max) {
+            return 'high';
+        }
+
+        return 'normal';
     }
 
     public function save(): void
     {
+        $existing = $this->isEdit ? LabTest::findOrFail($this->labTestId) : null;
+        $existing ? $this->authorize('update', $existing) : $this->authorize('create', LabTest::class);
+
+        $this->enforceOwnDoctor();
+
         $this->validate();
 
         $data = [
@@ -152,30 +232,46 @@ class LabTestForm extends Component
             $data['pdf_path'] = $this->pdf_file->store('lab-tests', 'public');
         }
 
-        if ($this->isEdit) {
-            $labTest = LabTest::findOrFail($this->labTestId);
-            $labTest->update($data);
-            $labTest->results()->delete();
+        // Les valeurs "0" sont des résultats valides : ne pas utiliser ?: (qui les transformerait en null)
+        $blankToNull = fn ($v) => ($v === null || $v === '') ? null : $v;
+
+        $labTest = DB::transaction(function () use ($existing, $data, $blankToNull) {
+            if ($existing) {
+                $existing->update($data);
+                $existing->results()->delete();
+                $labTest = $existing;
+            } else {
+                $data['created_by'] = auth()->id();
+                $labTest = LabTest::create($data);
+            }
+
+            foreach ($this->results as $r) {
+                $value = $blankToNull($r['value'] ?? null);
+                $min   = $blankToNull($r['normal_min'] ?? null);
+                $max   = $blankToNull($r['normal_max'] ?? null);
+
+                LabTestResult::create([
+                    'lab_test_id'      => $labTest->id,
+                    'lab_test_type_id' => ($r['lab_test_type_id'] ?? '') ?: null,
+                    'parameter_name'   => $r['parameter_name'],
+                    'value'            => $value,
+                    'unit'             => $blankToNull($r['unit'] ?? null),
+                    'normal_min'       => $min,
+                    'normal_max'       => $max,
+                    // Recalcul côté serveur : le statut ne dépend pas d'un événement JS
+                    'flag'             => static::computeFlag($value, $min, $max) ?? (($r['flag'] ?? '') ?: 'normal'),
+                    'notes'            => $blankToNull($r['notes'] ?? null),
+                ]);
+            }
+
+            return $labTest;
+        });
+
+        if ($existing) {
             $message = 'Analyse mise à jour.';
         } else {
-            $data['created_by'] = auth()->id();
-            $labTest = LabTest::create($data);
-            NotificationService::labTestCreated($labTest->id, $this->patient_id, $this->doctor_id);
+            NotificationService::labTestCreated($labTest->id, (int) $this->patient_id, (int) $this->doctor_id);
             $message = 'Analyse enregistrée.';
-        }
-
-        foreach ($this->results as $r) {
-            LabTestResult::create([
-                'lab_test_id'     => $labTest->id,
-                'lab_test_type_id'=> $r['lab_test_type_id'] ?: null,
-                'parameter_name'  => $r['parameter_name'],
-                'value'           => $r['value'] ?: null,
-                'unit'            => $r['unit'] ?: null,
-                'normal_min'      => $r['normal_min'] ?: null,
-                'normal_max'      => $r['normal_max'] ?: null,
-                'flag'            => $r['flag'] ?? 'normal',
-                'notes'           => $r['notes'] ?: null,
-            ]);
         }
 
         session()->flash('success', $message);

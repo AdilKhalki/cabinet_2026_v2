@@ -67,7 +67,13 @@
                                     <i class="feather {{ $icon }} text-muted"></i>
                                     {{ $document->title }}
                                 </td>
-                                <td>{{ $document->patient->full_name ?? '—' }}</td>
+                                <td>
+                                    @if($document->patient)
+                                        <a href="{{ route('patients.show', $document->patient) }}" wire:navigate>{{ $document->patient->full_name }}</a>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                                 <td>{{ $categories[$document->category] ?? $document->category ?? '—' }}</td>
                                 <td>
                                     @php
@@ -77,7 +83,7 @@
                                     <span class="label {{ $badgeColor }}">{{ strtoupper($ext ?: '—') }}</span>
                                 </td>
                                 <td>
-                                    {{ $document->document_date ? \Carbon\Carbon::parse($document->document_date)->format('d/m/Y') : '—' }}
+                                    {{ $document->document_date?->format('d/m/Y') ?? '—' }}
                                 </td>
                                 <td>
                                     @if($document->file_size)
@@ -92,14 +98,9 @@
                                 </td>
                                 <td>
                                     @if($document->file_path)
-                                        @if(in_array($ext, ['pdf']))
-                                            <a href="{{ Storage::url($document->file_path) }}" target="_blank" class="btn btn-info btn-xs" title="Prévisualiser">
-                                                <i class="feather icon-eye"></i>
-                                            </a>
-                                        @endif
-                                        <a href="{{ Storage::url($document->file_path) }}" download class="btn btn-default btn-xs" title="Télécharger">
+                                        <button type="button" wire:click="download({{ $document->id }})" class="btn btn-default btn-xs" title="Télécharger">
                                             <i class="feather icon-download"></i>
-                                        </a>
+                                        </button>
                                     @endif
                                     @can('update', $document)
                                     <a href="{{ route('documents.edit', $document) }}" class="btn btn-warning btn-xs" title="Modifier">

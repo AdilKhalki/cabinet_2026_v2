@@ -33,6 +33,13 @@ class MedicalHistory extends Model
         'habit'            => 'Habitude de vie',
     ];
 
+    public const HABIT_LABELS = [
+        'smoking'           => 'Tabac',
+        'alcohol'           => 'Alcool',
+        'physical_activity' => 'Activité physique',
+        'other'             => 'Autre',
+    ];
+
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);

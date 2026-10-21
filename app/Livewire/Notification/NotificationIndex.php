@@ -11,9 +11,13 @@ class NotificationIndex extends Component
     use WithPagination;
 
     public string $filter = 'all';
+    public string $typeFilter = '';
     public int $perPage = 20;
 
+    public const TYPES = ['appointment', 'payment', 'lab_result', 'prescription', 'alert', 'reminder', 'system'];
+
     public function updatingFilter(): void { $this->resetPage(); }
+    public function updatingTypeFilter(): void { $this->resetPage(); }
 
     #[Computed]
     public function notifications()
@@ -24,7 +28,9 @@ class NotificationIndex extends Component
             default  => auth()->user()->notifications(),
         };
 
-        return $query->paginate($this->perPage);
+        return $query
+            ->when(in_array($this->typeFilter, self::TYPES, true), fn ($q) => $q->where('data->type', $this->typeFilter))
+            ->paginate($this->perPage);
     }
 
     #[Computed]
@@ -59,14 +65,13 @@ class NotificationIndex extends Component
             'notifications'  => $this->notifications,
             'unreadCount'    => $this->unreadCount,
             'availableTypes' => [
-                'all'    => 'Toutes',
-                'unread' => 'Non lues',
-                'read'   => 'Lues',
-            ],
-            'typeColors' => [
-                'all'    => 'default',
-                'unread' => 'danger',
-                'read'   => 'success',
+                'appointment'  => 'Rendez-vous',
+                'payment'      => 'Paiement',
+                'lab_result'   => 'Analyse',
+                'prescription' => 'Ordonnance',
+                'alert'        => 'Alerte',
+                'reminder'     => 'Rappel',
+                'system'       => 'Système',
             ],
         ])->layout('layouts.cabinet', [
             'title'      => 'Notifications',

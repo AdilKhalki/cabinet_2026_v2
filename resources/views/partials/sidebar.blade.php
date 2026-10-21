@@ -17,7 +17,7 @@
         <ul class="pcoded-item pcoded-left-item">
 
             {{-- Tableau de bord --}}
-            <li class="{{ $isActive('dashboard') ? 'active' : '' }}">
+            <li class="{{ $currentRoute === 'home' ? 'active' : '' }}">
                 <a href="{{ route('home') }}">
                     <span class="pcoded-micon"><i class="feather icon-home"></i></span>
                     <span class="pcoded-mtext">Tableau de bord</span>

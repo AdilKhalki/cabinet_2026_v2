@@ -4,24 +4,30 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\InteractsWithCabinet;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithCabinet, RefreshDatabase;
 
     public function test_guests_are_redirected_to_the_login_page(): void
     {
-        $response = $this->get(route('dashboard'));
-        $response->assertRedirect(route('login'));
+        $this->get(route('home'))->assertRedirect(route('login'));
     }
 
-    public function test_authenticated_users_can_visit_the_dashboard(): void
+    public function test_dashboard_alias_redirects_to_home(): void
     {
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $this->actingAs(User::factory()->create());
 
-        $response = $this->get(route('dashboard'));
-        $response->assertOk();
+        $this->get(route('dashboard'))->assertRedirect('/');
+    }
+
+    public function test_each_role_can_visit_the_dashboard(): void
+    {
+        foreach (['admin', 'medecin', 'secretaire'] as $role) {
+            $this->actingAs($this->userWithRole($role));
+            $this->get(route('home'))->assertOk();
+        }
     }
 }

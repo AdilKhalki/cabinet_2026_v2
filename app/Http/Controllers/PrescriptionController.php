@@ -10,7 +10,8 @@ class PrescriptionController extends Controller
 {
     public function pdf(Prescription $prescription)
     {
-        Gate::authorize('view', $prescription->patient);
+        // Autorisation sur l'ordonnance elle-même (permission + isolation médecin)
+        Gate::authorize('print', $prescription);
 
         $prescription->load(['patient', 'doctor', 'lines.medication']);
 

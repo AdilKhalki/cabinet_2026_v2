@@ -6,6 +6,8 @@ use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -22,8 +24,11 @@ class AppointmentIndex extends Component
 
     public bool $showForm = false;
     public bool $showDeleteModal = false;
+    public bool $showCancelModal = false;
     public ?int $editingId = null;
     public ?int $deletingId = null;
+    public ?int $cancellingId = null;
+    public string $cancellation_reason = '';
 
     // Champs formulaire
     public int|string $patient_id = '';
@@ -36,13 +41,56 @@ class AppointmentIndex extends Component
 
     protected $queryString = ['search', 'statusFilter', 'doctorFilter', 'dateFilter'];
 
-    public function updatedSearch(): void { $this->resetPage(); }
+    protected array $validationAttributes = [
+        'patient_id'          => 'patient',
+        'doctor_id'           => 'médecin',
+        'scheduled_at'        => 'date et heure',
+        'duration_minutes'    => 'durée',
+        'consultation_type'   => 'type',
+        'cancellation_reason' => "motif d'annulation",
+    ];
+
+    public function mount(): void
+    {
+        // Ouverture directe du formulaire : /appointments/create?patient=ID&date=...
+        $patientId = request()->query('patient');
+        $date = request()->query('date');
+
+        if ((request()->routeIs('appointments.create') || $patientId || $date)
+            && auth()->user()->can('create', Appointment::class)) {
+            $this->openForm();
+
+            if ($patientId) {
+                $this->patient_id = (int) $patientId;
+            }
+            if ($date) {
+                try {
+                    $parsed = Date::parse($date);
+                    // Clic sur un jour entier (vue mois) : heure par défaut 09:00
+                    if (strlen($date) === 10) {
+                        $parsed = $parsed->setTime(9, 0);
+                    }
+                    $this->scheduled_at = $parsed->format('Y-m-d\TH:i');
+                } catch (\Throwable) {
+                    // Date invalide ignorée
+                }
+            }
+        }
+    }
+
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['search', 'statusFilter', 'doctorFilter', 'dateFilter'], true)) {
+            $this->resetPage();
+        }
+    }
 
     public function openForm(?int $id = null): void
     {
         $this->resetForm();
         if ($id) {
             $appt = Appointment::findOrFail($id);
+            $this->authorize('update', $appt);
             $this->editingId = $id;
             $this->patient_id = $appt->patient_id;
             $this->doctor_id = $appt->doctor_id;
@@ -52,6 +100,7 @@ class AppointmentIndex extends Component
             $this->notes = $appt->notes ?? '';
             $this->color = $appt->color ?? '#01a9ac';
         } else {
+            $this->authorize('create', Appointment::class);
             $this->doctor_id = auth()->user()->isMedecin() ? auth()->id() : '';
         }
         $this->showForm = true;
@@ -65,15 +114,47 @@ class AppointmentIndex extends Component
 
     public function save(): void
     {
-        $rules = [
+        $appt = $this->editingId ? Appointment::findOrFail($this->editingId) : null;
+        $appt ? $this->authorize('update', $appt) : $this->authorize('create', Appointment::class);
+
+        if ($appt && in_array($appt->status, ['completed', 'cancelled', 'no_show'], true)) {
+            $this->addError('scheduled_at', 'Ce rendez-vous est clôturé et ne peut plus être modifié.');
+
+            return;
+        }
+
+        // Un médecin (non admin) ne planifie que dans son propre agenda
+        $user = auth()->user();
+        if ($user->isMedecin() && ! $user->isAdmin()) {
+            $this->doctor_id = $user->id;
+        }
+
+        $this->validate([
             'patient_id'        => 'required|exists:patients,id',
-            'doctor_id'         => 'required|exists:users,id',
-            'scheduled_at'      => 'required|date',
-            'duration_minutes'  => 'required|integer|min:5|max:480',
-            'consultation_type' => 'required|in:general,specialized,followup,emergency,control,teleconsultation',
+            'doctor_id'         => ['required', Rule::in(User::doctors()->active()->pluck('id')->all())],
+            'scheduled_at'      => $appt ? 'required|date' : 'required|date|after_or_equal:today',
+            'duration_minutes'  => 'required|integer|min:5|max:'.Appointment::MAX_DURATION,
+            'consultation_type' => 'required|in:'.implode(',', array_keys(Appointment::TYPE_LABELS)),
             'notes'             => 'nullable|string|max:500',
-        ];
-        $this->validate($rules);
+            'color'             => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+        ], [
+            'doctor_id.in'                => 'Veuillez sélectionner un médecin actif.',
+            'scheduled_at.after_or_equal' => 'Impossible de créer un rendez-vous dans le passé.',
+            'color.regex'                 => 'Couleur invalide.',
+        ]);
+
+        // Anti double-réservation : le créneau du médecin doit être libre
+        $conflict = Appointment::overlapping((int) $this->doctor_id, $this->scheduled_at, $this->duration_minutes, $this->editingId)->first();
+        if ($conflict) {
+            $this->addError('scheduled_at', sprintf(
+                'Créneau indisponible : le médecin a déjà un rendez-vous de %s à %s (%s).',
+                $conflict->scheduled_at->format('H:i'),
+                $conflict->scheduled_end->format('H:i'),
+                $conflict->patient?->full_name ?? 'patient'
+            ));
+
+            return;
+        }
 
         $data = [
             'patient_id'        => $this->patient_id,
@@ -82,17 +163,15 @@ class AppointmentIndex extends Component
             'duration_minutes'  => $this->duration_minutes,
             'consultation_type' => $this->consultation_type,
             'notes'             => $this->notes ?: null,
-            'color'             => $this->color,
-            'created_by'        => auth()->id(),
+            'color'             => $this->color ?: '#01a9ac',
         ];
 
-        if ($this->editingId) {
-            $appt = Appointment::findOrFail($this->editingId);
+        if ($appt) {
             $appt->update($data);
             session()->flash('success', 'Rendez-vous modifié.');
         } else {
-            Appointment::create($data);
-            NotificationService::appointmentCreated($this->patient_id, $this->doctor_id, $this->scheduled_at);
+            Appointment::create($data + ['created_by' => auth()->id()]);
+            NotificationService::appointmentCreated((int) $this->patient_id, (int) $this->doctor_id, $this->scheduled_at);
             session()->flash('success', 'Rendez-vous créé.');
         }
 
@@ -102,31 +181,71 @@ class AppointmentIndex extends Component
     public function updateStatus(int $id, string $status): void
     {
         $appt = Appointment::findOrFail($id);
-        $appt->update(['status' => $status]);
+        $this->authorize('update', $appt);
 
+        // L'annulation passe par la modale (motif obligatoire)
         if ($status === 'cancelled') {
-            NotificationService::appointmentCancelled($appt->patient_id, $appt->doctor_id, $appt->scheduled_at);
+            $this->confirmCancel($id);
+
+            return;
         }
 
-        if ($status === 'waiting') {
-            $appt->update(['arrived_at' => now()]);
-        } elseif ($status === 'in_progress') {
-            $appt->update(['started_at' => now()]);
-        } elseif ($status === 'completed') {
-            $appt->update(['ended_at' => now()]);
+        if (! $appt->canTransitionTo($status)) {
+            session()->flash('error', 'Changement de statut impossible depuis « '.$appt->status_label.' ».');
+
+            return;
         }
+
+        $appt->transitionTo($status);
+    }
+
+    public function confirmCancel(int $id): void
+    {
+        $appt = Appointment::findOrFail($id);
+        $this->authorize('update', $appt);
+
+        $this->cancellingId = $id;
+        $this->cancellation_reason = '';
+        $this->resetValidation('cancellation_reason');
+        $this->showCancelModal = true;
+    }
+
+    public function cancel(): void
+    {
+        $appt = Appointment::findOrFail($this->cancellingId);
+        $this->authorize('update', $appt);
+
+        $this->validate(['cancellation_reason' => 'required|string|max:255']);
+
+        if (! $appt->canTransitionTo('cancelled')) {
+            $this->addError('cancellation_reason', 'Ce rendez-vous ne peut plus être annulé.');
+
+            return;
+        }
+
+        $appt->transitionTo('cancelled', ['cancellation_reason' => $this->cancellation_reason]);
+        NotificationService::appointmentCancelled($appt->patient_id, $appt->doctor_id, $appt->scheduled_at->toDateTimeString());
+
+        $this->showCancelModal = false;
+        $this->cancellingId = null;
+        $this->cancellation_reason = '';
+        session()->flash('success', 'Rendez-vous annulé.');
     }
 
     public function confirmDelete(int $id): void
     {
+        $this->authorize('delete', Appointment::findOrFail($id));
         $this->deletingId = $id;
         $this->showDeleteModal = true;
     }
 
     public function delete(): void
     {
-        Appointment::findOrFail($this->deletingId)->delete();
+        $appt = Appointment::findOrFail($this->deletingId);
+        $this->authorize('delete', $appt);
+        $appt->delete();
         $this->showDeleteModal = false;
+        $this->deletingId = null;
         session()->flash('success', 'Rendez-vous supprimé.');
     }
 
@@ -146,7 +265,7 @@ class AppointmentIndex extends Component
     #[Computed]
     public function appointments()
     {
-        return Appointment::with(['patient', 'doctor'])
+        return Appointment::with(['patient', 'doctor', 'consultation:id,appointment_id'])
             ->when($this->search, function ($q) {
                 $q->whereHas('patient', function ($pq) {
                     $pq->search($this->search);
@@ -154,7 +273,10 @@ class AppointmentIndex extends Component
             })
             ->when($this->statusFilter, fn ($q) => $q->where('status', $this->statusFilter))
             ->when($this->doctorFilter, fn ($q) => $q->where('doctor_id', $this->doctorFilter))
-            ->when($this->dateFilter, fn ($q) => $q->whereDate('scheduled_at', $this->dateFilter))
+            ->when($this->dateFilter, fn ($q) => $q->whereBetween('scheduled_at', [
+                Date::parse($this->dateFilter)->startOfDay(),
+                Date::parse($this->dateFilter)->endOfDay(),
+            ]))
             ->when(auth()->user()->isMedecin(), fn ($q) => $q->forDoctor(auth()->id()))
             ->orderBy('scheduled_at', 'desc')
             ->paginate($this->perPage);
@@ -177,7 +299,8 @@ class AppointmentIndex extends Component
         return view('livewire.appointment.appointment-index', [
             'appointments' => $this->appointments,
             'doctors'      => $this->doctors,
-            'patients'     => $this->patients,
+            // La liste complète des patients n'est chargée que si le formulaire est ouvert
+            'patients'     => $this->showForm ? $this->patients : collect(),
         ])->layout('layouts.cabinet', [
                 'title' => 'Rendez-vous',
                 'header' => 'Gestion des Rendez-vous',

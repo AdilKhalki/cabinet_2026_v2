@@ -26,6 +26,12 @@ class MedicalActIndex extends Component
     public array $editForm = [];
     public array $newForm = [];
 
+    /** Vérifiée à chaque requête (rendu initial ET appels d'actions Livewire) */
+    public function boot(): void
+    {
+        abort_unless(auth()->user()?->can('manage medications'), 403);
+    }
+
     public function updatingSearch(): void { $this->resetPage(); }
     public function updatingCategoryFilter(): void { $this->resetPage(); }
 

@@ -32,6 +32,13 @@ class ActivityLog extends Component
 
     public int $perPage = 20;
 
+    /** Vérifiée à chaque requête (rendu initial ET appels d'actions Livewire) */
+    public function boot(): void
+    {
+        $user = auth()->user();
+        abort_unless($user?->can('manage users') && $user->can('view activity-log'), 403);
+    }
+
     public function mount(): void
     {
         $this->dateFrom = now()->startOfMonth()->format('Y-m-d');

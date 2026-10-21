@@ -5,6 +5,12 @@
             {{ session('success') }}
         </div>
     @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            {{ session('error') }}
+        </div>
+    @endif
 
     {{-- ── Formulaire créer/modifier (panneau collapsible) ─────────────────── --}}
     @if($showForm)
@@ -33,7 +39,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label>Médecin <span class="text-danger">*</span></label>
-                            <select class="form-control" wire:model="doctor_id">
+                            <select class="form-control" wire:model="doctor_id" @disabled(auth()->user()->isMedecin() && ! auth()->user()->isAdmin())>
                                 <option value="">-- Sélectionner --</option>
                                 @foreach($doctors as $doctor)
                                     <option value="{{ $doctor->id }}">Dr. {{ $doctor->name }}</option>
@@ -73,18 +79,21 @@
                                 <option value="90">1h30</option>
                                 <option value="120">2h</option>
                             </select>
+                            @error('duration_minutes') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group">
                             <label>Couleur</label>
                             <input type="color" class="form-control" wire:model="color" style="height:38px;padding:2px 4px;">
+                            @error('color') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     <div class="col-md-8">
                         <div class="form-group">
                             <label>Notes</label>
                             <input type="text" class="form-control" wire:model="notes" placeholder="Motif, instructions...">
+                            @error('notes') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
                     </div>
                 </div>
@@ -258,10 +267,17 @@
                                                 class="btn btn-sm btn-warning m-b-2" title="Arrivé en salle d'attente" style="font-size:10px;">
                                             <i class="feather icon-user-check"></i>
                                         </button>
-                                        <button wire:click="updateStatus({{ $appt->id }}, 'cancelled')"
+                                        <button wire:click="confirmCancel({{ $appt->id }})"
                                                 class="btn btn-sm btn-danger m-b-2" title="Annuler" style="font-size:10px;">
                                             <i class="feather icon-x"></i>
                                         </button>
+                                        @if($appt->scheduled_at->isPast())
+                                        <button wire:click="updateStatus({{ $appt->id }}, 'no_show')"
+                                                wire:confirm="Marquer ce patient comme absent ?"
+                                                class="btn btn-sm btn-default m-b-2" title="Absent" style="font-size:10px;">
+                                            <i class="feather icon-user-x"></i>
+                                        </button>
+                                        @endif
                                     </div>
                                 @elseif($appt->status === 'waiting')
                                     <div class="m-t-5">
@@ -282,13 +298,18 @@
                                 <span class="label {{ \App\Models\Appointment::STATUS_COLORS[$appt->status] ?? 'label-default' }}">
                                     {{ \App\Models\Appointment::STATUS_LABELS[$appt->status] ?? $appt->status }}
                                 </span>
+                                @if($appt->status === 'cancelled' && $appt->cancellation_reason)
+                                    <div class="text-muted" style="font-size:11px;" title="{{ $appt->cancellation_reason }}">
+                                        {{ Str::limit($appt->cancellation_reason, 40) }}
+                                    </div>
+                                @endif
                             </td>
 
                             {{-- Actions --}}
                             <td class="text-center">
                                 {{-- Créer une consultation depuis le RDV --}}
                                 @can('create', App\Models\Consultation::class)
-                                @if(in_array($appt->status, ['confirmed','waiting','in_progress']) && !$appt->consultation)
+                                @if(in_array($appt->status, ['planned','confirmed','waiting','in_progress']) && !$appt->consultation && auth()->user()->can('update', $appt))
                                     <a href="{{ route('consultations.create', ['appointmentId' => $appt->id]) }}"
                                        class="btn btn-sm btn-success m-b-2" title="Créer consultation">
                                         <i class="feather icon-activity"></i>
@@ -333,9 +354,11 @@
             <div class="text-center p-40 text-muted">
                 <i class="feather icon-calendar" style="font-size:3em;"></i>
                 <p class="m-t-10">Aucun rendez-vous trouvé.</p>
+                @can('create', App\Models\Appointment::class)
                 <button wire:click="openForm()" class="btn btn-primary btn-sm">
                     <i class="feather icon-plus"></i> Créer un rendez-vous
                 </button>
+                @endcan
             </div>
             @endif
 
@@ -362,6 +385,38 @@
                         <i class="feather icon-trash-2"></i> Supprimer
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- ── Modal annulation (motif obligatoire) ─────────────────────────── --}}
+    @if($showCancelModal)
+    <div class="modal fade show" style="display:block; background:rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form wire:submit="cancel">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="feather icon-x-circle text-danger"></i> Annuler le rendez-vous</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Motif d'annulation <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" wire:model="cancellation_reason" maxlength="255"
+                                   placeholder="Ex : annulé par le patient, médecin indisponible...">
+                            @error('cancellation_reason') <span class="text-danger small">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" wire:click="$set('showCancelModal', false)" class="btn btn-default">
+                            <i class="feather icon-arrow-left"></i> Retour
+                        </button>
+                        <button type="submit" class="btn btn-danger">
+                            <span wire:loading wire:target="cancel"><i class="fa fa-spinner fa-spin"></i></span>
+                            <i class="feather icon-x"></i> Confirmer l'annulation
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

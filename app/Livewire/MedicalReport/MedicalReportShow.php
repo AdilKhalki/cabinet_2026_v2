@@ -11,6 +11,8 @@ class MedicalReportShow extends Component
 
     public function mount(MedicalReport $medicalReport): void
     {
+        $this->authorize('view', $medicalReport);
+
         $this->medicalReport = $medicalReport->load(['patient', 'doctor', 'consultation']);
     }
 

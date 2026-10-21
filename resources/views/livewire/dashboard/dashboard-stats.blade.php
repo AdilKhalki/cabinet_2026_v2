@@ -1,3 +1,6 @@
+@php
+    $showMedical = auth()->user()->isMedecin() || auth()->user()->can('view consultations');
+@endphp
 <div>
     {{-- Cartes de statistiques --}}
     <div class="row">
@@ -64,13 +67,14 @@
             </div>
         </div>
 
+        @can('view payments')
         <div class="col-md-3 col-sm-6">
             <div class="card bg-c-pink">
                 <div class="card-block">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h4 class="text-white">{{ number_format($this->monthlyRevenue, 0) }}</h4>
-                            <h6 class="text-white m-b-0">CA ce mois (MAD)</h6>
+                            <h4 class="text-white">{{ number_format($this->monthlyRevenue, 0, ',', ' ') }}</h4>
+                            <h6 class="text-white m-b-0">Encaissé ce mois (MAD)</h6>
                         </div>
                         <div class="col-4 text-right">
                             <i class="feather icon-trending-up" style="font-size:2.5em;color:rgba(255,255,255,0.5);"></i>
@@ -78,16 +82,18 @@
                     </div>
                 </div>
                 <div class="card-footer" style="background:rgba(0,0,0,0.1);">
-                    <a href="{{ route('reports.financial') }}" class="text-white">
-                        Impayés: {{ number_format($this->pendingPayments, 0) }} MAD <i class="feather icon-arrow-right"></i>
+                    <a href="{{ auth()->user()->can('view reports') ? route('reports.financial') : route('payments.index') }}" class="text-white">
+                        Impayés : {{ number_format($this->pendingPayments, 0, ',', ' ') }} MAD <i class="feather icon-arrow-right"></i>
                     </a>
                 </div>
             </div>
         </div>
+        @endcan
     </div>
 
     <div class="row">
         {{-- Graphique consultations --}}
+        @if($showMedical)
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
@@ -99,8 +105,10 @@
             </div>
         </div>
 
+        @endif
+
         {{-- Prochains RDV --}}
-        <div class="col-md-4">
+        <div class="{{ $showMedical ? 'col-md-4' : 'col-md-12' }}">
             <div class="card">
                 <div class="card-header">
                     <h5><i class="feather icon-clock"></i> Prochains RDV</h5>
@@ -112,7 +120,7 @@
                                 <div class="row">
                                     <div class="col-7">
                                         <strong>{{ $appt->patient->full_name }}</strong>
-                                        <small class="text-muted d-block">{{ $appt->patient->dossier_number }}</small>
+                                        <small class="text-muted d-block">{{ $appt->patient->dossier_number }} · Dr. {{ $appt->doctor->name }}</small>
                                     </div>
                                     <div class="col-5 text-right">
                                         <small class="text-primary">{{ $appt->scheduled_at->format('d/m H:i') }}</small>
@@ -133,7 +141,8 @@
         </div>
     </div>
 
-    {{-- Récentes consultations --}}
+    {{-- Récentes consultations (données médicales : masquées pour la secrétaire) --}}
+    @if($showMedical)
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -158,11 +167,11 @@
                                             </a>
                                         </td>
                                         <td>{{ $consult->doctor->name }}</td>
-                                        <td>{{ $consult->consultation_date->format('d/m/Y H:i') }}</td>
-                                        <td>{{ Str::limit($consult->reason, 50) ?? '—' }}</td>
+                                        <td><a href="{{ route('consultations.show', $consult) }}">{{ $consult->consultation_date->format('d/m/Y H:i') }}</a></td>
+                                        <td>{{ $consult->reason ? Str::limit($consult->reason, 50) : '—' }}</td>
                                         <td>
                                             <span class="label label-{{ $consult->status === 'completed' ? 'success' : 'warning' }}">
-                                                {{ $consult->status }}
+                                                {{ $consult->status_label }}
                                             </span>
                                         </td>
                                     </tr>
@@ -176,7 +185,8 @@
             </div>
         </div>
     </div>
-    
+    @endif
+
 </div>
 
 @push('scripts')

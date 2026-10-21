@@ -23,7 +23,7 @@ class MedicalReportForm extends Component
     public string $report_date = '';
     public string $valid_from = '';
     public string $valid_until = '';
-    public ?int $sick_leave_days = null;
+    public int|string|null $sick_leave_days = null; // string : champ number vidé côté navigateur
 
     public function mount($medicalReport = null, ?int $patientId = null): void
     {
@@ -38,10 +38,16 @@ class MedicalReportForm extends Component
             $this->patient_id = (int) $patientId;
         }
 
+        if ($consultationId = request()->query('consultation')) {
+            $this->consultation_id = (int) $consultationId;
+        }
+
         if ($medicalReport) {
             $report = $medicalReport instanceof MedicalReport
                 ? $medicalReport
                 : MedicalReport::findOrFail($medicalReport);
+
+            $this->authorize('update', $report);
             $this->reportId = $report->id;
             $this->patient_id      = $report->patient_id;
             $this->doctor_id       = $report->doctor_id ?? '';
@@ -53,6 +59,19 @@ class MedicalReportForm extends Component
             $this->valid_from      = $report->valid_from?->format('Y-m-d') ?? '';
             $this->valid_until     = $report->valid_until?->format('Y-m-d') ?? '';
             $this->sick_leave_days = $report->sick_leave_days;
+        } else {
+            $this->authorize('create', MedicalReport::class);
+        }
+
+        $this->enforceOwnDoctor();
+    }
+
+    /** Un médecin (non admin) signe toujours ses rapports en son propre nom. */
+    protected function enforceOwnDoctor(): void
+    {
+        $user = auth()->user();
+        if ($user->isMedecin() && ! $user->isAdmin()) {
+            $this->doctor_id = $user->id;
         }
     }
 
@@ -77,9 +96,25 @@ class MedicalReportForm extends Component
             'surgery_report' => "COMPTE-RENDU OPÉRATOIRE\n\nPatient(e) : [PATIENT]\nDate de naissance : [DATE_NAISSANCE]\nDate de l'intervention : [DATE_RAPPORT]\nChirurgien : Dr. [DOCTEUR]\nAnesthésiste : Dr. _______________\n\nIndication opératoire :\n[INDICATION]\n\nTechnique opératoire :\n[DESCRIPTION DE LA TECHNIQUE]\n\nConstatations peropératoires :\n[CONSTATATIONS]\n\nSuites opératoires immédiates :\n[SUITES]\n\nFait à [VILLE], le [DATE_RAPPORT]",
         ];
 
+        // Certains modèles n'ont pas de type dédié : les rattacher à un type existant (enum en base)
+        $templateTypes = [
+            'medical_certificate' => 'other',
+            'surgery_report'      => 'medical_report',
+        ];
+        $templateTitles = [
+            'sick_leave'          => 'Certificat d\'arrêt de travail',
+            'fitness_certificate' => 'Certificat d\'aptitude',
+            'medical_certificate' => 'Certificat médical',
+            'referral'            => 'Lettre de liaison',
+            'surgery_report'      => 'Compte-rendu opératoire',
+        ];
+
         if (isset($templates[$type])) {
-            $this->type    = $type;
+            $this->type    = $templateTypes[$type] ?? $type;
             $this->content = $this->replacePlaceholders($templates[$type]);
+            if ($this->title === '') {
+                $this->title = $templateTitles[$type];
+            }
         }
     }
 
@@ -129,16 +164,71 @@ class MedicalReportForm extends Component
 
     public function save(): void
     {
+        $existing = $this->reportId ? MedicalReport::findOrFail($this->reportId) : null;
+        $existing ? $this->authorize('update', $existing) : $this->authorize('create', MedicalReport::class);
+
+        $this->enforceOwnDoctor();
+
+        $isSickLeave = $this->type === 'sick_leave';
+
+        // Arrêt de travail : compléter la date de fin ou le nombre de jours à partir de l'autre
+        if ($isSickLeave && $this->valid_from) {
+            try {
+                $from = \Carbon\Carbon::parse($this->valid_from)->startOfDay();
+                if (is_numeric($this->sick_leave_days) && (int) $this->sick_leave_days > 0 && ! $this->valid_until) {
+                    $this->valid_until = $from->copy()->addDays((int) $this->sick_leave_days - 1)->format('Y-m-d');
+                } elseif (! $this->sick_leave_days && $this->valid_until) {
+                    $days = (int) $from->diffInDays(\Carbon\Carbon::parse($this->valid_until)->startOfDay(), false) + 1;
+                    $this->sick_leave_days = $days > 0 ? $days : null;
+                }
+            } catch (\Throwable) {
+                // Date invalide : la validation ci-dessous renverra l'erreur
+            }
+        }
+
         $this->validate([
             'patient_id'      => 'required|exists:patients,id',
             'doctor_id'       => 'required|exists:users,id',
+            'consultation_id' => [
+                'nullable',
+                'exists:consultations,id',
+                function ($attribute, $value, $fail) {
+                    if ($value && Consultation::whereKey($value)->value('patient_id') != $this->patient_id) {
+                        $fail('La consultation sélectionnée n\'appartient pas à ce patient.');
+                    }
+                },
+            ],
             'type'            => 'required|in:' . implode(',', array_keys(MedicalReport::TYPE_LABELS)),
-            'title'           => 'required|string|max:255',
-            'content'         => 'required|string',
+            'title'           => 'required|string|max:200',
+            'content'         => 'required|string|max:20000',
             'report_date'     => 'required|date',
-            'valid_from'      => 'nullable|date',
-            'valid_until'     => 'nullable|date|after_or_equal:valid_from',
-            'sick_leave_days' => 'nullable|integer|min:1',
+            'valid_from'      => ($isSickLeave ? 'required' : 'nullable') . '|date',
+            'valid_until'     => ($isSickLeave ? 'required' : 'nullable') . '|date|after_or_equal:valid_from',
+            'sick_leave_days' => [
+                $isSickLeave ? 'required' : 'nullable',
+                'integer',
+                'min:1',
+                'max:365',
+                function ($attribute, $value, $fail) use ($isSickLeave) {
+                    if (! $isSickLeave || ! $value || ! $this->valid_from || ! $this->valid_until) {
+                        return;
+                    }
+                    try {
+                        $expected = (int) \Carbon\Carbon::parse($this->valid_from)->startOfDay()
+                            ->diffInDays(\Carbon\Carbon::parse($this->valid_until)->startOfDay(), false) + 1;
+                    } catch (\Throwable) {
+                        return;
+                    }
+                    if ($expected !== (int) $value) {
+                        $fail("Le nombre de jours d'arrêt ({$value}) ne correspond pas à la période indiquée ({$expected} jour(s)).");
+                    }
+                },
+            ],
+        ], [
+            'valid_from.required'       => 'La date de début de l\'arrêt est obligatoire.',
+            'valid_until.required'      => 'La date de fin de l\'arrêt est obligatoire.',
+            'valid_until.after_or_equal' => 'La date de fin doit être postérieure ou égale à la date de début.',
+            'sick_leave_days.required'  => 'Le nombre de jours d\'arrêt est obligatoire.',
         ]);
 
         $data = [
@@ -151,16 +241,17 @@ class MedicalReportForm extends Component
             'report_date'     => $this->report_date,
             'valid_from'      => $this->valid_from ?: null,
             'valid_until'     => $this->valid_until ?: null,
-            'sick_leave_days' => $this->sick_leave_days,
-            'created_by'      => auth()->id(),
+            'sick_leave_days' => $isSickLeave && $this->sick_leave_days !== '' ? (int) $this->sick_leave_days : null,
         ];
 
-        if ($this->reportId) {
-            MedicalReport::findOrFail($this->reportId)->update($data);
+        if ($existing) {
+            // Ne pas écraser l'auteur d'origine (created_by) lors d'une modification
+            $existing->update($data);
             session()->flash('success', 'Rapport mis à jour.');
         } else {
+            $data['created_by'] = auth()->id();
             $report = MedicalReport::create($data);
-            NotificationService::medicalReportCreated($report->id, $this->patient_id, $this->doctor_id, $this->title);
+            NotificationService::medicalReportCreated($report->id, (int) $this->patient_id, (int) $this->doctor_id, $this->title);
             session()->flash('success', 'Rapport créé.');
         }
 

@@ -31,6 +31,12 @@ class Consultation extends Model
         'temperature' => 'decimal:1',
     ];
 
+    public const STATUS_LABELS = [
+        'in_progress' => 'En cours',
+        'completed'   => 'Terminée',
+        'archived'    => 'Archivée',
+    ];
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logFillable()->logOnlyDirty();
@@ -46,10 +52,21 @@ class Consultation extends Model
         return null;
     }
 
+    public function getStatusLabelAttribute(): string
+    {
+        return self::STATUS_LABELS[$this->status] ?? (string) $this->status;
+    }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return Appointment::TYPE_LABELS[$this->consultation_type] ?? (string) $this->consultation_type;
+    }
+
     // ── Relations ─────────────────────────────────────────────────
     public function patient(): BelongsTo
     {
-        return $this->belongsTo(Patient::class);
+        // withTrashed : l'historique médical reste consultable si le dossier est archivé
+        return $this->belongsTo(Patient::class)->withTrashed();
     }
 
     public function doctor(): BelongsTo

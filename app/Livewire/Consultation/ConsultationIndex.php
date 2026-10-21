@@ -17,6 +17,8 @@ class ConsultationIndex extends Component
 
     public function updatedSearch(): void { $this->resetPage(); }
 
+    public function updatedStatusFilter(): void { $this->resetPage(); }
+
     #[Computed]
     public function consultations()
     {

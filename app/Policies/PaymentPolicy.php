@@ -14,7 +14,12 @@ class PaymentPolicy
 
     public function view(User $user, Payment $payment): bool
     {
-        return $user->hasPermissionTo('view payments');
+        if (! $user->hasPermissionTo('view payments')) {
+            return false;
+        }
+
+        // Un médecin ne consulte que ses propres factures
+        return ! Payment::restrictedToOwn($user) || (int) $payment->doctor_id === (int) $user->id;
     }
 
     public function create(User $user): bool
@@ -24,7 +29,13 @@ class PaymentPolicy
 
     public function update(User $user, Payment $payment): bool
     {
-        return $user->hasPermissionTo('edit payments');
+        // Une facture annulée / remboursée n'est plus modifiable
+        return $user->hasPermissionTo('edit payments') && ! $payment->isClosed();
+    }
+
+    public function cancel(User $user, Payment $payment): bool
+    {
+        return $user->hasPermissionTo('edit payments') && ! $payment->isClosed();
     }
 
     public function delete(User $user, Payment $payment): bool

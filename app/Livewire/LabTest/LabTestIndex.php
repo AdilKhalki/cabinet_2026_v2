@@ -17,14 +17,29 @@ class LabTestIndex extends Component
 
     public function updatedSearch(): void { $this->resetPage(); }
 
+    public function updatedStatusFilter(): void { $this->resetPage(); }
+
     public function updateStatus(int $id, string $status): void
     {
-        LabTest::findOrFail($id)->update(['status' => $status]);
+        if (! in_array($status, ['requested', 'pending', 'completed', 'cancelled'], true)) {
+            return;
+        }
+
+        $labTest = LabTest::findOrFail($id);
+        $this->authorize('update', $labTest);
+
+        $data = ['status' => $status];
+        if ($status === 'completed' && ! $labTest->result_date) {
+            $data['result_date'] = today();
+        }
+        $labTest->update($data);
     }
 
     public function delete(int $id): void
     {
-        LabTest::findOrFail($id)->delete();
+        $labTest = LabTest::findOrFail($id);
+        $this->authorize('delete', $labTest);
+        $labTest->delete();
         session()->flash('success', 'Analyse supprimée.');
     }
 

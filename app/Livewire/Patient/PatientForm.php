@@ -32,6 +32,7 @@ class PatientForm extends Component
     public string $insurance_name = '';
     public string $insurance_number = '';
     public string $notes = '';
+    public bool $is_active = true;
     public $photo = null;
 
     protected function rules(): array
@@ -56,13 +57,16 @@ class PatientForm extends Component
             'insurance_name'   => 'nullable|string|max:150',
             'insurance_number' => 'nullable|string|max:50',
             'notes'            => 'nullable|string|max:2000',
-            'photo'            => 'nullable|image|max:2048',
+            'is_active'        => 'boolean',
+            'photo'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ];
     }
 
     public function mount(?Patient $patient = null): void
     {
         if ($patient && $patient->exists) {
+            $this->authorize('update', $patient);
+
             $this->patient         = $patient;
             $this->isEdit          = true;
             $this->first_name      = $patient->first_name ?? '';
@@ -82,11 +86,19 @@ class PatientForm extends Component
             $this->insurance_name  = $patient->insurance_name ?? '';
             $this->insurance_number= $patient->insurance_number ?? '';
             $this->notes           = $patient->notes ?? '';
+            $this->is_active       = (bool) ($patient->is_active ?? true);
+        } else {
+            $this->authorize('create', Patient::class);
         }
     }
 
     public function save(): void
     {
+        // Vérifier les droits avant toute écriture (y compris l'upload de la photo)
+        $this->isEdit
+            ? $this->authorize('update', $this->patient)
+            : $this->authorize('create', Patient::class);
+
         $this->validate();
 
         $data = [
@@ -107,8 +119,14 @@ class PatientForm extends Component
             'insurance_name'   => $this->insurance_name ?: null,
             'insurance_number' => $this->insurance_number ?: null,
             'notes'            => $this->notes ?: null,
-            'created_by'       => auth()->id(),
         ];
+
+        if ($this->isEdit) {
+            $data['is_active'] = $this->is_active;
+        } else {
+            // Ne pas écraser l'auteur initial lors d'une modification
+            $data['created_by'] = auth()->id();
+        }
 
         // Gestion de la photo
         if ($this->photo) {
@@ -119,16 +137,15 @@ class PatientForm extends Component
         }
 
         if ($this->isEdit) {
-            $this->authorize('update', $this->patient);
             $this->patient->update($data);
+            $patient = $this->patient;
             session()->flash('success', 'Patient mis à jour avec succès.');
         } else {
-            $this->authorize('create', Patient::class);
-            Patient::create($data);
-            session()->flash('success', 'Patient créé avec succès.');
+            $patient = Patient::create($data);
+            session()->flash('success', "Patient créé avec succès (dossier {$patient->dossier_number}).");
         }
 
-        $this->redirect(route('patients.index'), navigate: true);
+        $this->redirect(route('patients.show', $patient), navigate: true);
     }
 
     public function render()

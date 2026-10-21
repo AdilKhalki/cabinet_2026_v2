@@ -10,7 +10,8 @@ class LabTestController extends Controller
 {
     public function pdf(LabTest $labTest)
     {
-        Gate::authorize('view', $labTest->patient);
+        // Autorisation sur la demande elle-même (permission + isolation médecin)
+        Gate::authorize('view', $labTest);
 
         $labTest->load(['patient', 'doctor', 'results.labTestType']);
 

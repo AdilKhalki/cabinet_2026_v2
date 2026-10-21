@@ -21,7 +21,11 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['name', 'generic_name']);
-            $table->fullText(['name', 'generic_name']);
+
+            // L'index FULLTEXT n'existe pas sous SQLite (base des tests)
+            if (in_array(Schema::getConnection()->getDriverName(), ['mysql', 'mariadb', 'pgsql'], true)) {
+                $table->fullText(['name', 'generic_name']);
+            }
         });
     }
 

@@ -6,28 +6,61 @@ use App\Models\Appointment;
 use App\Models\Consultation;
 use App\Models\Patient;
 use App\Models\Payment;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class DashboardStats extends Component
 {
+    /** Médecin non admin : les indicateurs sont limités à son activité. */
+    private function doctorScopeId(): ?int
+    {
+        $user = auth()->user();
+
+        return $user->isMedecin() && ! $user->isAdmin() ? $user->id : null;
+    }
+
+    private function canSeeConsultations(): bool
+    {
+        $user = auth()->user();
+
+        return $user->isMedecin() || $user->can('viewAny', Consultation::class);
+    }
+
+    private function canSeePayments(): bool
+    {
+        return auth()->user()->can('view payments');
+    }
+
+    /** Bornes du mois courant (requêtes indexables, contrairement à whereMonth/whereYear). */
+    private function monthRange(): array
+    {
+        return [now()->startOfMonth(), now()->endOfMonth()];
+    }
+
+    #[Computed]
+    public function todayStatusCounts()
+    {
+        // Une seule requête groupée pour les deux cartes « RDV du jour »
+        return Appointment::today()
+            ->when($this->doctorScopeId(), fn ($q, $id) => $q->forDoctor($id))
+            ->selectRaw('status, COUNT(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+    }
+
     #[Computed]
     public function todayAppointments(): int
     {
-        return Appointment::today()
-            ->when(auth()->user()->isMedecin(), fn ($q) => $q->forDoctor(auth()->id()))
-            ->whereNotIn('status', ['cancelled', 'no_show'])
-            ->count();
+        return (int) $this->todayStatusCounts
+            ->except(Appointment::FREE_SLOT_STATUSES)
+            ->sum();
     }
 
     #[Computed]
     public function todayWaiting(): int
     {
-        return Appointment::today()
-            ->when(auth()->user()->isMedecin(), fn ($q) => $q->forDoctor(auth()->id()))
-            ->whereIn('status', ['waiting', 'in_progress'])
-            ->count();
+        return (int) $this->todayStatusCounts->only(['waiting', 'in_progress'])->sum();
     }
 
     #[Computed]
@@ -39,24 +72,32 @@ class DashboardStats extends Component
     #[Computed]
     public function newPatientsThisMonth(): int
     {
-        return Patient::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count();
+        return Patient::whereBetween('created_at', $this->monthRange())->count();
     }
 
+    /** Encaissé ce mois : montants réellement perçus (payés + acomptes des paiements partiels). */
     #[Computed]
     public function monthlyRevenue(): float
     {
-        return Payment::where('status', 'paid')
-            ->whereMonth('payment_date', now()->month)
-            ->whereYear('payment_date', now()->year)
-            ->sum('total_amount');
+        if (! $this->canSeePayments()) {
+            return 0.0;
+        }
+
+        return (float) Payment::whereIn('status', ['paid', 'partial'])
+            ->whereBetween('payment_date', array_map(fn ($d) => $d->toDateString(), $this->monthRange()))
+            ->when($this->doctorScopeId(), fn ($q, $id) => $q->where('doctor_id', $id))
+            ->sum('amount_paid');
     }
 
     #[Computed]
     public function pendingPayments(): float
     {
-        return Payment::whereIn('status', ['pending', 'partial'])
+        if (! $this->canSeePayments()) {
+            return 0.0;
+        }
+
+        return (float) Payment::whereIn('status', ['pending', 'partial'])
+            ->when($this->doctorScopeId(), fn ($q, $id) => $q->where('doctor_id', $id))
             ->sum('amount_due');
     }
 
@@ -65,7 +106,7 @@ class DashboardStats extends Component
     {
         return Appointment::with(['patient', 'doctor'])
             ->upcoming()
-            ->when(auth()->user()->isMedecin(), fn ($q) => $q->forDoctor(auth()->id()))
+            ->when($this->doctorScopeId(), fn ($q, $id) => $q->forDoctor($id))
             ->orderBy('scheduled_at')
             ->take(5)
             ->get();
@@ -74,7 +115,12 @@ class DashboardStats extends Component
     #[Computed]
     public function recentConsultations()
     {
-        return Consultation::with('patient')
+        // La secrétaire n'a pas accès aux données médicales
+        if (! $this->canSeeConsultations()) {
+            return new Collection;
+        }
+
+        return Consultation::with(['patient', 'doctor'])
             ->when(auth()->user()->isMedecin(), fn ($q) => $q->forDoctor(auth()->id()))
             ->orderByDesc('consultation_date')
             ->take(5)
@@ -84,19 +130,24 @@ class DashboardStats extends Component
     #[Computed]
     public function monthlyConsultationsChart(): array
     {
-        $data = Consultation::selectRaw('DATE(consultation_date) as date, COUNT(*) as count')
-            ->where('consultation_date', '>=', now()->subDays(30))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('count', 'date')
-            ->toArray();
+        $data = [];
+
+        if ($this->canSeeConsultations()) {
+            $data = Consultation::selectRaw('DATE(consultation_date) as date, COUNT(*) as count')
+                ->where('consultation_date', '>=', today()->subDays(29))
+                ->when($this->doctorScopeId(), fn ($q, $id) => $q->forDoctor($id))
+                ->groupBy('date')
+                ->orderBy('date')
+                ->pluck('count', 'date')
+                ->toArray();
+        }
 
         $labels = [];
         $values = [];
         for ($i = 29; $i >= 0; $i--) {
-            $date = now()->subDays($i)->format('Y-m-d');
-            $labels[] = now()->subDays($i)->format('d/m');
-            $values[] = $data[$date] ?? 0;
+            $day = today()->subDays($i);
+            $labels[] = $day->format('d/m');
+            $values[] = (int) ($data[$day->format('Y-m-d')] ?? 0);
         }
 
         return ['labels' => $labels, 'values' => $values];

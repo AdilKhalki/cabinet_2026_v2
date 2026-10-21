@@ -11,6 +11,12 @@ class Document extends Model
 {
     use SoftDeletes;
 
+    /**
+     * Disque privé (storage/app/private) : les documents médicaux ne doivent
+     * jamais être accessibles par une URL publique devinable.
+     */
+    public const DISK = 'local';
+
     protected $fillable = [
         'patient_id', 'consultation_id', 'category', 'title', 'description',
         'file_path', 'file_name', 'file_type', 'file_size', 'document_date',
@@ -28,9 +34,36 @@ class Document extends Model
         'other'                  => 'Autre',
     ];
 
-    public function getFileUrlAttribute(): string
+    /**
+     * Disque où se trouve réellement le fichier (les anciens fichiers
+     * ont été enregistrés sur le disque public).
+     */
+    public function storageDisk(): string
     {
-        return Storage::url($this->file_path);
+        return $this->file_path && Storage::disk(self::DISK)->exists($this->file_path)
+            ? self::DISK
+            : 'public';
+    }
+
+    /** URL temporaire signée (30 min) — à n'afficher qu'aux utilisateurs autorisés. */
+    public function getFileUrlAttribute(): ?string
+    {
+        if (! $this->file_path) {
+            return null;
+        }
+
+        $disk = $this->storageDisk();
+
+        return $disk === self::DISK
+            ? Storage::disk($disk)->temporaryUrl($this->file_path, now()->addMinutes(30))
+            : Storage::disk($disk)->url($this->file_path);
+    }
+
+    public function deleteFile(): void
+    {
+        if ($this->file_path) {
+            Storage::disk($this->storageDisk())->delete($this->file_path);
+        }
     }
 
     public function getFileSizeFormattedAttribute(): string
@@ -43,7 +76,8 @@ class Document extends Model
 
     public function patient(): BelongsTo
     {
-        return $this->belongsTo(Patient::class);
+        // Inclure les patients archivés pour garder l'historique lisible
+        return $this->belongsTo(Patient::class)->withTrashed();
     }
 
     public function consultation(): BelongsTo

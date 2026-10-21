@@ -67,14 +67,18 @@
                 </div>
 
                 <div class="card-footer">
+                    @can('print', $report)
                     <a href="{{ route('medical-reports.pdf', $report) }}"
                        target="_blank" class="btn btn-info btn-block m-b-10">
                         <i class="feather icon-download"></i> Télécharger PDF
                     </a>
+                    @endcan
+                    @can('update', $report)
                     <a href="{{ route('medical-reports.edit', $report) }}"
                        class="btn btn-warning btn-block m-b-10">
                         <i class="feather icon-edit"></i> Modifier
                     </a>
+                    @endcan
                     <a href="{{ url()->previous() }}" class="btn btn-default btn-block">
                         <i class="feather icon-arrow-left"></i> Retour
                     </a>

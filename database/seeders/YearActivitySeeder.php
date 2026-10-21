@@ -709,10 +709,11 @@ class YearActivitySeeder extends Seeder
             'subtotal' => $subtotal,
             'discount' => $discount,
             'insurance_coverage' => $insurance,
-            'total_amount' => $total,
+            // Même formule que l'application : total = sous-total − remise − part assurance
+            'total_amount' => $net,
             'amount_paid' => $paid,
             'amount_due' => $due,
-            'payment_date' => in_array($status, ['paid', 'partial'], true) ? $date->toDateString() : null,
+            'payment_date' => $date->toDateString(), // sert aussi de date de facture dans les rapports
             'due_date' => in_array($status, ['pending', 'partial'], true) ? $date->copy()->addDays(30)->toDateString() : null,
             'notes' => $discount > 0 ? 'Remise accordée' : null,
             'created_by' => $this->secretaryId ?? $doctorId,

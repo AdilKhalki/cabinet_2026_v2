@@ -12,6 +12,11 @@ class PatientIndex extends Component
 {
     use WithPagination;
 
+    /** Colonnes autorisées pour le tri (évite les erreurs SQL sur une valeur d'URL arbitraire) */
+    private const SORTABLE = ['created_at', 'dossier_number', 'last_name', 'birth_date'];
+
+    private const PER_PAGE_OPTIONS = [15, 25, 50];
+
     #[Url(as: 'q')]
     public string $search = '';
 
@@ -24,12 +29,14 @@ class PatientIndex extends Component
     #[Url]
     public string $sortDir = 'desc';
 
+    /** Afficher les dossiers archivés (supprimés logiquement) */
+    #[Url]
+    public bool $showArchived = false;
+
     public int $perPage = 15;
 
     public bool $showDeleteModal = false;
     public ?int $deletingId = null;
-
-    protected $queryString = ['search', 'genderFilter', 'sortBy', 'sortDir'];
 
     public function updatedSearch(): void
     {
@@ -41,8 +48,22 @@ class PatientIndex extends Component
         $this->resetPage();
     }
 
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedShowArchived(): void
+    {
+        $this->resetPage();
+    }
+
     public function sort(string $column): void
     {
+        if (! in_array($column, self::SORTABLE, true)) {
+            return;
+        }
+
         if ($this->sortBy === $column) {
             $this->sortDir = $this->sortDir === 'asc' ? 'desc' : 'asc';
         } else {
@@ -65,7 +86,7 @@ class PatientIndex extends Component
         $patient->delete();
         $this->showDeleteModal = false;
         $this->deletingId = null;
-        session()->flash('success', 'Patient supprimé avec succès.');
+        session()->flash('success', 'Patient archivé avec succès.');
     }
 
     public function cancelDelete(): void
@@ -74,14 +95,29 @@ class PatientIndex extends Component
         $this->deletingId = null;
     }
 
+    public function restore(int $id): void
+    {
+        $patient = Patient::onlyTrashed()->findOrFail($id);
+        $this->authorize('restore', $patient);
+        $patient->restore();
+        session()->flash('success', 'Dossier patient restauré.');
+    }
+
     #[Computed]
     public function patients()
     {
+        $sortBy = in_array($this->sortBy, self::SORTABLE, true) ? $this->sortBy : 'created_at';
+        $sortDir = $this->sortDir === 'asc' ? 'asc' : 'desc';
+        $perPage = in_array($this->perPage, self::PER_PAGE_OPTIONS, true) ? $this->perPage : 15;
+
+        $canSeeArchived = $this->showArchived && auth()->user()->can('delete patients');
+
         return Patient::query()
+            ->when($canSeeArchived, fn ($q) => $q->onlyTrashed())
             ->when($this->search, fn ($q) => $q->search($this->search))
-            ->when($this->genderFilter, fn ($q) => $q->where('gender', $this->genderFilter))
-            ->orderBy($this->sortBy, $this->sortDir)
-            ->paginate($this->perPage);
+            ->when(in_array($this->genderFilter, ['male', 'female'], true), fn ($q) => $q->where('gender', $this->genderFilter))
+            ->orderBy($sortBy, $sortDir)
+            ->paginate($perPage);
     }
 
     public function render()

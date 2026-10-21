@@ -11,28 +11,41 @@
         <div class="card-header">
             <h5><i class="feather icon-image"></i> {{ $medicalImage->title }}</h5>
             <div class="card-header-right">
-                <a href="{{ url()->previous() }}" class="btn btn-default btn-sm">
-                    <i class="feather icon-arrow-left"></i> Retour
-                </a>
-                @if($medicalImage->file_path)
-                    <a href="{{ Storage::url($medicalImage->file_path) }}" download class="btn btn-info btn-sm">
-                        <i class="feather icon-download"></i> Télécharger
+                @if($medicalImage->patient)
+                    <a href="{{ route('patients.show', $medicalImage->patient) }}" wire:navigate class="btn btn-default btn-sm">
+                        <i class="feather icon-arrow-left"></i> Dossier patient
+                    </a>
+                @else
+                    <a href="{{ route('medical-images.index') }}" wire:navigate class="btn btn-default btn-sm">
+                        <i class="feather icon-arrow-left"></i> Retour
                     </a>
                 @endif
+                @if($medicalImage->file_path)
+                    <button type="button" wire:click="download" class="btn btn-info btn-sm">
+                        <i class="feather icon-download"></i> Télécharger
+                    </button>
+                @endif
+                @can('update', $medicalImage)
                 <a href="{{ route('medical-images.edit', $medicalImage) }}" class="btn btn-warning btn-sm">
                     <i class="feather icon-edit"></i> Modifier
                 </a>
+                @endcan
             </div>
         </div>
         <div class="card-block">
             <div class="row">
                 <div class="col-md-3">
                     <strong><i class="feather icon-user"></i> Patient :</strong><br>
-                    {{ $medicalImage->patient->full_name ?? '—' }}
+                    @if($medicalImage->patient)
+                        <a href="{{ route('patients.show', $medicalImage->patient) }}" wire:navigate>{{ $medicalImage->patient->full_name }}</a>
+                        <br><small class="text-muted">{{ $medicalImage->patient->dossier_number }}</small>
+                    @else
+                        —
+                    @endif
                 </div>
                 <div class="col-md-3">
                     <strong><i class="feather icon-calendar"></i> Date :</strong><br>
-                    {{ $medicalImage->image_date ? \Carbon\Carbon::parse($medicalImage->image_date)->format('d/m/Y') : '—' }}
+                    {{ $medicalImage->image_date?->format('d/m/Y') ?? '—' }}
                 </div>
                 <div class="col-md-3">
                     <strong><i class="feather icon-tag"></i> Catégorie :</strong><br>
@@ -68,9 +81,10 @@
     {{-- Inline Image Viewer --}}
     @if($medicalImage->file_path)
         @php
-            $ext = strtolower(pathinfo($medicalImage->file_path, PATHINFO_EXTENSION));
-            $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
+            $ext = strtolower($medicalImage->file_type ?: pathinfo($medicalImage->file_path, PATHINFO_EXTENSION));
+            $isImage = $medicalImage->is_image;
             $isPdf = $ext === 'pdf';
+            $fileUrl = $medicalImage->file_url;
         @endphp
 
         <div class="card m-t-15">
@@ -100,7 +114,7 @@
                         </div>
                         <div style="overflow: auto; max-height: 600px; border: 1px solid #ddd; border-radius: 4px; padding: 10px; background: #f8f9fa;">
                             <div style="display: inline-block; transition: transform 0.2s;" :style="'transform: scale(' + scale + '); transform-origin: top center;'">
-                                <img src="{{ Storage::url($medicalImage->file_path) }}"
+                                <img src="{{ $fileUrl }}"
                                      alt="{{ $medicalImage->title }}"
                                      style="max-width: 100%; display: block; margin: 0 auto; border-radius: 4px;">
                             </div>
@@ -110,20 +124,17 @@
                     <div class="text-center p-20" style="border: 1px solid #ddd; border-radius: 4px; background: #f8f9fa;">
                         <i class="feather icon-file" style="font-size: 4em; color: #e74c3c;"></i>
                         <p class="m-t-10">Document PDF</p>
-                        <a href="{{ Storage::url($medicalImage->file_path) }}" target="_blank" class="btn btn-info">
-                            <i class="feather icon-external-link"></i> Ouvrir le PDF
-                        </a>
-                        <a href="{{ Storage::url($medicalImage->file_path) }}" download class="btn btn-default">
-                            <i class="feather icon-download"></i> Télécharger
-                        </a>
+                        <button type="button" wire:click="download" class="btn btn-info">
+                            <i class="feather icon-download"></i> Télécharger le PDF
+                        </button>
                     </div>
                 @else
                     <div class="text-center p-20 text-muted">
                         <i class="feather icon-file" style="font-size: 4em;"></i>
                         <p>Format de fichier non prévisualisable.</p>
-                        <a href="{{ Storage::url($medicalImage->file_path) }}" download class="btn btn-info">
+                        <button type="button" wire:click="download" class="btn btn-info">
                             <i class="feather icon-download"></i> Télécharger le fichier
-                        </a>
+                        </button>
                     </div>
                 @endif
 
@@ -138,13 +149,14 @@
         </div>
         <div class="card-block">
             @if($editing ?? false)
-                <div class="form-group">
+                <div class="form-group {{ $errors->has('radiologicalReport') ? 'has-error' : '' }}">
                     <textarea wire:model="radiologicalReport" class="form-control" rows="8"></textarea>
+                    @error('radiologicalReport')<span class="help-block text-danger">{{ $message }}</span>@enderror
                 </div>
                 <button type="button" wire:click="saveReport" class="btn btn-primary btn-sm">
                     <i class="feather icon-save"></i> Sauvegarder
                 </button>
-                <button type="button" wire:click="$set('editing', false)" class="btn btn-default btn-sm">
+                <button type="button" wire:click="cancelEditing" class="btn btn-default btn-sm">
                     <i class="feather icon-x"></i> Annuler
                 </button>
             @else
@@ -153,9 +165,11 @@
                 @else
                     <p class="text-muted">Aucun compte-rendu radiologique disponible.</p>
                 @endif
-                <button type="button" wire:click="$set('editing', true)" class="btn btn-warning btn-sm m-t-10">
+                @can('update', $medicalImage)
+                <button type="button" wire:click="startEditing" class="btn btn-warning btn-sm m-t-10">
                     <i class="feather icon-edit"></i> Modifier le compte-rendu
                 </button>
+                @endcan
             @endif
         </div>
     </div>

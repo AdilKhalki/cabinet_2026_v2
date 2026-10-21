@@ -34,17 +34,17 @@
                     </thead>
                     <tbody>
                         @forelse($this->consultations as $consult)
-                            <tr>
+                            <tr wire:key="consult-{{ $consult->id }}">
                                 <td>
                                     <a href="{{ route('patients.show', $consult->patient) }}"><strong>{{ $consult->patient->full_name }}</strong></a>
                                     <small class="text-muted d-block">{{ $consult->patient->dossier_number }}</small>
                                 </td>
                                 <td>{{ $consult->doctor->name }}</td>
                                 <td>{{ $consult->consultation_date->format('d/m/Y H:i') }}</td>
-                                <td><span class="label label-info">{{ $consult->consultation_type }}</span></td>
-                                <td>{{ Str::limit($consult->reason, 50) ?? '&mdash;' }}</td>
+                                <td><span class="label label-info">{{ $consult->type_label }}</span></td>
+                                <td>{{ $consult->reason ? Str::limit($consult->reason, 50) : '—' }}</td>
                                 <td>
-                                    <span class="label label-{{ $consult->status === 'completed' ? 'success' : 'warning' }}">{{ $consult->status }}</span>
+                                    <span class="label label-{{ $consult->status === 'completed' ? 'success' : 'warning' }}">{{ $consult->status_label }}</span>
                                 </td>
                                 <td>
                                     <a href="{{ route('consultations.show', $consult) }}" class="btn btn-info btn-xs"><i class="feather icon-eye"></i></a>

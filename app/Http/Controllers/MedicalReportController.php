@@ -11,7 +11,8 @@ class MedicalReportController extends Controller
 {
     public function pdf(MedicalReport $medicalReport)
     {
-        Gate::authorize('view', $medicalReport->patient);
+        // Autorisation sur le rapport lui-même (permission + isolation médecin)
+        Gate::authorize('print', $medicalReport);
 
         $medicalReport->load(['patient', 'doctor']);
 
@@ -22,6 +23,8 @@ class MedicalReportController extends Controller
         if (Storage::exists('cabinet_settings.json')) {
             $settings = json_decode(Storage::get('cabinet_settings.json'), true) ?? [];
         }
+        // Les champs vides des paramètres ne doivent pas masquer les valeurs par défaut
+        $settings = array_filter($settings, fn ($v) => $v !== null && $v !== '');
 
         $pdf = Pdf::loadView('pdf.medical-report', compact('report', 'patient', 'settings'))
             ->setPaper('a4', 'portrait');

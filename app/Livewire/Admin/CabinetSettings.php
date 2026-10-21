@@ -21,6 +21,12 @@ class CabinetSettings extends Component
     public string $pdf_footer_text = '';
     public int $appointment_reminder_hours = 24;
 
+    /** Vérifiée à chaque requête (rendu initial ET appels d'actions Livewire) */
+    public function boot(): void
+    {
+        abort_unless(auth()->user()?->can('manage users'), 403);
+    }
+
     public function mount(): void
     {
         $this->loadSettings();
@@ -39,7 +45,7 @@ class CabinetSettings extends Component
             $this->doctor_speciality = $data['doctor_speciality'] ?? '';
             $this->doctor_license = $data['doctor_license'] ?? '';
             $this->pdf_footer_text = $data['pdf_footer_text'] ?? '';
-            $this->appointment_reminder_hours = $data['appointment_reminder_hours'] ?? 24;
+            $this->appointment_reminder_hours = (int) ($data['appointment_reminder_hours'] ?? 24);
         }
     }
 
@@ -47,11 +53,20 @@ class CabinetSettings extends Component
     {
         $this->validate([
             'cabinet_name' => 'required|string|max:255',
+            'cabinet_address' => 'nullable|string|max:500',
+            'cabinet_city' => 'nullable|string|max:100',
             'cabinet_phone' => 'required|string|max:20',
-            'cabinet_email' => 'nullable|email',
+            'cabinet_email' => 'nullable|email|max:255',
             'doctor_name' => 'required|string|max:255',
+            'doctor_speciality' => 'nullable|string|max:150',
             'doctor_license' => 'nullable|string|max:50',
+            'pdf_footer_text' => 'nullable|string|max:1000',
             'appointment_reminder_hours' => 'required|integer|min:1|max:168',
+        ], [], [
+            'cabinet_name' => 'nom du cabinet',
+            'cabinet_phone' => 'téléphone',
+            'doctor_name' => 'nom du médecin',
+            'appointment_reminder_hours' => 'délai de rappel',
         ]);
 
         $data = [

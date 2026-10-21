@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Prescription;
 
+use App\Models\Consultation;
 use App\Models\Medication;
 use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\PrescriptionLine;
 use App\Models\User;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class PrescriptionForm extends Component
@@ -38,6 +40,11 @@ class PrescriptionForm extends Component
 
         if ($consultationId = request()->query('consultation')) {
             $this->consultation_id = (int) $consultationId;
+
+            // Pré-remplir le patient depuis la consultation si absent
+            if (! $this->patient_id && ($consultation = Consultation::find($this->consultation_id))) {
+                $this->patient_id = $consultation->patient_id;
+            }
         }
 
         // Mode édition
@@ -45,6 +52,8 @@ class PrescriptionForm extends Component
             $record = $prescription instanceof Prescription
                 ? $prescription
                 : Prescription::with('lines')->findOrFail($prescription);
+
+            $this->authorize('update', $record);
 
             $this->prescriptionId = $record->id;
             $this->isEdit = true;
@@ -73,7 +82,19 @@ class PrescriptionForm extends Component
                 $this->addLine();
             }
         } else {
+            $this->authorize('create', Prescription::class);
             $this->addLine();
+        }
+
+        $this->enforceOwnDoctor();
+    }
+
+    /** Un médecin (non admin) prescrit toujours en son propre nom. */
+    protected function enforceOwnDoctor(): void
+    {
+        $user = auth()->user();
+        if ($user->isMedecin() && ! $user->isAdmin()) {
+            $this->doctor_id = $user->id;
         }
     }
 
@@ -97,8 +118,14 @@ class PrescriptionForm extends Component
         $this->lines = array_values($this->lines);
     }
 
-    public function selectMedication(int $index, string $medicationId): void
+    public function selectMedication(int $index, $medicationId = ''): void
     {
+        if (! array_key_exists($index, $this->lines)) {
+            return;
+        }
+
+        $this->lines[$index]['medication_id'] = $medicationId ? (int) $medicationId : '';
+
         if ($medicationId) {
             $med = Medication::find((int) $medicationId);
             if ($med) {
@@ -113,12 +140,42 @@ class PrescriptionForm extends Component
 
     public function save(): void
     {
+        $existing = $this->isEdit ? Prescription::findOrFail($this->prescriptionId) : null;
+        $existing ? $this->authorize('update', $existing) : $this->authorize('create', Prescription::class);
+
+        $this->enforceOwnDoctor();
+
         $this->validate([
-            'patient_id'  => 'required|exists:patients,id',
-            'doctor_id'   => 'required|exists:users,id',
-            'prescribed_at' => 'required|date',
-            'lines'       => 'required|array|min:1',
-            'lines.*.medication_name' => 'required|string',
+            'patient_id'      => 'required|exists:patients,id',
+            'doctor_id'       => 'required|exists:users,id',
+            'consultation_id' => [
+                'nullable',
+                'exists:consultations,id',
+                function ($attribute, $value, $fail) {
+                    if ($value && Consultation::whereKey($value)->value('patient_id') != $this->patient_id) {
+                        $fail('La consultation sélectionnée n\'appartient pas à ce patient.');
+                    }
+                },
+            ],
+            'prescribed_at'   => 'required|date',
+            'valid_until'     => 'nullable|date|after_or_equal:prescribed_at',
+            'notes'           => 'nullable|string|max:5000',
+            'lines'           => 'required|array|min:1',
+            'lines.*.medication_id'   => 'nullable|exists:medications,id',
+            'lines.*.medication_name' => 'required|string|max:200',
+            'lines.*.dosage'          => 'nullable|string|max:150',
+            'lines.*.frequency'       => 'nullable|string|max:100',
+            'lines.*.duration_days'   => 'nullable|integer|min:1|max:3650',
+            'lines.*.route'           => 'nullable|string|max:80',
+            'lines.*.instructions'    => 'nullable|string|max:1000',
+            'lines.*.quantity'        => 'nullable|integer|min:1|max:999',
+        ], [
+            'lines.required'                   => 'Ajoutez au moins un médicament.',
+            'lines.min'                        => 'Ajoutez au moins un médicament.',
+            'lines.*.medication_name.required' => 'Le nom du médicament est obligatoire.',
+            'lines.*.duration_days.integer'    => 'La durée doit être un nombre de jours.',
+            'lines.*.quantity.integer'         => 'La quantité doit être un nombre entier (nombre de boîtes).',
+            'valid_until.after_or_equal'       => 'La date de validité doit être postérieure ou égale à la date de prescription.',
         ]);
 
         $data = [
@@ -130,33 +187,40 @@ class PrescriptionForm extends Component
             'notes'           => $this->notes ?: null,
         ];
 
-        if ($this->isEdit) {
-            $prescription = Prescription::findOrFail($this->prescriptionId);
-            $prescription->update($data);
+        $prescription = DB::transaction(function () use ($existing, $data) {
+            if ($existing) {
+                $existing->update($data);
+                // Supprimer les anciennes lignes et recréer
+                $existing->lines()->delete();
+                $prescription = $existing;
+            } else {
+                $data['created_by'] = auth()->id();
+                $prescription = Prescription::create($data);
+            }
 
-            // Supprimer les anciennes lignes et recréer
-            $prescription->lines()->delete();
+            foreach (array_values($this->lines) as $i => $line) {
+                PrescriptionLine::create([
+                    'prescription_id' => $prescription->id,
+                    'medication_id'   => ($line['medication_id'] ?? '') ?: null,
+                    'medication_name' => trim($line['medication_name']),
+                    'dosage'          => ($line['dosage'] ?? '') ?: null,
+                    'frequency'       => ($line['frequency'] ?? '') ?: null,
+                    'duration_days'   => ($line['duration_days'] ?? '') ?: null,
+                    'route'           => ($line['route'] ?? '') ?: null,
+                    'instructions'    => ($line['instructions'] ?? '') ?: null,
+                    'quantity'        => ($line['quantity'] ?? '') ?: null,
+                    'sort_order'      => $i,
+                ]);
+            }
+
+            return $prescription;
+        });
+
+        if ($existing) {
             $message = 'Ordonnance mise à jour.';
         } else {
-            $data['created_by'] = auth()->id();
-            $prescription = Prescription::create($data);
-            NotificationService::prescriptionCreated($prescription->id, $this->patient_id, $this->doctor_id);
+            NotificationService::prescriptionCreated($prescription->id, (int) $this->patient_id, (int) $this->doctor_id);
             $message = 'Ordonnance créée.';
-        }
-
-        foreach ($this->lines as $i => $line) {
-            PrescriptionLine::create([
-                'prescription_id' => $prescription->id,
-                'medication_id'   => $line['medication_id'] ?: null,
-                'medication_name' => $line['medication_name'],
-                'dosage'          => $line['dosage'] ?: null,
-                'frequency'       => $line['frequency'] ?: null,
-                'duration_days'   => $line['duration_days'] ?: null,
-                'route'           => $line['route'] ?: null,
-                'instructions'    => $line['instructions'] ?: null,
-                'quantity'        => $line['quantity'] ?: null,
-                'sort_order'      => $i,
-            ]);
         }
 
         session()->flash('success', $message);
@@ -171,6 +235,9 @@ class PrescriptionForm extends Component
             'patients'    => Patient::active()->orderBy('last_name')->get(),
             'doctors'     => User::doctors()->active()->get(),
             'medications' => Medication::active()->orderBy('name')->get(),
+            'patientAllergies' => $this->patient_id
+                ? Patient::whereKey($this->patient_id)->value('known_allergies')
+                : null,
         ])->layout('layouts.cabinet', [
             'title' => $title,
             'header' => $title,

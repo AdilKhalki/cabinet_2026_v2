@@ -54,36 +54,31 @@ class ProfileUpdateTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_delete_their_account(): void
+    /**
+     * Cabinet médical : un utilisateur ne peut pas supprimer son propre compte
+     * (la suppression d'un médecin effacerait en cascade ses dossiers).
+     */
+    public function test_user_cannot_delete_their_own_account(): void
     {
         $user = User::factory()->create();
 
         $this->actingAs($user);
 
-        $response = Livewire::test('pages::settings.delete-user-modal')
+        Livewire::test('pages::settings.delete-user-modal')
             ->set('password', 'password')
-            ->call('deleteUser');
-
-        $response
-            ->assertHasNoErrors()
-            ->assertRedirect('/');
-
-        $this->assertNull($user->fresh());
-        $this->assertFalse(auth()->check());
-    }
-
-    public function test_correct_password_must_be_provided_to_delete_account(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $response = Livewire::test('pages::settings.delete-user-modal')
-            ->set('password', 'wrong-password')
-            ->call('deleteUser');
-
-        $response->assertHasErrors(['password']);
+            ->call('deleteUser')
+            ->assertForbidden();
 
         $this->assertNotNull($user->fresh());
+        $this->assertTrue(auth()->check());
+    }
+
+    public function test_delete_account_section_is_hidden_on_profile_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->get(route('profile.edit'))
+            ->assertOk()
+            ->assertDontSee('data-test="delete-user-button"', false);
     }
 }

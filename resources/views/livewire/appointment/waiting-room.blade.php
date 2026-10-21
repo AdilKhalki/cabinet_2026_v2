@@ -1,4 +1,8 @@
 <div wire:poll.30000ms>
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
     {{-- Statistiques du jour --}}
     <div class="row">
         <div class="col-md-3">
@@ -29,7 +33,7 @@
             <div class="card bg-c-pink">
                 <div class="card-block text-white text-center">
                     <h2>{{ $this->todayStats['cancelled'] }}</h2>
-                    <p><i class="feather icon-x-circle"></i> Annulés</p>
+                    <p><i class="feather icon-x-circle"></i> Annulés / absents</p>
                 </div>
             </div>
         </div>
@@ -61,6 +65,9 @@
                             <div class="col-md-5">
                                 <h5 class="m-0">{{ $appt->patient->full_name }}</h5>
                                 <small class="text-muted">{{ $appt->patient->dossier_number }}</small>
+                                @unless(auth()->user()->isMedecin())
+                                    <small class="text-muted"> · Dr. {{ $appt->doctor->name }}</small>
+                                @endunless
                                 <br>
                                 <span class="label label-{{ $appt->status === 'in_progress' ? 'success' : 'warning' }}">
                                     {{ $appt->status === 'in_progress' ? 'En consultation' : 'En attente' }}
@@ -74,25 +81,37 @@
                                 @endif
                             </div>
                             <div class="col-md-3 text-right">
+                                @can('update', $appt)
                                 @if($appt->status === 'waiting')
                                     <button wire:click="callNext({{ $appt->id }})"
                                             class="btn btn-success btn-sm">
                                         <i class="feather icon-arrow-right"></i> Appeler
                                     </button>
+                                    <button wire:click="markNoShow({{ $appt->id }})"
+                                            wire:confirm="Marquer ce patient comme absent ?"
+                                            class="btn btn-danger btn-sm m-t-5">
+                                        <i class="feather icon-user-x"></i> Absent
+                                    </button>
                                 @else
-                                    <a href="{{ route('consultations.create', ['appointment' => $appt->id]) }}"
-                                       class="btn btn-primary btn-sm">
-                                        <i class="feather icon-activity"></i> Consulter
-                                    </a>
+                                    @if($appt->consultation)
+                                        <a href="{{ route('consultations.edit', $appt->consultation->id) }}"
+                                           class="btn btn-primary btn-sm">
+                                            <i class="feather icon-activity"></i> Reprendre
+                                        </a>
+                                    @else
+                                        @can('create', App\Models\Consultation::class)
+                                        <a href="{{ route('consultations.create', ['appointmentId' => $appt->id]) }}"
+                                           class="btn btn-primary btn-sm">
+                                            <i class="feather icon-activity"></i> Consulter
+                                        </a>
+                                        @endcan
+                                    @endif
                                     <button wire:click="markCompleted({{ $appt->id }})"
                                             class="btn btn-info btn-sm m-t-5">
                                         <i class="feather icon-check"></i> Terminé
                                     </button>
                                 @endif
-                                <button wire:click="markNoShow({{ $appt->id }})"
-                                        class="btn btn-danger btn-sm m-t-5">
-                                    <i class="feather icon-user-x"></i> Absent
-                                </button>
+                                @endcan
                             </div>
                         </div>
                     </div>
@@ -104,6 +123,56 @@
                     <p class="text-muted">Aucun patient en attente pour le moment.</p>
                 </div>
             @endforelse
+        </div>
+    </div>
+
+    {{-- Patients attendus aujourd'hui (pointage de l'arrivée) --}}
+    <div class="card">
+        <div class="card-header">
+            <h5>
+                <i class="feather icon-clock"></i> Attendus aujourd'hui
+                <span class="label label-primary m-l-5">{{ $this->expectedPatients->count() }}</span>
+            </h5>
+        </div>
+        <div class="card-block">
+            @if($this->expectedPatients->isEmpty())
+                <p class="text-center text-muted m-0">Aucun autre rendez-vous prévu aujourd'hui.</p>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-hover m-0">
+                        <thead>
+                            <tr><th>Heure</th><th>Patient</th><th>Médecin</th><th>Statut</th><th class="text-right">Action</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach($this->expectedPatients as $appt)
+                                <tr wire:key="expected-{{ $appt->id }}">
+                                    <td>
+                                        {{ $appt->scheduled_at->format('H:i') }}
+                                        @if($appt->scheduled_at->isPast())
+                                            <span class="label label-danger" style="font-size:9px;">En retard</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $appt->patient->full_name }} <small class="text-muted">{{ $appt->patient->dossier_number }}</small></td>
+                                    <td>Dr. {{ $appt->doctor->name }}</td>
+                                    <td><span class="label {{ $appt->status_color }}">{{ $appt->status_label }}</span></td>
+                                    <td class="text-right">
+                                        @can('update', $appt)
+                                            <button wire:click="markArrived({{ $appt->id }})" class="btn btn-warning btn-sm">
+                                                <i class="feather icon-user-check"></i> Arrivé
+                                            </button>
+                                            <button wire:click="markNoShow({{ $appt->id }})"
+                                                    wire:confirm="Marquer ce patient comme absent ?"
+                                                    class="btn btn-default btn-sm">
+                                                <i class="feather icon-user-x"></i> Absent
+                                            </button>
+                                        @endcan
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
     </div>
 </div>

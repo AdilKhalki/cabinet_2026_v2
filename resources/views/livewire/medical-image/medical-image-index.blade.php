@@ -48,14 +48,15 @@
                             <div class="card" style="border: 1px solid #ddd; border-radius: 6px; overflow: hidden;">
                                 {{-- Thumbnail --}}
                                 <div style="height: 180px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                                    @if(in_array(strtolower($image->file_type ?? ''), ['pdf']))
+                                    @if($image->file_path && ! $image->is_image)
                                         <div class="text-center text-muted p-20">
                                             <i class="feather icon-file" style="font-size: 4em; color: #e74c3c;"></i>
-                                            <br><small>Document PDF</small>
+                                            <br><small>Document {{ strtoupper($image->file_type) }}</small>
                                         </div>
                                     @elseif($image->file_path)
-                                        <img src="{{ Storage::url($image->file_path) }}"
+                                        <img src="{{ $image->file_url }}"
                                              alt="{{ $image->title }}"
+                                             loading="lazy"
                                              style="width: 100%; height: 180px; object-fit: cover;"
                                              onerror="this.parentElement.innerHTML='<div class=\'text-center text-muted p-20\'><i class=\'feather icon-image\' style=\'font-size:3em\'></i><br><small>Image non disponible</small></div>'">
                                     @else
@@ -72,7 +73,12 @@
                                         {{ $image->title }}
                                     </h6>
                                     <p class="text-muted m-b-5" style="font-size: 12px;">
-                                        <i class="feather icon-user"></i> {{ $image->patient->full_name ?? '—' }}
+                                        <i class="feather icon-user"></i>
+                                        @if($image->patient)
+                                            <a href="{{ route('patients.show', $image->patient) }}" wire:navigate>{{ $image->patient->full_name }}</a>
+                                        @else
+                                            —
+                                        @endif
                                     </p>
                                     <p class="m-b-5">
                                         @php
@@ -86,7 +92,7 @@
                                     </p>
                                     <p class="text-muted m-b-10" style="font-size: 12px;">
                                         <i class="feather icon-calendar"></i>
-                                        {{ $image->image_date ? \Carbon\Carbon::parse($image->image_date)->format('d/m/Y') : '—' }}
+                                        {{ $image->image_date?->format('d/m/Y') ?? '—' }}
                                     </p>
                                     <div class="btn-group btn-group-sm" style="width: 100%;">
                                         <a href="{{ route('medical-images.show', $image) }}" class="btn btn-info btn-sm" title="Voir">
@@ -99,7 +105,7 @@
                                         @endcan
                                         @can('delete', $image)
                                         <button type="button"
-                                            wire:click="confirmDelete({{ $image->id }})"
+                                            wire:click="delete({{ $image->id }})"
                                             wire:confirm="Êtes-vous sûr de vouloir supprimer cette image ?"
                                             class="btn btn-danger btn-sm" title="Supprimer">
                                             <i class="feather icon-trash-2"></i>

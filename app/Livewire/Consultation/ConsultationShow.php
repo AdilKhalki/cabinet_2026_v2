@@ -11,10 +11,32 @@ class ConsultationShow extends Component
 
     public function mount(Consultation $consultation): void
     {
+        // Secret médical : un médecin ne consulte que ses propres consultations
+        $this->authorize('view', $consultation);
+
         $this->consultation = $consultation->load([
-            'patient', 'doctor', 'prescriptions.lines.medication',
+            'patient', 'doctor', 'appointment', 'prescriptions.lines.medication',
             'labTests.results', 'medicalImages', 'documents', 'payment',
         ]);
+    }
+
+    /** Clôture une consultation en cours (et le RDV lié). */
+    public function complete(): void
+    {
+        $this->authorize('update', $this->consultation);
+
+        if ($this->consultation->status !== 'in_progress') {
+            return;
+        }
+
+        $this->consultation->update(['status' => 'completed']);
+
+        $appt = $this->consultation->appointment;
+        if ($appt && $appt->canTransitionTo('completed')) {
+            $appt->transitionTo('completed');
+        }
+
+        session()->flash('success', 'Consultation terminée.');
     }
 
     public function render()

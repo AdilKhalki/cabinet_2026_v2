@@ -42,10 +42,11 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="form-group">
+                                <div class="form-group {{ $errors->has('ip_number') ? 'has-error' : '' }}">
                                     <label class="control-label">N° IP</label>
                                     <input type="text" wire:model="ip_number" class="form-control"
                                            placeholder="Numéro IPP">
+                                    @error('ip_number') <span class="help-block text-danger">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -78,12 +79,14 @@
                                             <option value="{{ $bg }}">{{ $bg }}</option>
                                         @endforeach
                                     </select>
+                                    @error('blood_group') <span class="help-block text-danger">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="form-group">
+                                <div class="form-group {{ $errors->has('profession') ? 'has-error' : '' }}">
                                     <label class="control-label">Profession</label>
                                     <input type="text" wire:model="profession" class="form-control">
+                                    @error('profession') <span class="help-block text-danger">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                         </div>
@@ -98,34 +101,39 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
+                                <div class="form-group {{ $errors->has('phone_secondary') ? 'has-error' : '' }}">
                                     <label class="control-label">Téléphone secondaire</label>
                                     <input type="tel" wire:model="phone_secondary" class="form-control">
+                                    @error('phone_secondary') <span class="help-block text-danger">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group {{ $errors->has('email') ? 'has-error' : '' }}">
                             <label class="control-label">Email</label>
                             <input type="email" wire:model="email" class="form-control"
                                    placeholder="patient@exemple.com">
+                            @error('email') <span class="help-block text-danger">{{ $message }}</span> @enderror
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group {{ $errors->has('address') ? 'has-error' : '' }}">
                             <label class="control-label">Adresse</label>
                             <input type="text" wire:model="address" class="form-control"
                                    placeholder="Adresse complète">
+                            @error('address') <span class="help-block text-danger">{{ $message }}</span> @enderror
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group {{ $errors->has('city') ? 'has-error' : '' }}">
                             <label class="control-label">Ville</label>
                             <input type="text" wire:model="city" class="form-control">
+                            @error('city') <span class="help-block text-danger">{{ $message }}</span> @enderror
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group {{ $errors->has('known_allergies') ? 'has-error' : '' }}">
                             <label class="control-label">Allergies connues</label>
                             <textarea wire:model="known_allergies" class="form-control" rows="2"
                                       placeholder="Ex: Pénicilline, aspirine..."></textarea>
+                            @error('known_allergies') <span class="help-block text-danger">{{ $message }}</span> @enderror
                         </div>
 
                     </div>
@@ -141,13 +149,16 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label">Nom de la mutuelle</label>
-                                    <input type="text" wire:model="insurance_name" class="form-control">
+                                    <input type="text" wire:model="insurance_name" class="form-control"
+                                           placeholder="Ex : CNSS (AMO), CNOPS, AMO Tadamon...">
+                                    @error('insurance_name') <span class="help-block text-danger">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label">N° de contrat / immatriculation</label>
                                     <input type="text" wire:model="insurance_number" class="form-control">
+                                    @error('insurance_number') <span class="help-block text-danger">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                         </div>
@@ -163,6 +174,7 @@
                         <div class="form-group">
                             <textarea wire:model="notes" class="form-control" rows="4"
                                       placeholder="Notes supplémentaires..."></textarea>
+                            @error('notes') <span class="help-block text-danger">{{ $message }}</span> @enderror
                         </div>
                     </div>
                 </div>
@@ -176,7 +188,7 @@
                     </div>
                     <div class="card-block text-center">
                         {{-- Aperçu photo --}}
-                        @if($photo)
+                        @if($photo && method_exists($photo, 'isPreviewable') && $photo->isPreviewable())
                             <img src="{{ $photo->temporaryUrl() }}"
                                  class="img-radius img-fluid m-b-15"
                                  style="max-height:200px;object-fit:cover;"
@@ -214,6 +226,12 @@
                                 <span class="label label-primary">{{ $patient->dossier_number }}</span>
                             </p>
                             <p><strong>Créé le :</strong> {{ $patient->created_at->format('d/m/Y') }}</p>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" wire:model="is_active"> Dossier actif
+                                </label>
+                                <small class="text-muted d-block">Un patient inactif n'apparaît plus dans les listes de sélection (RDV, documents...).</small>
+                            </div>
                         </div>
                     </div>
                 @endif
@@ -230,7 +248,7 @@
                                 <i class="feather icon-loader"></i> Enregistrement...
                             </span>
                         </button>
-                        <a href="{{ url()->previous() }}" class="btn btn-default btn-block m-t-5">
+                        <a href="{{ $isEdit ? route('patients.show', $patient) : route('patients.index') }}" wire:navigate class="btn btn-default btn-block m-t-5">
                             <i class="feather icon-x"></i> Annuler
                         </a>
                     </div>

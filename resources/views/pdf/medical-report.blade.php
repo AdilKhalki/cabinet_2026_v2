@@ -97,16 +97,28 @@
 </head>
 <body>
 
+    @php
+        // Le médecin signataire du rapport prime sur les paramètres du cabinet (cabinet multi-médecins)
+        $doc            = $report->doctor;
+        $doctorName     = preg_replace('/^Dr\.?\s+/i', '', $doc?->name ?: ($settings['doctor_name'] ?? ''));
+        $doctorSpec     = $doc?->speciality ?: ($settings['doctor_speciality'] ?? null);
+        $doctorLicense  = $doc?->license_number ?: ($settings['doctor_license'] ?? null);
+        $signaturePath  = $doc?->signature_path ? storage_path('app/public/' . $doc->signature_path) : null;
+        $stampPath      = $doc?->stamp_path ? storage_path('app/public/' . $doc->stamp_path) : null;
+        $signaturePath  = $signaturePath && is_file($signaturePath) ? $signaturePath : null;
+        $stampPath      = $stampPath && is_file($stampPath) ? $stampPath : null;
+    @endphp
+
     {{-- En-tête Médecin --}}
     <div class="header clearfix">
         <div class="header-left">
-            <div class="doctor-name">Dr. {{ $settings['doctor_name'] ?? $report->doctor->name }}</div>
+            <div class="doctor-name">Dr. {{ $doctorName }}</div>
             <div class="cabinet-info">
-                @if(!empty($settings['doctor_speciality']) || $report->doctor->speciality)
-                    {{ $settings['doctor_speciality'] ?? $report->doctor->speciality }}<br>
+                @if($doctorSpec)
+                    {{ $doctorSpec }}<br>
                 @endif
-                @if(!empty($settings['doctor_license']) || $report->doctor->license_number)
-                    Inpe : {{ $settings['doctor_license'] ?? $report->doctor->license_number }}<br>
+                @if($doctorLicense)
+                    INPE : {{ $doctorLicense }}<br>
                 @endif
                 {{ $settings['cabinet_name'] ?? 'Cabinet Médical' }}<br>
                 @if(!empty($settings['cabinet_address']))
@@ -190,15 +202,17 @@
         </div>
         <div class="signature-block">
             <div class="signature-label">Signature et cachet du médecin</div>
-            @if($report->doctor->signature_path)
-                <img src="{{ storage_path('app/public/' . $report->doctor->signature_path) }}"
-                     style="max-height: 60px;" alt="Signature">
+            @if($signaturePath)
+                <img src="{{ $signaturePath }}" style="max-height: 60px;" alt="Signature">
             @else
                 <div style="height: 60px; border-bottom: 1px solid #333; width: 150px; margin: 10px auto 5px;"></div>
             @endif
-            <div class="signature-name">Dr. {{ $settings['doctor_name'] ?? $report->doctor->name }}</div>
-            @if(!empty($settings['doctor_speciality']) || $report->doctor->speciality)
-                <div class="signature-spec">{{ $settings['doctor_speciality'] ?? $report->doctor->speciality }}</div>
+            @if($stampPath)
+                <img src="{{ $stampPath }}" style="max-height: 80px;" alt="Cachet">
+            @endif
+            <div class="signature-name">Dr. {{ $doctorName }}</div>
+            @if($doctorSpec)
+                <div class="signature-spec">{{ $doctorSpec }}</div>
             @endif
         </div>
     </div>

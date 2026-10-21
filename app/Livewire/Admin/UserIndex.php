@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -22,19 +23,34 @@ class UserIndex extends Component
 
     public int $perPage = 15;
 
-    // Modal
     public bool $showModal = false;
     public ?int $editingId = null;
-    public ?int $confirmingDeleteId = null;
 
-    // Form fields
     public string $name = '';
     public string $email = '';
     public string $password = '';
+    public string $password_confirmation = '';
     public string $role = 'medecin';
     public string $phone = '';
     public string $speciality = '';
     public bool $is_active = true;
+
+    /** Relations cliniques supprimées en cascade (FK cascadeOnDelete) si l'utilisateur est supprimé */
+    private const CLINICAL_RELATIONS = [
+        'appointments'   => \App\Models\Appointment::class,
+        'consultations'  => \App\Models\Consultation::class,
+        'prescriptions'  => \App\Models\Prescription::class,
+        'lab_tests'      => \App\Models\LabTest::class,
+        'medical_images' => \App\Models\MedicalImage::class,
+        'medical_reports' => \App\Models\MedicalReport::class,
+        'payments'       => \App\Models\Payment::class,
+    ];
+
+    /** Vérifiée à chaque requête (rendu initial ET appels d'actions Livewire) */
+    public function boot(): void
+    {
+        abort_unless(auth()->user()?->can('manage users'), 403);
+    }
 
     public function updatingSearch(): void
     {
@@ -67,7 +83,8 @@ class UserIndex extends Component
 
     public function openCreate(): void
     {
-        $this->reset(['editingId', 'name', 'email', 'password', 'phone', 'speciality']);
+        $this->resetValidation();
+        $this->reset(['editingId', 'name', 'email', 'password', 'password_confirmation', 'phone', 'speciality']);
         $this->role = 'medecin';
         $this->is_active = true;
         $this->showModal = true;
@@ -75,11 +92,13 @@ class UserIndex extends Component
 
     public function openEdit(int $id): void
     {
+        $this->resetValidation();
         $user = User::findOrFail($id);
         $this->editingId = $id;
         $this->name = $user->name;
         $this->email = $user->email;
         $this->password = '';
+        $this->password_confirmation = '';
         $this->phone = $user->phone ?? '';
         $this->speciality = $user->speciality ?? '';
         $this->is_active = $user->is_active ?? true;
@@ -87,28 +106,49 @@ class UserIndex extends Component
         $this->showModal = true;
     }
 
+    public function closeModal(): void
+    {
+        $this->showModal = false;
+        $this->resetValidation();
+    }
+
     public function save(): void
     {
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email' . ($this->editingId ? ",{$this->editingId}" : ''),
-            'role' => 'required|in:admin,medecin,secretaire',
+            'email' => 'required|email|max:255|unique:users,email' . ($this->editingId ? ",{$this->editingId}" : ''),
+            'role' => 'required|exists:roles,name',
             'phone' => 'nullable|string|max:20',
             'speciality' => 'nullable|string|max:100',
             'is_active' => 'boolean',
+            'password' => [$this->editingId ? 'nullable' : 'required', 'string', Password::default(), 'confirmed'],
         ];
 
-        if (!$this->editingId) {
-            $rules['password'] = 'required|min:8';
-        } else {
-            $rules['password'] = 'nullable|min:8';
-        }
+        $this->validate($rules, [], [
+            'name' => 'nom',
+            'role' => 'rôle',
+            'phone' => 'téléphone',
+            'speciality' => 'spécialité',
+            'password' => 'mot de passe',
+        ]);
 
-        $this->validate($rules);
+        if ($this->editingId) {
+            $user = User::findOrFail($this->editingId);
+
+            // Garde-fous : ne pas se retirer soi-même l'accès / ne pas supprimer le dernier admin
+            if ($user->is($this->currentUser()) && ! $this->is_active) {
+                $this->addError('is_active', 'Vous ne pouvez pas désactiver votre propre compte.');
+                return;
+            }
+            if ($user->hasRole('admin') && ($this->role !== 'admin' || ! $this->is_active) && $this->isLastActiveAdmin($user)) {
+                $this->addError('role', 'Impossible : il doit rester au moins un administrateur actif.');
+                return;
+            }
+        }
 
         $data = [
             'name' => $this->name,
-            'email' => $this->email,
+            'email' => strtolower($this->email),
             'phone' => $this->phone ?: null,
             'speciality' => $this->speciality ?: null,
             'is_active' => $this->is_active,
@@ -119,13 +159,13 @@ class UserIndex extends Component
         }
 
         if ($this->editingId) {
-            $user = User::findOrFail($this->editingId);
             $user->update($data);
             activity()->on($user)->log('Utilisateur modifié');
             session()->flash('success', 'Utilisateur mis à jour.');
         } else {
-            $data['password'] = Hash::make($this->password);
             $user = User::create($data);
+            // Compte créé par l'administrateur : adresse considérée comme vérifiée
+            $user->forceFill(['email_verified_at' => now()])->save();
             activity()->on($user)->log('Utilisateur créé');
             session()->flash('success', 'Utilisateur créé avec succès.');
         }
@@ -133,29 +173,83 @@ class UserIndex extends Component
         $user->syncRoles([$this->role]);
 
         $this->showModal = false;
+        $this->reset(['password', 'password_confirmation']);
         unset($this->users);
     }
 
-    public function confirmDelete(int $id): void
+    public function toggleActive(int $id): void
     {
-        $this->confirmingDeleteId = $id;
-    }
+        $user = User::findOrFail($id);
 
-    public function delete(): void
-    {
-        if ($this->confirmingDeleteId) {
-            $user = User::findOrFail($this->confirmingDeleteId);
-            activity()->on($user)->log('Utilisateur supprimé');
-            $user->delete();
-            session()->flash('success', 'Utilisateur supprimé.');
-            $this->confirmingDeleteId = null;
-            unset($this->users);
+        if ($user->is($this->currentUser())) {
+            session()->flash('error', 'Vous ne pouvez pas désactiver votre propre compte.');
+            return;
         }
+
+        if ($user->is_active && $user->hasRole('admin') && $this->isLastActiveAdmin($user)) {
+            session()->flash('error', 'Impossible : il doit rester au moins un administrateur actif.');
+            return;
+        }
+
+        $user->update(['is_active' => ! $user->is_active]);
+        activity()->on($user)->log($user->is_active ? 'Utilisateur activé' : 'Utilisateur désactivé');
+        session()->flash('success', $user->is_active ? 'Utilisateur activé.' : 'Utilisateur désactivé.');
+        unset($this->users);
     }
 
-    public function cancelDelete(): void
+    public function delete(int $id): void
     {
-        $this->confirmingDeleteId = null;
+        $user = User::findOrFail($id);
+
+        if ($user->is($this->currentUser())) {
+            session()->flash('error', 'Vous ne pouvez pas supprimer votre propre compte.');
+            return;
+        }
+
+        if ($user->hasRole('admin') && $this->isLastActiveAdmin($user)) {
+            session()->flash('error', 'Impossible : il doit rester au moins un administrateur actif.');
+            return;
+        }
+
+        // Les dossiers médicaux liés seraient supprimés définitivement (cascade) :
+        // on impose la désactivation du compte à la place.
+        if ($this->hasClinicalRecords($user)) {
+            session()->flash('error', 'Cet utilisateur possède des données médicales ou financières (RDV, consultations, paiements…). Désactivez son compte au lieu de le supprimer.');
+            return;
+        }
+
+        activity()->on($user)->log('Utilisateur supprimé');
+        $user->delete();
+        session()->flash('success', 'Utilisateur supprimé.');
+        unset($this->users);
+    }
+
+    private function currentUser(): User
+    {
+        return auth()->user();
+    }
+
+    private function isLastActiveAdmin(User $user): bool
+    {
+        return ! User::role('admin')
+            ->where('is_active', true)
+            ->whereKeyNot($user->getKey())
+            ->exists();
+    }
+
+    private function hasClinicalRecords(User $user): bool
+    {
+        foreach (self::CLINICAL_RELATIONS as $model) {
+            $query = $model::query()->where('doctor_id', $user->getKey());
+            if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($model))) {
+                $query->withTrashed();
+            }
+            if ($query->exists()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function render()

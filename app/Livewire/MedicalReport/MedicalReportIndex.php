@@ -44,10 +44,17 @@ class MedicalReportIndex extends Component
     public function confirmDelete(int $id): void { $this->confirmingDeleteId = $id; }
     public function cancelDelete(): void { $this->confirmingDeleteId = null; }
 
-    public function delete(): void
+    public function delete(?int $id = null): void
     {
+        // La vue appelle delete(id) directement (wire:confirm) : accepter l'id en paramètre
+        if ($id) {
+            $this->confirmingDeleteId = $id;
+        }
+
         if ($this->confirmingDeleteId) {
-            MedicalReport::findOrFail($this->confirmingDeleteId)->delete();
+            $report = MedicalReport::findOrFail($this->confirmingDeleteId);
+            $this->authorize('delete', $report);
+            $report->delete();
             session()->flash('success', 'Rapport supprimé.');
             $this->confirmingDeleteId = null;
             unset($this->reports);

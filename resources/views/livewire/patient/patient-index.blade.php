@@ -31,20 +31,29 @@
                                placeholder="Rechercher par nom, téléphone, dossier, CIN...">
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-{{ auth()->user()->can('delete patients') ? 2 : 3 }}">
                     <select wire:model.live="genderFilter" class="form-control">
                         <option value="">Tous les sexes</option>
                         <option value="male">Homme</option>
                         <option value="female">Femme</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-{{ auth()->user()->can('delete patients') ? 2 : 3 }}">
                     <select wire:model.live="perPage" class="form-control">
                         <option value="15">15 par page</option>
                         <option value="25">25 par page</option>
                         <option value="50">50 par page</option>
                     </select>
                 </div>
+                @can('delete patients')
+                    <div class="col-md-2">
+                        <div class="checkbox m-t-5">
+                            <label>
+                                <input type="checkbox" wire:model.live="showArchived"> Dossiers archivés
+                            </label>
+                        </div>
+                    </div>
+                @endcan
             </div>
 
             {{-- Tableau --}}
@@ -130,6 +139,15 @@
                                 </td>
                                 <td>
                                     <div class="btn-group">
+                                        @if($patient->trashed())
+                                            @can('restore', $patient)
+                                                <button wire:click="restore({{ $patient->id }})"
+                                                        wire:confirm="Restaurer ce dossier patient ?"
+                                                        class="btn btn-success btn-sm" title="Restaurer">
+                                                    <i class="feather icon-rotate-ccw"></i>
+                                                </button>
+                                            @endcan
+                                        @else
                                         <a href="{{ route('patients.show', $patient) }}"
                                            class="btn btn-info btn-sm" title="Voir dossier">
                                             <i class="feather icon-eye"></i>
@@ -146,6 +164,7 @@
                                                 <i class="feather icon-trash-2"></i>
                                             </button>
                                         @endcan
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -186,17 +205,17 @@
             <div class="modal-dialog modal-sm">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Confirmer la suppression</h4>
+                        <h4 class="modal-title">Confirmer l'archivage</h4>
                     </div>
                     <div class="modal-body">
-                        <p>Êtes-vous sûr de vouloir supprimer ce patient ? Cette action est réversible (soft delete).</p>
+                        <p>Êtes-vous sûr de vouloir archiver ce dossier patient ? Il pourra être restauré depuis le filtre « Dossiers archivés ».</p>
                     </div>
                     <div class="modal-footer">
                         <button wire:click="cancelDelete" class="btn btn-default btn-sm">
                             <i class="feather icon-x"></i> Annuler
                         </button>
                         <button wire:click="delete" class="btn btn-danger btn-sm">
-                            <i class="feather icon-trash-2"></i> Supprimer
+                            <i class="feather icon-trash-2"></i> Archiver
                         </button>
                     </div>
                 </div>

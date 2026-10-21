@@ -200,6 +200,9 @@
                 @if ($line->route)
                     <strong>Voie :</strong> {{ $line->route }}<br>
                 @endif
+                @if ($line->quantity)
+                    <strong>Quantité :</strong> {{ $line->quantity }}<br>
+                @endif
                 @if ($line->instructions)
                     <em>{{ $line->instructions }}</em>
                 @endif

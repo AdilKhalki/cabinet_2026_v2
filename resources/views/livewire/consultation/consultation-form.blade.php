@@ -15,7 +15,15 @@
 
                 {{-- Infos de base --}}
                 <div class="card">
-                    <div class="card-header"><h5><i class="feather icon-info"></i> Informations générales</h5></div>
+                    <div class="card-header">
+                        <h5><i class="feather icon-info"></i> Informations générales</h5>
+                        @if($appointmentId)
+                            <span class="label label-info m-l-10"><i class="feather icon-calendar"></i> Depuis le RDV n° {{ $appointmentId }}</span>
+                        @endif
+                        @if($isEdit)
+                            <span class="label label-{{ $status === 'completed' ? 'success' : 'warning' }} m-l-5">{{ \App\Models\Consultation::STATUS_LABELS[$status] ?? $status }}</span>
+                        @endif
+                    </div>
                     <div class="card-block">
                         <div class="row">
                             <div class="col-md-6">
@@ -28,7 +36,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Médecin <span class="text-danger">*</span></label>
-                                    <select class="form-control" wire:model="doctor_id">
+                                    <select class="form-control" wire:model="doctor_id" @disabled($isEdit || (auth()->user()->isMedecin() && ! auth()->user()->isAdmin()))>
                                         <option value="">-- Sélectionner --</option>
                                         @foreach($doctors as $doctor)
                                             <option value="{{ $doctor->id }}">Dr. {{ $doctor->name }}</option>
@@ -43,12 +51,9 @@
                                 <div class="form-group">
                                     <label>Type de consultation <span class="text-danger">*</span></label>
                                     <select class="form-control" wire:model="consultation_type">
-                                        <option value="general">Consultation générale</option>
-                                        <option value="specialized">Consultation spécialisée</option>
-                                        <option value="followup">Suivi</option>
-                                        <option value="emergency">Urgence</option>
-                                        <option value="control">Contrôle</option>
-                                        <option value="teleconsultation">Téléconsultation</option>
+                                        @foreach(\App\Models\Appointment::TYPE_LABELS as $key => $label)
+                                            <option value="{{ $key }}">{{ $label }}</option>
+                                        @endforeach
                                     </select>
                                     @error('consultation_type') <span class="text-danger small">{{ $message }}</span> @enderror
                                 </div>
@@ -167,7 +172,7 @@
                                    step="1" min="0" max="300" placeholder="175">
                             @error('height_cm') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
-                        @if($weight_kg && $height_cm && $height_cm > 0)
+                        @if(is_numeric($weight_kg) && is_numeric($height_cm) && $height_cm > 0)
                         <div class="alert alert-info p-10 m-b-15" style="font-size:12px;">
                             IMC : <strong>{{ number_format($weight_kg / (($height_cm/100) ** 2), 1) }}</strong>
                         </div>
@@ -176,11 +181,13 @@
                             <label>Tension artérielle</label>
                             <input type="text" class="form-control" wire:model="blood_pressure"
                                    placeholder="120/80">
+                            @error('blood_pressure') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
                         <div class="form-group">
                             <label>Fréquence cardiaque (bpm)</label>
                             <input type="number" class="form-control" wire:model="heart_rate"
                                    min="0" max="300" placeholder="75">
+                            @error('heart_rate') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
                         <div class="form-group">
                             <label>Température (°C)</label>
@@ -201,13 +208,16 @@
                 <div class="card">
                     <div class="card-block">
                         <button type="submit" class="btn btn-primary btn-block m-b-10">
-                            <div wire:loading wire:target="save">
-                                <span class="fa fa-spinner fa-spin"></span>
-                            </div>
-                            <i class="feather icon-save"></i>
-                            {{ $isEdit ? 'Mettre à jour' : 'Enregistrer la consultation' }}
+                            <span wire:loading wire:target="save"><span class="fa fa-spinner fa-spin"></span></span>
+                            <i class="feather icon-check-circle"></i>
+                            {{ $isEdit && $status === 'completed' ? 'Mettre à jour' : 'Enregistrer et terminer' }}
                         </button>
-                        <a href="{{ url()->previous() }}" class="btn btn-default btn-block">
+                        @if(! $isEdit || $status !== 'completed')
+                        <button type="button" wire:click="save(false)" class="btn btn-default btn-block m-b-10">
+                            <i class="feather icon-save"></i> Enregistrer (consultation en cours)
+                        </button>
+                        @endif
+                        <a href="{{ $isEdit ? route('consultations.show', $consultationId) : route('consultations.index') }}" class="btn btn-default btn-block">
                             <i class="feather icon-x"></i> Annuler
                         </a>
                     </div>

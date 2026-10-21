@@ -22,6 +22,36 @@ class CabinetStats extends Component
         $this->month = now()->month;
     }
 
+    private const MONTH_NAMES = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+    /** Expression SQL « mois » portable (MySQL / SQLite / PostgreSQL) */
+    private function monthExpression(string $column): string
+    {
+        return match (DB::connection()->getDriverName()) {
+            'sqlite' => "CAST(strftime('%m', {$column}) AS INTEGER)",
+            'pgsql'  => "EXTRACT(MONTH FROM {$column})",
+            default  => "MONTH({$column})",
+        };
+    }
+
+    /** Nombre d'enregistrements par mois (1..12) pour l'année sélectionnée */
+    private function countByMonth($query, string $column): array
+    {
+        $expr = $this->monthExpression($column);
+        $rows = $query->whereYear($column, $this->year)
+            ->selectRaw("{$expr} as month, COUNT(*) as total")
+            ->groupByRaw($expr)
+            ->toBase()
+            ->pluck('total', 'month');
+
+        $counts = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $counts[$m] = (int) ($rows[$m] ?? 0);
+        }
+
+        return $counts;
+    }
+
     #[Computed]
     public function globalStats(): array
     {
@@ -30,34 +60,20 @@ class CabinetStats extends Component
             'active_patients'        => Patient::active()->count(),
             'total_consultations'    => Consultation::count(),
             'total_appointments'     => Appointment::count(),
-            'total_revenue'          => Payment::where('status', '!=', 'cancelled')->sum('amount_paid'),
+            'total_revenue'          => Payment::revenue()->sum('amount_paid'),
             'new_patients_this_month'=> Patient::whereYear('created_at', $this->year)
                                                ->whereMonth('created_at', $this->month)->count(),
-            'consultations_this_month' => Consultation::whereYear('created_at', $this->year)
-                                               ->whereMonth('created_at', $this->month)->count(),
+            'consultations_this_month' => Consultation::whereYear('consultation_date', $this->year)
+                                               ->whereMonth('consultation_date', $this->month)->count(),
         ];
     }
 
     #[Computed]
     public function monthlyConsultations(): array
     {
-        $rows = Consultation::whereYear('created_at', $this->year)
-            ->groupBy(DB::raw('MONTH(created_at)'))
-            ->selectRaw('MONTH(created_at) as month, COUNT(*) as total')
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
+        $counts = $this->countByMonth(Consultation::query(), 'consultation_date');
 
-        $labels = [];
-        $data = [];
-        $monthNames = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
-
-        for ($m = 1; $m <= 12; $m++) {
-            $labels[] = $monthNames[$m - 1];
-            $data[] = $rows->get($m)?->total ?? 0;
-        }
-
-        return ['labels' => $labels, 'data' => $data];
+        return ['labels' => self::MONTH_NAMES, 'data' => array_values($counts)];
     }
 
     #[Computed]
@@ -68,7 +84,7 @@ class CabinetStats extends Component
             ->get();
 
         return [
-            'labels' => $rows->pluck('status')->map(fn($s) => ucfirst($s))->toArray(),
+            'labels' => $rows->pluck('status')->map(fn ($s) => Appointment::STATUS_LABELS[$s] ?? ucfirst((string) $s))->toArray(),
             'data'   => $rows->pluck('total')->toArray(),
         ];
     }
@@ -95,7 +111,9 @@ class CabinetStats extends Component
             ->get();
 
         return [
-            'labels' => $rows->pluck('consultation_type')->map(fn($t) => ucfirst(str_replace('_', ' ', $t)))->toArray(),
+            'labels' => $rows->pluck('consultation_type')
+                ->map(fn ($t) => Appointment::TYPE_LABELS[$t] ?? ($t ? ucfirst(str_replace('_', ' ', $t)) : 'Non précisé'))
+                ->toArray(),
             'data'   => $rows->pluck('total')->toArray(),
         ];
     }
@@ -104,15 +122,10 @@ class CabinetStats extends Component
     {
         $gs = $this->globalStats;
 
-        // New patients per month for current year (for chart)
-        $npRows = Patient::whereYear('created_at', $this->year)
-            ->groupBy(DB::raw('MONTH(created_at)'))
-            ->selectRaw('MONTH(created_at) as month, COUNT(*) as total')
-            ->get()->keyBy('month');
-        $monthNames = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+        // Nouveaux patients par mois de l'année (graphique)
         $npData = [];
-        for ($m = 1; $m <= 12; $m++) {
-            $npData[] = ['label' => $monthNames[$m-1], 'value' => $npRows->get($m)?->total ?? 0];
+        foreach ($this->countByMonth(Patient::query(), 'created_at') as $m => $total) {
+            $npData[] = ['label' => self::MONTH_NAMES[$m - 1], 'value' => $total];
         }
 
         $cancelledCount = Appointment::where('status', 'cancelled')->count();
@@ -122,8 +135,8 @@ class CabinetStats extends Component
             'totalPatients'           => $gs['total_patients'],
             'newPatientsThisMonth'    => $gs['new_patients_this_month'],
             'consultationsThisMonth'  => $gs['consultations_this_month'],
-            'consultationsThisYear'   => Consultation::whereYear('created_at', $this->year)->count(),
-            'appointmentsThisMonth'   => Appointment::whereYear('created_at', $this->year)->whereMonth('created_at', $this->month)->count(),
+            'consultationsThisYear'   => Consultation::whereYear('consultation_date', $this->year)->count(),
+            'appointmentsThisMonth'   => Appointment::whereYear('scheduled_at', $this->year)->whereMonth('scheduled_at', $this->month)->count(),
             'pendingAppointments'     => Appointment::whereIn('status', ['planned','confirmed','waiting'])->count(),
             'cancelledAppointments'   => $cancelledCount,
             'cancellationRate'        => $totalAppts > 0 ? round($cancelledCount / $totalAppts * 100, 1) : 0,

@@ -70,8 +70,8 @@ new #[Title('Profile settings')] class extends Component {
     #[Computed]
     public function showDeleteUser(): bool
     {
-        return ! Auth::user() instanceof MustVerifyEmail
-            || (Auth::user() instanceof MustVerifyEmail && Auth::user()->hasVerifiedEmail());
+        // Auto-suppression désactivée (voir delete-user-modal) : gérée par l'administrateur
+        return false;
     }
 }; ?>
 

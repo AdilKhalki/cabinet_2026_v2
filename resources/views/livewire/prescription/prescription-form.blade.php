@@ -60,6 +60,14 @@
                     </div>
                 </div>
 
+                {{-- Alerte allergies du patient --}}
+                @if(!empty($patientAllergies))
+                    <div class="alert alert-danger">
+                        <i class="feather icon-alert-triangle"></i>
+                        <strong>Allergies connues :</strong> {{ $patientAllergies }}
+                    </div>
+                @endif
+
                 {{-- Lignes de médicaments --}}
                 <div class="card">
                     <div class="card-header">
@@ -160,14 +168,20 @@
                                         <input type="number" class="form-control form-control-sm"
                                                wire:model="lines.{{ $i }}.duration_days"
                                                min="1" placeholder="7">
+                                        @error("lines.$i.duration_days")
+                                            <span class="text-danger small">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group m-b-10">
-                                        <label class="small text-muted">Quantité</label>
-                                        <input type="text" class="form-control form-control-sm"
+                                        <label class="small text-muted">Quantité (boîtes)</label>
+                                        <input type="number" class="form-control form-control-sm"
                                                wire:model="lines.{{ $i }}.quantity"
-                                               placeholder="Ex: 1 boîte">
+                                               min="1" placeholder="Ex: 1">
+                                        @error("lines.$i.quantity")
+                                            <span class="text-danger small">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="col-md-2">

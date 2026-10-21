@@ -25,27 +25,40 @@
                     <p class="text-muted m-b-0">
                         <i class="feather icon-folder"></i> {{ $consultation->patient->dossier_number }}
                         &nbsp;&bull;&nbsp;
-                        <i class="feather icon-calendar"></i> {{ $consultation->created_at->format('d/m/Y H:i') }}
+                        <i class="feather icon-calendar"></i> {{ ($consultation->consultation_date ?? $consultation->created_at)->format('d/m/Y H:i') }}
                     </p>
                     <p class="text-muted m-b-0">
                         <i class="feather icon-user"></i> Dr. {{ $consultation->doctor->name }}
                         &nbsp;&bull;&nbsp;
-                        <span class="label label-info">{{ ucfirst(str_replace('_', ' ', $consultation->consultation_type)) }}</span>
+                        <span class="label label-info">{{ $consultation->type_label }}</span>
+                        <span class="label label-{{ $consultation->status === 'completed' ? 'success' : 'warning' }} m-l-5">{{ $consultation->status_label }}</span>
                         @if($consultation->followup_required)
                             <span class="label label-warning m-l-5">Suivi requis</span>
                         @endif
                     </p>
                 </div>
                 <div class="col-md-6 text-right">
+                    @can('update', $consultation)
+                    @if($consultation->status === 'in_progress')
+                    <button type="button" wire:click="complete" wire:confirm="Terminer cette consultation ?"
+                            class="btn btn-primary btn-sm m-r-5">
+                        <i class="feather icon-check-circle"></i> Terminer
+                    </button>
+                    @endif
+                    @endcan
+                    @can('create prescriptions')
                     <a href="{{ route('prescriptions.create', ['patient' => $consultation->patient_id, 'doctor' => $consultation->doctor_id, 'consultation' => $consultation->id]) }}"
                        class="btn btn-success btn-sm m-r-5">
                         <i class="feather icon-file-text"></i> Nouvelle Ordonnance
                     </a>
+                    @endcan
+                    @can('update', $consultation)
                     <a href="{{ route('consultations.edit', $consultation->id) }}"
                        class="btn btn-warning btn-sm m-r-5">
                         <i class="feather icon-edit"></i> Modifier
                     </a>
-                    <a href="{{ url()->previous() }}" class="btn btn-default btn-sm">
+                    @endcan
+                    <a href="{{ route('consultations.index') }}" class="btn btn-default btn-sm">
                         <i class="feather icon-arrow-left"></i> Retour
                     </a>
                 </div>
@@ -289,7 +302,7 @@
                                 <div class="card">
                                     @php $ext = strtolower(pathinfo($img->file_path, PATHINFO_EXTENSION)); @endphp
                                     @if(in_array($ext, ['jpg','jpeg','png','gif']))
-                                        <img src="{{ Storage::url($img->file_path) }}" class="img-fluid"
+                                        <img src="{{ $img->file_url }}" class="img-fluid"
                                              style="height:150px;object-fit:cover;">
                                     @else
                                         <div class="text-center p-20" style="background:#f4f7fa;">
@@ -322,7 +335,7 @@
                                     <td>{{ $doc->category ?? '-' }}</td>
                                     <td>{{ $doc->created_at->format('d/m/Y') }}</td>
                                     <td>
-                                        <a href="{{ Storage::url($doc->file_path) }}" target="_blank" class="btn btn-primary btn-xs">
+                                        <a href="{{ $doc->file_url }}" target="_blank" class="btn btn-primary btn-xs">
                                             <i class="feather icon-download"></i>
                                         </a>
                                     </td>

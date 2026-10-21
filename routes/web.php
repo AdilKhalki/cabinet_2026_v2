@@ -21,6 +21,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
     Route::get('/', DashboardStats::class)->name('home');
+    // Alias utilisé par Fortify (config fortify.home) et les vues du starter kit
+    Route::redirect('/dashboard', '/')->name('dashboard');
 
     // ── Patients ───────────────────────────────────────────
     Route::prefix('patients')->name('patients.')->middleware('permission:view patients')->group(function () {
@@ -35,31 +37,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', AppointmentIndex::class)->name('index');
         Route::get('/calendar', AppointmentCalendar::class)->name('calendar');
         Route::get('/waiting-room', WaitingRoom::class)->name('waiting-room');
-        Route::get('/create', AppointmentIndex::class)->name('create');
+        Route::get('/create', AppointmentIndex::class)->name('create')->middleware('permission:create appointments');
     });
 
     // ── Consultations ──────────────────────────────────────
     Route::prefix('consultations')->name('consultations.')->middleware('permission:view consultations')->group(function () {
         Route::get('/', ConsultationIndex::class)->name('index');
-        Route::get('/create', ConsultationForm::class)->name('create');
+        Route::get('/create', ConsultationForm::class)->name('create')->middleware('permission:create consultations');
         Route::get('/{consultation}', ConsultationShow::class)->name('show');
-        Route::get('/{consultation}/edit', ConsultationForm::class)->name('edit');
+        Route::get('/{consultation}/edit', ConsultationForm::class)->name('edit')->middleware('permission:edit consultations');
     });
 
     // ── Ordonnances ────────────────────────────────────────
     Route::prefix('prescriptions')->name('prescriptions.')->middleware('permission:view prescriptions')->group(function () {
         Route::get('/', \App\Livewire\Prescription\PrescriptionIndex::class)->name('index');
-        Route::get('/create', \App\Livewire\Prescription\PrescriptionForm::class)->name('create');
-        Route::get('/{prescription}/edit', \App\Livewire\Prescription\PrescriptionForm::class)->name('edit');
-        Route::get('/{prescription}/pdf', [\App\Http\Controllers\PrescriptionController::class, 'pdf'])->name('pdf');
+        Route::get('/create', \App\Livewire\Prescription\PrescriptionForm::class)->name('create')->middleware('permission:create prescriptions');
+        Route::get('/{prescription}/edit', \App\Livewire\Prescription\PrescriptionForm::class)->name('edit')->middleware('permission:create prescriptions');
+        Route::get('/{prescription}/pdf', [\App\Http\Controllers\PrescriptionController::class, 'pdf'])->name('pdf')->middleware('permission:print prescriptions');
         Route::get('/{prescription}', \App\Livewire\Prescription\PrescriptionShow::class)->name('show');
     });
 
     // ── Analyses ───────────────────────────────────────────
     Route::prefix('lab-tests')->name('lab-tests.')->middleware('permission:view lab-tests')->group(function () {
         Route::get('/', \App\Livewire\LabTest\LabTestIndex::class)->name('index');
-        Route::get('/create', \App\Livewire\LabTest\LabTestForm::class)->name('create');
-        Route::get('/{labTest}/edit', \App\Livewire\LabTest\LabTestForm::class)->name('edit');
+        Route::get('/create', \App\Livewire\LabTest\LabTestForm::class)->name('create')->middleware('permission:create lab-tests');
+        Route::get('/{labTest}/edit', \App\Livewire\LabTest\LabTestForm::class)->name('edit')->middleware('permission:edit lab-tests');
         Route::get('/{labTest}/pdf', [\App\Http\Controllers\LabTestController::class, 'pdf'])->name('pdf');
         Route::get('/{labTest}', \App\Livewire\LabTest\LabTestShow::class)->name('show');
     });
@@ -67,24 +69,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Imagerie ───────────────────────────────────────────
     Route::prefix('medical-images')->name('medical-images.')->middleware('permission:view medical-images')->group(function () {
         Route::get('/', \App\Livewire\MedicalImage\MedicalImageIndex::class)->name('index');
-        Route::get('/create', \App\Livewire\MedicalImage\MedicalImageForm::class)->name('create');
-        Route::get('/{medicalImage}/edit', \App\Livewire\MedicalImage\MedicalImageForm::class)->name('edit');
+        Route::get('/create', \App\Livewire\MedicalImage\MedicalImageForm::class)->name('create')->middleware('permission:create medical-images');
+        Route::get('/{medicalImage}/edit', \App\Livewire\MedicalImage\MedicalImageForm::class)->name('edit')->middleware('permission:edit medical-images');
         Route::get('/{medicalImage}', \App\Livewire\MedicalImage\MedicalImageShow::class)->name('show');
     });
 
     // ── Documents ──────────────────────────────────────────
     Route::prefix('documents')->name('documents.')->middleware('permission:view documents')->group(function () {
         Route::get('/', \App\Livewire\Document\DocumentIndex::class)->name('index');
-        Route::get('/create', \App\Livewire\Document\DocumentForm::class)->name('create');
-        Route::get('/{document}/edit', \App\Livewire\Document\DocumentForm::class)->name('edit');
+        Route::get('/create', \App\Livewire\Document\DocumentForm::class)->name('create')->middleware('permission:upload documents');
+        Route::get('/{document}/edit', \App\Livewire\Document\DocumentForm::class)->name('edit')->middleware('permission:upload documents');
     });
 
     // ── Rapports médicaux ──────────────────────────────────
     Route::prefix('medical-reports')->name('medical-reports.')->middleware('permission:view medical-reports')->group(function () {
         Route::get('/', \App\Livewire\MedicalReport\MedicalReportIndex::class)->name('index');
-        Route::get('/create', \App\Livewire\MedicalReport\MedicalReportForm::class)->name('create');
-        Route::get('/{medicalReport}/edit', \App\Livewire\MedicalReport\MedicalReportForm::class)->name('edit');
-        Route::get('/{medicalReport}/pdf', [\App\Http\Controllers\MedicalReportController::class, 'pdf'])->name('pdf');
+        Route::get('/create', \App\Livewire\MedicalReport\MedicalReportForm::class)->name('create')->middleware('permission:create medical-reports');
+        Route::get('/{medicalReport}/edit', \App\Livewire\MedicalReport\MedicalReportForm::class)->name('edit')->middleware('permission:edit medical-reports');
+        Route::get('/{medicalReport}/pdf', [\App\Http\Controllers\MedicalReportController::class, 'pdf'])->name('pdf')->middleware('permission:print medical-reports');
         Route::get('/{medicalReport}', \App\Livewire\MedicalReport\MedicalReportShow::class)->name('show');
     });
 
@@ -120,26 +122,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── API interne ────────────────────────────────────────
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/appointments/calendar', [\App\Http\Controllers\Api\AppointmentApiController::class, 'calendar'])
-            ->name('appointments.calendar');
+            ->name('appointments.calendar')->middleware('permission:view appointments');
         Route::get('/medications/search', [\App\Http\Controllers\Api\MedicationApiController::class, 'search'])
-            ->name('medications.search');
+            ->name('medications.search')->middleware('permission:create prescriptions|manage medications');
     });
 });
 
 require __DIR__ . '/settings.php';
-
-// Route temporaire pour vider le cache (à supprimer après usage)
-Route::get('/clear-cache-2026', function () {
-    Artisan::call('optimize:clear');
-    Artisan::call('view:clear');
-    Artisan::call('route:clear');
-    Artisan::call('config:clear');
-    Artisan::call('event:clear');
-
-    // Supprimer le cache OPcache si disponible
-    if (function_exists('opcache_reset')) {
-        opcache_reset();
-    }
-
-    return 'Cache vidé avec succès ! Supprimez cette route après usage.';
-});

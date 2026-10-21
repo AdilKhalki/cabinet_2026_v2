@@ -19,15 +19,14 @@ class MedicalImageIndex extends Component
     public string $categoryFilter = '';
 
     public int $perPage = 12;
-    public ?int $confirmingDeleteId = null;
+
+    public function mount(): void
+    {
+        $this->authorize('viewAny', MedicalImage::class);
+    }
 
     public function updatingSearch(): void { $this->resetPage(); }
     public function updatingCategoryFilter(): void { $this->resetPage(); }
-
-    public function getCategoriesArray(): array
-    {
-        return MedicalImage::CATEGORY_LABELS;
-    }
 
     #[Computed]
     public function medicalImages()
@@ -35,38 +34,36 @@ class MedicalImageIndex extends Component
         return MedicalImage::with(['patient', 'doctor'])
             ->when($this->search, fn($q) => $q->where(function ($q) {
                 $q->where('title', 'like', "%{$this->search}%")
-                  ->orWhereHas('patient', fn($pq) => $pq
-                      ->where('first_name', 'like', "%{$this->search}%")
-                      ->orWhere('last_name', 'like', "%{$this->search}%"));
+                  ->orWhere('body_part', 'like', "%{$this->search}%")
+                  ->orWhereHas('patient', fn($pq) => $pq->search($this->search));
             }))
-            ->when($this->categoryFilter, fn($q) => $q->where('category', $this->categoryFilter))
+            ->when(array_key_exists($this->categoryFilter, MedicalImage::CATEGORY_LABELS),
+                fn($q) => $q->where('category', $this->categoryFilter))
+            // Un médecin ne voit dans la liste globale que ses propres examens
+            // (le dossier patient affiche l'intégralité de l'imagerie du patient).
             ->when(auth()->user()->isMedecin(), fn($q) => $q->where('doctor_id', auth()->id()))
-            ->orderByDesc('created_at')
+            ->orderByDesc('image_date')
+            ->orderByDesc('id')
             ->paginate($this->perPage);
     }
 
-    public function confirmDelete(int $id): void { $this->confirmingDeleteId = $id; }
-    public function cancelDelete(): void { $this->confirmingDeleteId = null; }
-
-    public function delete(): void
+    public function delete(int $id): void
     {
-        if ($this->confirmingDeleteId) {
-            $image = MedicalImage::findOrFail($this->confirmingDeleteId);
-            if ($image->file_path) {
-                \Illuminate\Support\Facades\Storage::delete($image->file_path);
-            }
-            $image->delete();
-            session()->flash('success', 'Image supprimée.');
-            $this->confirmingDeleteId = null;
-            unset($this->medicalImages);
-        }
+        $image = MedicalImage::findOrFail($id);
+        $this->authorize('delete', $image);
+
+        // Suppression logique : le fichier est conservé pour permettre une restauration
+        $image->delete();
+
+        session()->flash('success', 'Image supprimée.');
+        unset($this->medicalImages);
     }
 
     public function render()
     {
         return view('livewire.medical-image.medical-image-index', [
             'medicalImages' => $this->medicalImages,
-            'categories'    => $this->getCategoriesArray(),
+            'categories'    => MedicalImage::CATEGORY_LABELS,
         ])->layout('layouts.cabinet', [
             'title'      => 'Imagerie Médicale',
             'header'     => 'Imagerie Médicale',

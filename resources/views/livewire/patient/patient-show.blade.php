@@ -1,4 +1,17 @@
 <div>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <i class="feather icon-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
+
+    @if($patient->trashed())
+        <div class="alert alert-warning">
+            <i class="feather icon-archive"></i> Ce dossier patient est archivé.
+        </div>
+    @endif
+
     {{-- En-tête du dossier --}}
     <div class="row">
         <div class="col-md-12">
@@ -29,7 +42,7 @@
                                 @endif
                             </p>
                             <div class="row m-t-10">
-                                <div class="col-md-3"><i class="feather icon-calendar"></i> {{ $patient->age }} ans ({{ $patient->birth_date->format('d/m/Y') }})</div>
+                                <div class="col-md-3"><i class="feather icon-calendar"></i> {{ $patient->age }} ans ({{ $patient->birth_date?->format('d/m/Y') }})</div>
                                 <div class="col-md-3"><i class="feather icon-phone"></i> {{ $patient->phone }}</div>
                                 @if($patient->email)
                                     <div class="col-md-3"><i class="feather icon-mail"></i> {{ $patient->email }}</div>
@@ -51,12 +64,12 @@
                                     <i class="feather icon-edit"></i> Modifier
                                 </a>
                             @endcan
-                            @can('create', App\Models\Appointment::class)
+                            @can('create appointments')
                             <a href="{{ route('appointments.create', ['patient' => $patient->id]) }}" class="btn btn-info btn-sm m-t-5">
                                 <i class="feather icon-calendar"></i> RDV
                             </a>
                             @endcan
-                            @can('create', App\Models\Consultation::class)
+                            @can('create consultations')
                             <a href="{{ route('consultations.create', ['patient' => $patient->id]) }}" class="btn btn-success btn-sm m-t-5">
                                 <i class="feather icon-activity"></i> Consultation
                             </a>
@@ -71,29 +84,13 @@
     {{-- Onglets de navigation --}}
     <div class="card">
         <div class="card-block p-0">
-            @php
-                $tabs = [
-                    'overview'       => ['icon'=>'icon-eye',        'label'=>'Vue d\'ensemble',                        'roles'=>null],
-                    'consultations'  => ['icon'=>'icon-activity',   'label'=>'Consultations ('.count($patient->consultations).')',   'roles'=>['admin','medecin']],
-                    'prescriptions'  => ['icon'=>'icon-file-text',  'label'=>'Ordonnances ('.count($patient->prescriptions).')',     'roles'=>['admin','medecin']],
-                    'lab-tests'      => ['icon'=>'icon-thermometer','label'=>'Analyses ('.count($patient->labTests).')',             'roles'=>['admin','medecin']],
-                    'images'         => ['icon'=>'icon-image',      'label'=>'Imagerie ('.count($patient->medicalImages).')',        'roles'=>['admin','medecin']],
-                    'reports'        => ['icon'=>'icon-clipboard',  'label'=>'Rapports ('.count($patient->medicalReports).')',       'roles'=>['admin','medecin']],
-                    'acts'           => ['icon'=>'icon-list',       'label'=>'Actes Médicaux',                          'roles'=>['admin','medecin']],
-                    'history'        => ['icon'=>'icon-clock',      'label'=>'Antécédents',                             'roles'=>null],
-                    'documents'      => ['icon'=>'icon-folder',     'label'=>'Documents ('.count($patient->documents).')',           'roles'=>null],
-                    'payments'       => ['icon'=>'icon-credit-card','label'=>'Paiements ('.count($patient->payments).')',            'roles'=>null],
-                ];
-            @endphp
             <ul class="nav nav-tabs" style="margin:0;border-bottom:none;">
                 @foreach($tabs as $tab => $info)
-                    @if($info['roles'] === null || auth()->user()->hasAnyRole($info['roles']))
                     <li class="{{ $activeTab === $tab ? 'active' : '' }}">
                         <a href="#" wire:click.prevent="setTab('{{ $tab }}')" style="border-radius:0;">
                             <i class="feather {{ $info['icon'] }}"></i> {{ $info['label'] }}
                         </a>
                     </li>
-                    @endif
                 @endforeach
             </ul>
         </div>
@@ -105,37 +102,70 @@
         {{-- Vue d'ensemble --}}
         @if($activeTab === 'overview')
             <div class="row">
+                @isset($patient->consultations_count)
                 <div class="col-md-3">
                     <div class="card bg-c-blue">
                         <div class="card-block text-white text-center">
-                            <h2>{{ $patient->consultations->count() }}</h2>
+                            <h2>{{ $patient->consultations_count }}</h2>
                             <p>Consultations</p>
                         </div>
                     </div>
                 </div>
+                @endisset
                 <div class="col-md-3">
                     <div class="card bg-c-green">
                         <div class="card-block text-white text-center">
-                            <h2>{{ $patient->appointments->count() }}</h2>
+                            <h2>{{ $patient->appointments_count }}</h2>
                             <p>Rendez-vous</p>
                         </div>
                     </div>
                 </div>
+                @isset($patient->prescriptions_count)
                 <div class="col-md-3">
                     <div class="card bg-c-yellow">
                         <div class="card-block text-white text-center">
-                            <h2>{{ $patient->prescriptions->count() }}</h2>
+                            <h2>{{ $patient->prescriptions_count }}</h2>
                             <p>Ordonnances</p>
                         </div>
                     </div>
                 </div>
+                @endisset
+                @can('view payments')
                 <div class="col-md-3">
                     <div class="card bg-c-pink">
                         <div class="card-block text-white text-center">
-                            <h2>{{ $patient->payments->where('status','pending')->count() }}</h2>
-                            <p>Impayés</p>
+                            <h2>{{ $patient->unpaid_payments_count }}</h2>
+                            <p>Factures impayées</p>
                         </div>
                     </div>
+                </div>
+                @endcan
+            </div>
+
+            {{-- Informations administratives --}}
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="feather icon-info"></i> Informations administratives</h5>
+                </div>
+                <div class="card-block">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong>CIN :</strong> {{ $patient->cin ?? '—' }}</p>
+                            <p><strong>N° IP :</strong> {{ $patient->ip_number ?? '—' }}</p>
+                            <p><strong>Profession :</strong> {{ $patient->profession ?? '—' }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Téléphone secondaire :</strong> {{ $patient->phone_secondary ?? '—' }}</p>
+                            <p><strong>Adresse :</strong> {{ $patient->address ?? '—' }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Mutuelle :</strong> {{ $patient->insurance_name ?? '—' }}</p>
+                            <p><strong>N° d'immatriculation :</strong> {{ $patient->insurance_number ?? '—' }}</p>
+                        </div>
+                    </div>
+                    @if($patient->notes)
+                        <p class="m-b-0" style="white-space: pre-line;"><strong>Notes :</strong> {{ $patient->notes }}</p>
+                    @endif
                 </div>
             </div>
 
@@ -154,7 +184,7 @@
                     <div class="card-block">
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>Date :</strong> {{ $lastConsult->consultation_date->format('d/m/Y H:i') }}</p>
+                                <p><strong>Date :</strong> {{ $lastConsult->consultation_date?->format('d/m/Y H:i') }}</p>
                                 <p><strong>Motif :</strong> {{ $lastConsult->reason ?? '—' }}</p>
                                 <p><strong>Diagnostic :</strong> {{ $lastConsult->diagnosis ?? '—' }}</p>
                             </div>
@@ -181,10 +211,12 @@
                 <div class="card-header">
                     <h5>Historique des Consultations</h5>
                     <div class="card-header-right">
+                        @can('create consultations')
                         <a href="{{ route('consultations.create', ['patient' => $patient->id]) }}"
                            class="btn btn-primary btn-sm">
                             <i class="feather icon-plus"></i> Nouvelle consultation
                         </a>
+                        @endcan
                     </div>
                 </div>
                 <div class="card-block">
@@ -198,13 +230,13 @@
                             <tbody>
                                 @forelse($patient->consultations as $consult)
                                     <tr>
-                                        <td>{{ $consult->consultation_date->format('d/m/Y H:i') }}</td>
-                                        <td>{{ \App\Models\Appointment::TYPE_LABELS[$consult->consultation_type] ?? $consult->consultation_type }}</td>
-                                        <td>{{ Str::limit($consult->reason, 60) ?? '—' }}</td>
-                                        <td>{{ $consult->doctor->name }}</td>
+                                        <td>{{ $consult->consultation_date?->format('d/m/Y H:i') }}</td>
+                                        <td>{{ $consult->type_label }}</td>
+                                        <td>{{ $consult->reason ? Str::limit($consult->reason, 60) : '—' }}</td>
+                                        <td>{{ $consult->doctor?->name ?? '—' }}</td>
                                         <td>
                                             <span class="label {{ $consult->status === 'completed' ? 'label-success' : 'label-warning' }}">
-                                                {{ $consult->status }}
+                                                {{ $consult->status_label }}
                                             </span>
                                         </td>
                                         <td>
@@ -230,10 +262,12 @@
                 <div class="card-header">
                     <h5><i class="feather icon-file-text"></i> Ordonnances</h5>
                     <div class="card-header-right">
+                        @can('create prescriptions')
                         <a href="{{ route('prescriptions.create', ['patient' => $patient->id]) }}"
                            class="btn btn-primary btn-sm">
                             <i class="feather icon-plus"></i> Nouvelle ordonnance
                         </a>
+                        @endcan
                     </div>
                 </div>
                 <div class="card-block">
@@ -253,8 +287,8 @@
                                 @forelse($patient->prescriptions as $prescription)
                                     <tr>
                                         <td><strong>{{ $prescription->prescription_number }}</strong></td>
-                                        <td>{{ $prescription->prescribed_at->format('d/m/Y') }}</td>
-                                        <td>{{ $prescription->doctor->name }}</td>
+                                        <td>{{ $prescription->prescribed_at?->format('d/m/Y') }}</td>
+                                        <td>{{ $prescription->doctor?->name ?? '—' }}</td>
                                         <td>
                                             @foreach($prescription->lines as $line)
                                                 <span class="label label-default m-b-2" style="display:inline-block;">{{ $line->medication_name }}</span>
@@ -277,10 +311,12 @@
                                                class="btn btn-info btn-xs" title="Voir">
                                                 <i class="feather icon-eye"></i>
                                             </a>
+                                            @can('print prescriptions')
                                             <a href="{{ route('prescriptions.pdf', $prescription) }}"
                                                class="btn btn-warning btn-xs" title="PDF" target="_blank">
                                                 <i class="feather icon-printer"></i>
                                             </a>
+                                            @endcan
                                         </td>
                                     </tr>
                                 @empty
@@ -299,10 +335,12 @@
                 <div class="card-header">
                     <h5><i class="feather icon-thermometer"></i> Analyses Biologiques</h5>
                     <div class="card-header-right">
+                        @can('create lab-tests')
                         <a href="{{ route('lab-tests.create', ['patient' => $patient->id]) }}"
                            class="btn btn-primary btn-sm">
                             <i class="feather icon-plus"></i> Nouvelle analyse
                         </a>
+                        @endcan
                     </div>
                 </div>
                 <div class="card-block">
@@ -322,9 +360,9 @@
                                 @forelse($patient->labTests as $labTest)
                                     <tr>
                                         <td><strong>{{ $labTest->request_number }}</strong></td>
-                                        <td>{{ $labTest->requested_at->format('d/m/Y') }}</td>
+                                        <td>{{ $labTest->requested_at?->format('d/m/Y') }}</td>
                                         <td>{{ $labTest->laboratory_name ?? '—' }}</td>
-                                        <td>{{ $labTest->results->count() }} résultat(s)</td>
+                                        <td>{{ $labTest->results_count }} résultat(s)</td>
                                         <td>
                                             <span class="label label-{{ match($labTest->status) {
                                                 'completed' => 'success',
@@ -369,10 +407,12 @@
                 <div class="card-header">
                     <h5><i class="feather icon-image"></i> Imagerie Médicale</h5>
                     <div class="card-header-right">
+                        @can('create', App\Models\MedicalImage::class)
                         <a href="{{ route('medical-images.create', ['patient' => $patient->id]) }}"
                            class="btn btn-primary btn-sm">
                             <i class="feather icon-plus"></i> Nouvelle imagerie
                         </a>
+                        @endcan
                     </div>
                 </div>
                 <div class="card-block">
@@ -423,10 +463,12 @@
                 <div class="card-header">
                     <h5><i class="feather icon-folder"></i> Documents</h5>
                     <div class="card-header-right">
+                        @can('create', App\Models\Document::class)
                         <a href="{{ route('documents.create', ['patient' => $patient->id]) }}"
                            class="btn btn-primary btn-sm">
                             <i class="feather icon-plus"></i> Nouveau document
                         </a>
+                        @endcan
                     </div>
                 </div>
                 <div class="card-block">
@@ -455,10 +497,12 @@
                                         <td>{{ $document->file_name ?? '—' }}</td>
                                         <td>{{ $document->file_size_formatted }}</td>
                                         <td>
-                                            <a href="{{ $document->file_url }}"
-                                               class="btn btn-info btn-xs" title="Télécharger" target="_blank">
+                                            @if($document->file_path)
+                                            <button type="button" wire:click="downloadDocument({{ $document->id }})"
+                                                    class="btn btn-info btn-xs" title="Télécharger">
                                                 <i class="feather icon-download"></i>
-                                            </a>
+                                            </button>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
@@ -477,10 +521,12 @@
                 <div class="card-header">
                     <h5><i class="feather icon-clipboard"></i> Rapports Médicaux</h5>
                     <div class="card-header-right">
+                        @can('create medical-reports')
                         <a href="{{ route('medical-reports.create', ['patient' => $patient->id]) }}"
                            class="btn btn-primary btn-sm">
                             <i class="feather icon-plus"></i> Nouveau rapport
                         </a>
+                        @endcan
                     </div>
                 </div>
                 <div class="card-block">
@@ -513,14 +559,18 @@
                                                class="btn btn-info btn-xs" title="Voir">
                                                 <i class="feather icon-eye"></i>
                                             </a>
+                                            @can('edit medical-reports')
                                             <a href="{{ route('medical-reports.edit', $report) }}"
                                                class="btn btn-warning btn-xs" title="Modifier">
                                                 <i class="feather icon-edit"></i>
                                             </a>
+                                            @endcan
+                                            @can('print medical-reports')
                                             <a href="{{ route('medical-reports.pdf', $report) }}"
                                                class="btn btn-primary btn-xs" title="PDF" target="_blank">
                                                 <i class="feather icon-printer"></i>
                                             </a>
+                                            @endcan
                                         </td>
                                     </tr>
                                 @empty
@@ -599,8 +649,124 @@
             <div class="card">
                 <div class="card-header">
                     <h5><i class="feather icon-clock"></i> Antécédents Médicaux</h5>
+                    @if($canManageHistory && ! $showHistoryForm)
+                        <div class="card-header-right">
+                            <button type="button" wire:click="openHistoryForm" class="btn btn-primary btn-sm">
+                                <i class="feather icon-plus"></i> Ajouter un antécédent
+                            </button>
+                        </div>
+                    @endif
                 </div>
                 <div class="card-block">
+                    @if($canManageHistory && $showHistoryForm)
+                        <form wire:submit="saveHistory" class="m-b-20 p-15" style="background:#f8f9fa;border-radius:4px;">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group {{ $errors->has('history_type') ? 'has-error' : '' }}">
+                                        <label>Type <span class="text-danger">*</span></label>
+                                        <select wire:model.live="history_type" class="form-control">
+                                            @foreach(\App\Models\MedicalHistory::TYPE_LABELS as $key => $label)
+                                                <option value="{{ $key }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('history_type') <span class="help-block text-danger">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="form-group {{ $errors->has('history_title') ? 'has-error' : '' }}">
+                                        <label>Intitulé <span class="text-danger">*</span></label>
+                                        <input type="text" wire:model="history_title" class="form-control"
+                                               placeholder="Ex : Diabète de type 2, Appendicectomie...">
+                                        @error('history_title') <span class="help-block text-danger">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group {{ $errors->has('history_date_occurred') ? 'has-error' : '' }}">
+                                        <label>Date</label>
+                                        <input type="date" wire:model="history_date_occurred" class="form-control">
+                                        @error('history_date_occurred') <span class="help-block text-danger">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if($history_type === 'family')
+                                <div class="form-group">
+                                    <label>Lien de parenté</label>
+                                    <input type="text" wire:model="history_relation" class="form-control" placeholder="Ex : Père, mère, frère...">
+                                    @error('history_relation') <span class="help-block text-danger">{{ $message }}</span> @enderror
+                                </div>
+                            @elseif($history_type === 'habit')
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Habitude</label>
+                                            <select wire:model="history_habit_type" class="form-control">
+                                                <option value="">-- Sélectionner --</option>
+                                                @foreach(\App\Models\MedicalHistory::HABIT_LABELS as $key => $label)
+                                                    <option value="{{ $key }}">{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('history_habit_type') <span class="help-block text-danger">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Fréquence</label>
+                                            <input type="text" wire:model="history_habit_frequency" class="form-control" placeholder="Ex : 10 cigarettes / jour">
+                                            @error('history_habit_frequency') <span class="help-block text-danger">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif($history_type === 'vaccination')
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Vaccin</label>
+                                            <input type="text" wire:model="history_vaccine_name" class="form-control">
+                                            @error('history_vaccine_name') <span class="help-block text-danger">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Date de vaccination</label>
+                                            <input type="date" wire:model="history_vaccine_date" class="form-control">
+                                            @error('history_vaccine_date') <span class="help-block text-danger">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Date de rappel</label>
+                                            <input type="date" wire:model="history_vaccine_next_date" class="form-control">
+                                            @error('history_vaccine_next_date') <span class="help-block text-danger">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>N° de lot</label>
+                                            <input type="text" wire:model="history_vaccine_batch" class="form-control">
+                                            @error('history_vaccine_batch') <span class="help-block text-danger">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea wire:model="history_description" class="form-control" rows="2"></textarea>
+                                @error('history_description') <span class="help-block text-danger">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="text-right">
+                                <button type="button" wire:click="cancelHistoryForm" class="btn btn-default btn-sm">
+                                    <i class="feather icon-x"></i> Annuler
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-sm" wire:loading.attr="disabled">
+                                    <i class="feather icon-save"></i> Enregistrer
+                                </button>
+                            </div>
+                        </form>
+                    @endif
+
                     @php
                         $histories = $patient->medicalHistories->groupBy('type');
                     @endphp
@@ -615,17 +781,34 @@
                                     <div class="card m-b-5" style="border-left: 3px solid #01a9ac;">
                                         <div class="card-block p-10">
                                             <strong>{{ $hist->title }}</strong>
+                                            @can('edit consultations')
+                                                <button type="button" wire:click="deleteHistory({{ $hist->id }})"
+                                                        wire:confirm="Supprimer cet antécédent ?"
+                                                        class="btn btn-danger btn-xs pull-right m-l-10" title="Supprimer">
+                                                    <i class="feather icon-trash-2"></i>
+                                                </button>
+                                            @endcan
                                             @if($hist->date_occurred)
                                                 <small class="text-muted pull-right">{{ $hist->date_occurred->format('d/m/Y') }}</small>
+                                            @endif
+                                            @if($hist->type === 'family' && $hist->relation)
+                                                <span class="label label-default m-l-5">{{ $hist->relation }}</span>
+                                            @endif
+                                            @if($hist->type === 'habit' && ($hist->habit_type || $hist->habit_frequency))
+                                                <p class="m-b-0">
+                                                    {{ \App\Models\MedicalHistory::HABIT_LABELS[$hist->habit_type] ?? '' }}
+                                                    @if($hist->habit_frequency) — {{ $hist->habit_frequency }} @endif
+                                                </p>
                                             @endif
                                             @if($hist->description)
                                                 <p class="text-muted m-b-0 m-t-5">{{ $hist->description }}</p>
                                             @endif
                                             @if($hist->type === 'vaccination' && $hist->vaccine_name)
                                                 <p class="m-b-0">
-                                                    Vaccin: {{ $hist->vaccine_name }}
+                                                    Vaccin : {{ $hist->vaccine_name }}
                                                     @if($hist->vaccine_date) — Le {{ $hist->vaccine_date->format('d/m/Y') }} @endif
-                                                    @if($hist->vaccine_next_date) — Rappel: {{ $hist->vaccine_next_date->format('d/m/Y') }} @endif
+                                                    @if($hist->vaccine_next_date) — Rappel : {{ $hist->vaccine_next_date->format('d/m/Y') }} @endif
+                                                    @if($hist->vaccine_batch) — Lot : {{ $hist->vaccine_batch }} @endif
                                                 </p>
                                             @endif
                                         </div>
@@ -635,7 +818,7 @@
                         @endif
                     @endforeach
 
-                    @if($patient->medicalHistories->isEmpty())
+                    @if($patient->medicalHistories->isEmpty() && ! $showHistoryForm)
                         <p class="text-muted text-center p-20">Aucun antécédent enregistré.</p>
                     @endif
                 </div>

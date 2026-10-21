@@ -13,7 +13,7 @@
                 {{ $isEdit ? 'Modifier Image Médicale' : 'Nouvelle Image Médicale' }}
             </h5>
             <div class="card-header-right">
-                <a href="{{ url()->previous() }}" class="btn btn-default btn-sm">
+                <a href="{{ $isEdit ? route('medical-images.show', $medicalImage) : route('medical-images.index') }}" wire:navigate class="btn btn-default btn-sm">
                     <i class="feather icon-arrow-left"></i> Retour
                 </a>
             </div>
@@ -35,7 +35,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group {{ $errors->has('doctor_id') ? 'has-error' : '' }}">
-                                    <label>Médecin</label>
+                                    <label>Médecin <span class="text-danger">*</span></label>
                                     <select wire:model="doctor_id" class="form-control">
                                         <option value="">-- Sélectionner un médecin --</option>
                                         @foreach($doctors as $doctor)
@@ -62,7 +62,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group {{ $errors->has('image_date') ? 'has-error' : '' }}">
-                                    <label>Date de l'image</label>
+                                    <label>Date de l'image <span class="text-danger">*</span></label>
                                     <input type="date" wire:model="image_date" class="form-control">
                                     @error('image_date')<span class="help-block text-danger">{{ $message }}</span>@enderror
                                 </div>
@@ -81,6 +81,20 @@
                                     <label>Partie du corps</label>
                                     <input type="text" wire:model="body_part" class="form-control" placeholder="Ex: Thorax, Genou gauche...">
                                     @error('body_part')<span class="help-block text-danger">{{ $message }}</span>@enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group {{ $errors->has('consultation_id') ? 'has-error' : '' }}">
+                                    <label>Consultation liée <small class="text-muted">(optionnel)</small></label>
+                                    <select wire:model="consultation_id" class="form-control">
+                                        <option value="">-- Aucune consultation --</option>
+                                        @foreach($consultations as $consultation)
+                                            <option value="{{ $consultation->id }}">
+                                                {{ $consultation->consultation_date?->format('d/m/Y H:i') }} — {{ $consultation->reason ? \Illuminate\Support\Str::limit($consultation->reason, 40) : 'Consultation' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('consultation_id')<span class="help-block text-danger">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                         </div>
@@ -103,9 +117,9 @@
                     <div class="col-md-4">
 
                         <div class="form-group {{ $errors->has('imageFile') ? 'has-error' : '' }}">
-                            <label><i class="feather icon-upload"></i> Fichier image <span class="text-danger">*</span></label>
-                            <input type="file" wire:model="imageFile" class="form-control" accept="image/*,.pdf">
-                            <small class="text-muted">Formats acceptés : JPG, PNG, GIF, PDF. Max 10 Mo.</small>
+                            <label><i class="feather icon-upload"></i> Fichier image @unless($isEdit)<span class="text-danger">*</span>@endunless</label>
+                            <input type="file" wire:model="imageFile" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf">
+                            <small class="text-muted">Formats acceptés : JPG, PNG, GIF, WEBP, PDF. Max 10 Mo.</small>
                             <div wire:loading wire:target="imageFile" class="text-info m-t-5">
                                 <i class="feather icon-loader"></i> Chargement en cours...
                             </div>
@@ -117,7 +131,7 @@
                             @php
                                 $ext = strtolower(pathinfo($imageFile->getClientOriginalName(), PATHINFO_EXTENSION));
                             @endphp
-                            @if(in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']))
+                            @if(in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']) && $imageFile->isPreviewable())
                                 <div class="m-t-10">
                                     <label>Aperçu :</label>
                                     <div style="border: 1px solid #ddd; border-radius: 4px; padding: 5px; text-align: center;">
@@ -135,8 +149,8 @@
                             <div class="m-t-10">
                                 <label>Fichier actuel :</label>
                                 <div style="border: 1px solid #ddd; border-radius: 4px; padding: 10px; text-align: center;">
-                                    @if(in_array(strtolower(pathinfo($existingFilePath, PATHINFO_EXTENSION)), ['jpg','jpeg','png','gif']))
-                                        <img src="{{ Storage::url($existingFilePath) }}" alt="Image actuelle" style="max-width: 100%; max-height: 200px;">
+                                    @if($existingFileUrl)
+                                        <img src="{{ $existingFileUrl }}" alt="Image actuelle" style="max-width: 100%; max-height: 200px;">
                                     @else
                                         <i class="feather icon-file" style="font-size: 3em; color: #e74c3c;"></i>
                                         <p class="text-muted">Fichier PDF existant</p>
@@ -157,7 +171,7 @@
 
                 <div class="row">
                     <div class="col-md-12 text-right">
-                        <a href="{{ url()->previous() }}" class="btn btn-default">
+                        <a href="{{ $isEdit ? route('medical-images.show', $medicalImage) : route('medical-images.index') }}" wire:navigate class="btn btn-default">
                             <i class="feather icon-x"></i> Annuler
                         </a>
                         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:loading.class="disabled">

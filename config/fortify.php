@@ -144,7 +144,9 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Inscription publique désactivée : les comptes du personnel sont créés
+        // par un administrateur (Administration > Utilisateurs).
+        // Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

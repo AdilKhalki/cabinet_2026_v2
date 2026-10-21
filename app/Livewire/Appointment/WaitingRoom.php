@@ -8,61 +8,101 @@ use Livewire\Component;
 
 class WaitingRoom extends Component
 {
-    // Polling toutes les 30 secondes pour la file d'attente en temps réel
-    protected int $pollingInterval = 30000;
+    // Rafraîchissement via wire:poll.30000ms dans la vue
 
+    /** Le patient se présente à l'accueil : il entre en salle d'attente. */
+    public function markArrived(int $appointmentId): void
+    {
+        $this->changeStatus($appointmentId, 'waiting');
+    }
+
+    /** Le médecin appelle le patient : la consultation commence. */
     public function callNext(int $appointmentId): void
     {
-        $appt = Appointment::findOrFail($appointmentId);
-        $appt->update([
-            'status' => 'in_progress',
-            'started_at' => now(),
-        ]);
+        $this->changeStatus($appointmentId, 'in_progress');
     }
 
     public function markCompleted(int $appointmentId): void
     {
-        $appt = Appointment::findOrFail($appointmentId);
-        $appt->update([
-            'status' => 'completed',
-            'ended_at' => now(),
-        ]);
+        $appt = $this->changeStatus($appointmentId, 'completed');
+
+        // Clôturer la consultation liée encore ouverte
+        $appt?->consultation()->where('status', 'in_progress')->update(['status' => 'completed']);
     }
 
     public function markNoShow(int $appointmentId): void
     {
-        Appointment::findOrFail($appointmentId)->update(['status' => 'no_show']);
+        $this->changeStatus($appointmentId, 'no_show');
+    }
+
+    private function changeStatus(int $appointmentId, string $status): ?Appointment
+    {
+        $appt = Appointment::findOrFail($appointmentId);
+        $this->authorize('update', $appt);
+
+        if (! $appt->canTransitionTo($status)) {
+            session()->flash('error', 'Action impossible : le rendez-vous est « '.$appt->status_label.' ».');
+
+            return null;
+        }
+
+        $appt->transitionTo($status);
+
+        return $appt;
+    }
+
+    private function scopedToday()
+    {
+        return Appointment::today()
+            ->when(auth()->user()->isMedecin(), fn ($q) => $q->forDoctor(auth()->id()));
     }
 
     #[Computed]
     public function waitingPatients()
     {
-        return Appointment::with('patient')
+        return Appointment::with(['patient', 'doctor', 'consultation:id,appointment_id,status'])
             ->waitingRoom()
             ->when(auth()->user()->isMedecin(), fn ($q) => $q->forDoctor(auth()->id()))
+            // Patients en consultation en premier, puis ordre d'arrivée
+            ->orderByRaw("CASE WHEN status = 'in_progress' THEN 0 ELSE 1 END")
             ->orderBy('arrived_at')
+            ->get();
+    }
+
+    /** RDV du jour pas encore arrivés (pour pointer l'arrivée). */
+    #[Computed]
+    public function expectedPatients()
+    {
+        return $this->scopedToday()
+            ->with(['patient', 'doctor'])
+            ->whereIn('status', ['planned', 'confirmed'])
+            ->orderBy('scheduled_at')
             ->get();
     }
 
     #[Computed]
     public function todayStats()
     {
-        $query = Appointment::today()
-            ->when(auth()->user()->isMedecin(), fn ($q) => $q->forDoctor(auth()->id()));
+        // Une seule requête groupée au lieu de quatre COUNT
+        $counts = $this->scopedToday()
+            ->selectRaw('status, COUNT(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
 
         return [
-            'total'       => (clone $query)->count(),
-            'completed'   => (clone $query)->where('status', 'completed')->count(),
-            'waiting'     => (clone $query)->whereIn('status', ['waiting', 'in_progress'])->count(),
-            'cancelled'   => (clone $query)->where('status', 'cancelled')->count(),
+            'total'     => (int) $counts->sum(),
+            'completed' => (int) ($counts['completed'] ?? 0),
+            'waiting'   => (int) (($counts['waiting'] ?? 0) + ($counts['in_progress'] ?? 0)),
+            'cancelled' => (int) (($counts['cancelled'] ?? 0) + ($counts['no_show'] ?? 0)),
         ];
     }
 
     public function render()
     {
         return view('livewire.appointment.waiting-room', [
-            'waitingPatients' => $this->waitingPatients,
-            'todayStats'      => $this->todayStats,
+            'waitingPatients'  => $this->waitingPatients,
+            'expectedPatients' => $this->expectedPatients,
+            'todayStats'       => $this->todayStats,
         ])->layout('layouts.cabinet', [
                 'title' => 'Salle d\'attente',
                 'header' => 'Salle d\'Attente — ' . now()->format('d/m/Y'),

@@ -33,6 +33,7 @@
                         <option value="partial">Partiel</option>
                         <option value="pending">Impayé</option>
                         <option value="cancelled">Annulé</option>
+                        <option value="refunded">Remboursé</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -72,13 +73,14 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label>Médecin</label>
-                        <select class="form-control" wire:model="doctor_id">
+                        <label>Médecin <span class="text-danger">*</span></label>
+                        <select class="form-control" wire:model="doctor_id" @if(\App\Models\Payment::restrictedToOwn(auth()->user())) disabled @endif>
                             <option value="">-- Sélectionner --</option>
                             @foreach($doctors as $doc)
                                 <option value="{{ $doc->id }}">Dr. {{ $doc->name }}</option>
                             @endforeach
                         </select>
+                        @error('doctor_id') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -105,8 +107,14 @@
                     </thead>
                     <tbody>
                     @foreach($lines as $i => $line)
-                        <tr>
+                        <tr wire:key="line-{{ $i }}">
                             <td>
+                                <select class="form-control form-control-sm m-b-5" wire:model.live="lines.{{ $i }}.medical_act_id">
+                                    <option value="">-- Acte médical (optionnel) --</option>
+                                    @foreach($this->medicalActs as $act)
+                                        <option value="{{ $act->id }}">{{ $act->code ? $act->code.' — ' : '' }}{{ $act->name }} ({{ number_format($act->price, 2, ',', ' ') }} MAD)</option>
+                                    @endforeach
+                                </select>
                                 <input type="text" class="form-control form-control-sm"
                                        wire:model="lines.{{ $i }}.description"
                                        placeholder="Description de l'acte">
@@ -123,7 +131,7 @@
                             </td>
                             <td>
                                 <span class="form-control form-control-sm bg-light">
-                                    {{ number_format(($line['quantity'] ?? 1) * ($line['unit_price'] ?? 0), 2) }}
+                                    {{ number_format((float) ($line['total_price'] ?? 0), 2, ',', ' ') }}
                                 </span>
                             </td>
                             <td class="text-center">
@@ -150,12 +158,11 @@
                             <div class="form-group">
                                 <label>Mode de paiement <span class="text-danger">*</span></label>
                                 <select class="form-control" wire:model="payment_method">
-                                    <option value="cash">Espèces</option>
-                                    <option value="card">Carte bancaire</option>
-                                    <option value="transfer">Virement</option>
-                                    <option value="insurance">Assurance</option>
-                                    <option value="check">Chèque</option>
+                                    @foreach(\App\Models\Payment::METHOD_LABELS as $value => $label)
+                                        <option value="{{ $value }}">{{ $label }}</option>
+                                    @endforeach
                                 </select>
+                                @error('payment_method') <span class="text-danger small">{{ $message }}</span> @enderror
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -170,42 +177,47 @@
                     <table class="table table-condensed">
                         <tr>
                             <th>Sous-total</th>
-                            <td class="text-right">{{ number_format($this->subtotal, 2) }} MAD</td>
+                            <td class="text-right">{{ number_format($this->subtotal, 2, ',', ' ') }} MAD</td>
                         </tr>
                         <tr>
                             <th>
                                 Remise
                                 <input type="number" class="form-control form-control-sm d-inline" style="width:80px"
-                                       wire:model.live="discount" min="0">
+                                       wire:model.live.debounce.400ms="discount" min="0" step="0.01">
                                 MAD
                             </th>
-                            <td class="text-right text-danger">- {{ number_format($discount, 2) }} MAD</td>
+                            <td class="text-right text-danger">- {{ number_format((float) $discount, 2, ',', ' ') }} MAD</td>
                         </tr>
                         <tr>
                             <th>
                                 Couverture assurance
                                 <input type="number" class="form-control form-control-sm d-inline" style="width:80px"
-                                       wire:model.live="insurance_coverage" min="0">
+                                       wire:model.live.debounce.400ms="insurance_coverage" min="0" step="0.01">
                                 MAD
                             </th>
-                            <td class="text-right text-info">- {{ number_format($insurance_coverage, 2) }} MAD</td>
+                            <td class="text-right text-info">- {{ number_format((float) $insurance_coverage, 2, ',', ' ') }} MAD</td>
                         </tr>
                         <tr class="bg-primary text-white">
                             <th>TOTAL</th>
-                            <td class="text-right"><strong>{{ number_format($this->total, 2) }} MAD</strong></td>
+                            <td class="text-right"><strong>{{ number_format($this->total, 2, ',', ' ') }} MAD</strong></td>
                         </tr>
                         <tr>
                             <th>
                                 Montant payé
                                 <input type="number" class="form-control form-control-sm d-inline" style="width:100px"
-                                       wire:model.live="amount_paid" min="0">
+                                       wire:model.live.debounce.400ms="amount_paid" min="0" step="0.01">
                             </th>
-                            <td class="text-right text-success">{{ number_format($amount_paid, 2) }} MAD</td>
+                            <td class="text-right text-success">{{ number_format((float) $amount_paid, 2, ',', ' ') }} MAD</td>
                         </tr>
+                        @foreach(['discount', 'insurance_coverage', 'amount_paid'] as $field)
+                            @error($field)
+                                <tr><td colspan="2" class="text-danger small">{{ $message }}</td></tr>
+                            @enderror
+                        @endforeach
                         <tr>
                             <th>Reste à payer</th>
                             <td class="text-right {{ $this->amountDue > 0 ? 'text-danger' : 'text-success' }}">
-                                <strong>{{ number_format($this->amountDue, 2) }} MAD</strong>
+                                <strong>{{ number_format($this->amountDue, 2, ',', ' ') }} MAD</strong>
                             </td>
                         </tr>
                     </table>
@@ -248,20 +260,20 @@
                         @php
                             $statusColors = ['paid'=>'bg-success','partial'=>'bg-warning','pending'=>'bg-danger','cancelled'=>'bg-dark','refunded'=>'bg-info'];
                             $statusLabels = ['paid'=>'Payé','partial'=>'Partiel','pending'=>'Impayé','cancelled'=>'Annulé','refunded'=>'Remboursé'];
-                            $methodLabels = ['cash'=>'Espèces','card'=>'Carte','transfer'=>'Virement','insurance'=>'Assurance','check'=>'Chèque'];
+                            $methodLabels = \App\Models\Payment::METHOD_LABELS;
                         @endphp
-                        <tr>
+                        <tr wire:key="payment-{{ $payment->id }}">
                             <td><strong>{{ $payment->invoice_number }}</strong></td>
                             <td>
                                 <a href="{{ route('patients.show', $payment->patient_id) }}">
-                                    {{ $payment->patient->full_name }}
+                                    {{ $payment->patient?->full_name ?? '—' }}
                                 </a>
                             </td>
-                            <td>{{ $payment->payment_date ? \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') : $payment->created_at->format('d/m/Y') }}</td>
-                            <td>{{ number_format($payment->total_amount, 2) }} MAD</td>
-                            <td class="text-success">{{ number_format($payment->amount_paid, 2) }} MAD</td>
+                            <td>{{ ($payment->payment_date ?? $payment->created_at)->format('d/m/Y') }}</td>
+                            <td>{{ number_format($payment->total_amount, 2, ',', ' ') }} MAD</td>
+                            <td class="text-success">{{ number_format($payment->amount_paid, 2, ',', ' ') }} MAD</td>
                             <td class="{{ $payment->amount_due > 0 ? 'text-danger' : '' }}">
-                                {{ number_format($payment->amount_due, 2) }} MAD
+                                {{ number_format($payment->amount_due, 2, ',', ' ') }} MAD
                             </td>
                             <td>{{ $methodLabels[$payment->payment_method] ?? $payment->payment_method }}</td>
                             <td>
@@ -278,6 +290,13 @@
                                 <button wire:click="openEdit({{ $payment->id }})"
                                         class="btn btn-warning btn-sm" title="Modifier">
                                     <i class="feather icon-edit"></i>
+                                </button>
+                                @endcan
+                                @can('cancel', $payment)
+                                <button wire:click="cancel({{ $payment->id }})"
+                                        wire:confirm="Annuler la facture {{ $payment->invoice_number }} ? Elle sera exclue du chiffre d'affaires."
+                                        class="btn btn-inverse btn-sm" title="Annuler la facture">
+                                    <i class="feather icon-slash"></i>
                                 </button>
                                 @endcan
                                 @can('delete', $payment)

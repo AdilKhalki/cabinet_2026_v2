@@ -29,13 +29,20 @@ class PrescriptionIndex extends Component
             ->paginate($this->perPage);
     }
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Prescription::class);
+    }
+
     public function confirmDelete(int $id): void { $this->confirmingDeleteId = $id; }
     public function cancelDelete(): void { $this->confirmingDeleteId = null; }
 
     public function delete(): void
     {
         if ($this->confirmingDeleteId) {
-            Prescription::findOrFail($this->confirmingDeleteId)->delete();
+            $prescription = Prescription::findOrFail($this->confirmingDeleteId);
+            $this->authorize('delete', $prescription);
+            $prescription->delete();
             session()->flash('success', 'Ordonnance supprimée.');
             $this->confirmingDeleteId = null;
             unset($this->prescriptions);

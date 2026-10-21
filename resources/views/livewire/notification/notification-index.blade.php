@@ -35,8 +35,8 @@
             {{-- Filter --}}
             <div class="row m-b-20">
                 <div class="col-md-4">
-                    <select wire:model.live="statusFilter" class="form-control">
-                        <option value="">-- Toutes les notifications --</option>
+                    <select wire:model.live="filter" class="form-control">
+                        <option value="all">-- Toutes les notifications --</option>
                         <option value="unread">Non lues</option>
                         <option value="read">Lues</option>
                     </select>
@@ -44,8 +44,8 @@
                 <div class="col-md-4">
                     <select wire:model.live="typeFilter" class="form-control">
                         <option value="">-- Tous les types --</option>
-                        @foreach($availableTypes as $type)
-                            <option value="{{ $type }}">{{ ucfirst(str_replace('_', ' ', $type)) }}</option>
+                        @foreach($availableTypes as $type => $label)
+                            <option value="{{ $type }}">{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -102,7 +102,7 @@
                                     @else
                                         {{ $message }}
                                     @endif
-                                    @if(!empty($notification->data['url']))
+                                    @if(!empty($notification->data['url']) && \Illuminate\Support\Str::startsWith($notification->data['url'], ['http://', 'https://', '/']))
                                         <br><a href="{{ $notification->data['url'] }}" class="text-primary" style="font-size:12px;">
                                             <i class="feather icon-external-link"></i> Voir les détails
                                         </a>

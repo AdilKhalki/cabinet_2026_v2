@@ -54,7 +54,8 @@ class Payment extends Model
 
     public function patient(): BelongsTo
     {
-        return $this->belongsTo(Patient::class);
+        // Inclure les patients archivés : une facture doit rester consultable/imprimable
+        return $this->belongsTo(Patient::class)->withTrashed();
     }
 
     public function doctor(): BelongsTo
@@ -77,9 +78,49 @@ class Payment extends Model
         return $query->whereIn('status', ['pending', 'partial']);
     }
 
+    /** Statuts exclus du chiffre d'affaires */
+    public const NON_REVENUE_STATUSES = ['cancelled', 'refunded'];
+
     public function scopeForPeriod($query, string $start, string $end)
     {
-        return $query->whereBetween('payment_date', [$start, $end]);
+        // whereDate : portable (SQLite stocke « Y-m-d H:i:s ») et inclut le dernier jour
+        return $query->whereDate('payment_date', '>=', $start)
+            ->whereDate('payment_date', '<=', $end);
+    }
+
+    /** Factures comptant dans le chiffre d'affaires (hors annulées / remboursées) */
+    public function scopeRevenue($query)
+    {
+        return $query->whereNotIn('status', self::NON_REVENUE_STATUSES);
+    }
+
+    /** Un médecin (non admin / non secrétaire) ne voit que ses propres factures */
+    public function scopeVisibleTo($query, User $user)
+    {
+        return $query->when(
+            static::restrictedToOwn($user),
+            fn ($q) => $q->where('doctor_id', $user->id)
+        );
+    }
+
+    public static function restrictedToOwn(User $user): bool
+    {
+        return $user->hasRole('medecin') && ! $user->hasAnyRole(['admin', 'secretaire']);
+    }
+
+    /** Statut cohérent avec les montants */
+    public static function statusFor(float $total, float $paid): string
+    {
+        if ($total - $paid <= 0.004) {
+            return 'paid';
+        }
+
+        return $paid > 0 ? 'partial' : 'pending';
+    }
+
+    public function isClosed(): bool
+    {
+        return in_array($this->status, self::NON_REVENUE_STATUSES, true);
     }
 
     protected static function boot(): void

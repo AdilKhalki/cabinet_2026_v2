@@ -15,6 +15,11 @@ new class extends Component {
      */
     public function deleteUser(Logout $logout): void
     {
+        // Cabinet médical : la suppression de compte est réservée à l'administrateur
+        // (Administration > Utilisateurs). Supprimer un médecin effacerait en cascade
+        // ses consultations, ordonnances, paiements…
+        abort(403, 'La suppression de compte doit être effectuée par un administrateur.');
+
         $this->validate([
             'password' => $this->currentPasswordRules(),
         ]);

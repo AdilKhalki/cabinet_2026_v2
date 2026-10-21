@@ -13,7 +13,7 @@
                 {{ $isEdit ? 'Modifier le Document' : 'Nouveau Document' }}
             </h5>
             <div class="card-header-right">
-                <a href="{{ url()->previous() }}" class="btn btn-default btn-sm">
+                <a href="{{ route('documents.index') }}" wire:navigate class="btn btn-default btn-sm">
                     <i class="feather icon-arrow-left"></i> Retour
                 </a>
             </div>
@@ -38,7 +38,7 @@
                                         <option value="">-- Aucune consultation --</option>
                                         @foreach($consultations as $consultation)
                                             <option value="{{ $consultation->id }}">
-                                                {{ \Carbon\Carbon::parse($consultation->consultation_date)->format('d/m/Y') }} — {{ $consultation->patient->full_name ?? '' }}
+                                                {{ $consultation->consultation_date?->format('d/m/Y H:i') }} — {{ $consultation->reason ? \Illuminate\Support\Str::limit($consultation->reason, 40) : 'Consultation' }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -93,9 +93,9 @@
                     <div class="col-md-4">
 
                         <div class="form-group {{ $errors->has('file') ? 'has-error' : '' }}">
-                            <label><i class="feather icon-paperclip"></i> Fichier <span class="text-danger">*</span></label>
-                            <input type="file" wire:model="file" class="form-control">
-                            <small class="text-muted">PDF, DOC, DOCX, XLS, XLSX, JPG, PNG. Max 20 Mo.</small>
+                            <label><i class="feather icon-paperclip"></i> Fichier @unless($isEdit)<span class="text-danger">*</span>@endunless</label>
+                            <input type="file" wire:model="file" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                            <small class="text-muted">PDF, DOC, DOCX, XLS, XLSX, JPG, PNG. Max 10 Mo.</small>
                             <div wire:loading wire:target="file" class="m-t-5 text-info">
                                 <i class="feather icon-loader"></i> Chargement du fichier...
                             </div>
@@ -116,7 +116,7 @@
                                         {{ round($file->getSize() / 1024, 1) }} Ko
                                     @endif
                                 </small><br>
-                                <small class="text-muted">Type : {{ strtoupper($file->extension()) }}</small>
+                                <small class="text-muted">Type : {{ strtoupper($file->getClientOriginalExtension()) }}</small>
                             </div>
                         @elseif($existingFileName)
                             <div class="alert alert-default m-t-10" style="padding: 10px; border: 1px solid #ddd;">
@@ -127,7 +127,7 @@
                         @else
                             <div class="text-center p-20 text-muted" style="border: 2px dashed #ddd; border-radius: 4px;">
                                 <i class="feather icon-upload" style="font-size: 2.5em;"></i>
-                                <p class="m-t-5">Glissez un fichier ou cliquez pour sélectionner</p>
+                                <p class="m-t-5">Aucun fichier sélectionné</p>
                             </div>
                         @endif
 
@@ -138,7 +138,7 @@
 
                 <div class="row">
                     <div class="col-md-12 text-right">
-                        <a href="{{ url()->previous() }}" class="btn btn-default">
+                        <a href="{{ route('documents.index') }}" wire:navigate class="btn btn-default">
                             <i class="feather icon-x"></i> Annuler
                         </a>
                         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:loading.class="disabled">

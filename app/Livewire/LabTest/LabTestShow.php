@@ -14,6 +14,8 @@ class LabTestShow extends Component
 
     public function mount(LabTest $labTest): void
     {
+        $this->authorize('view', $labTest);
+
         $this->labTest = $labTest->load(['patient', 'doctor', 'results.labTestType', 'consultation']);
     }
 
@@ -28,15 +30,20 @@ class LabTestShow extends Component
                 ->where('lab_tests.patient_id', $this->labTest->patient_id)
                 ->where('lab_test_results.parameter_name', $result->parameter_name)
                 ->where('lab_tests.status', 'completed')
-                ->orderBy('lab_tests.result_date')
+                ->whereNull('lab_tests.deleted_at') // exclure les analyses supprimées
+                ->whereNotNull('lab_tests.result_date')
+                ->orderByDesc('lab_tests.result_date')
                 ->select('lab_tests.result_date as date', 'lab_test_results.value')
                 ->take(12)
-                ->get();
+                ->get()
+                ->filter(fn ($row) => is_numeric(str_replace(',', '.', (string) $row->value)))
+                ->reverse()
+                ->values();
 
             if ($history->count() > 1) {
                 $data[$result->parameter_name] = [
                     'labels' => $history->pluck('date')->map(fn ($d) => \Carbon\Carbon::parse($d)->format('d/m/Y'))->toArray(),
-                    'values' => $history->pluck('value')->map(fn ($v) => (float) $v)->toArray(),
+                    'values' => $history->pluck('value')->map(fn ($v) => (float) str_replace(',', '.', (string) $v))->toArray(),
                     'unit'   => $result->unit,
                     'normal_min' => $result->normal_min,
                     'normal_max' => $result->normal_max,

@@ -54,7 +54,7 @@ class Patient extends Model
     {
         return Attribute::get(
             fn () => $this->photo_path
-                ? Storage::url($this->photo_path)
+                ? Storage::disk('public')->url($this->photo_path)
                 : null
         );
     }
@@ -116,15 +116,29 @@ class Patient extends Model
         return $query->where('is_active', true);
     }
 
+    /**
+     * Recherche multi-mots : chaque mot doit correspondre à au moins un champ,
+     * ce qui permet de chercher « Ahmed Alami » comme « Alami Ahmed ».
+     */
     public function scopeSearch($query, string $search)
     {
-        return $query->where(function ($q) use ($search) {
-            $q->where('first_name', 'like', "%{$search}%")
-              ->orWhere('last_name', 'like', "%{$search}%")
-              ->orWhere('phone', 'like', "%{$search}%")
-              ->orWhere('dossier_number', 'like', "%{$search}%")
-              ->orWhere('cin', 'like', "%{$search}%");
-        });
+        $terms = preg_split('/\s+/', trim($search), -1, PREG_SPLIT_NO_EMPTY);
+
+        foreach ($terms as $term) {
+            $like = "%{$term}%";
+
+            $query->where(function ($q) use ($like) {
+                $q->where('first_name', 'like', $like)
+                  ->orWhere('last_name', 'like', $like)
+                  ->orWhere('phone', 'like', $like)
+                  ->orWhere('phone_secondary', 'like', $like)
+                  ->orWhere('dossier_number', 'like', $like)
+                  ->orWhere('cin', 'like', $like)
+                  ->orWhere('ip_number', 'like', $like);
+            });
+        }
+
+        return $query;
     }
 
     // ── Boot ──────────────────────────────────────────────────────

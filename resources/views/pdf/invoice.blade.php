@@ -15,6 +15,7 @@
         .grand-total { background: #01a9ac; color: white; }
         .badge-paid { background: #28a745; color: white; padding: 3px 8px; border-radius: 3px; }
         .badge-pending { background: #ffc107; color: #333; padding: 3px 8px; border-radius: 3px; }
+        .badge-cancelled { background: #dc3545; color: white; padding: 3px 8px; border-radius: 3px; }
         .clearfix::after { content: ''; display: table; clear: both; }
     </style>
 </head>
@@ -25,9 +26,14 @@
             <div class="header-subtitle">{{ $payment->invoice_number }}</div>
         </div>
         <div style="float:right; text-align:right; color: #ccc; font-size: 11px;">
-            Cabinet Médical — {{ config('app.name', 'MISAHATI') }}<br>
-            Dr. {{ $payment->doctor->name }}<br>
-            Date: {{ $payment->payment_date?->format('d/m/Y') ?? now()->format('d/m/Y') }}
+            {{ $settings['cabinet_name'] ?? 'Cabinet Médical' }}<br>
+            @if(!empty($settings['cabinet_address'])){{ $settings['cabinet_address'] }}@if(!empty($settings['cabinet_city'])), {{ $settings['cabinet_city'] }}@endif<br>@endif
+            @if(!empty($settings['cabinet_phone']))Tél : {{ $settings['cabinet_phone'] }}<br>@endif
+            Dr. {{ $payment->doctor?->name ?? ($settings['doctor_name'] ?? '') }}
+            @if($payment->doctor?->license_number ?? ($settings['doctor_license'] ?? null))
+                — INPE : {{ $payment->doctor?->license_number ?? $settings['doctor_license'] }}
+            @endif<br>
+            Date : {{ $payment->payment_date?->format('d/m/Y') ?? $payment->created_at->format('d/m/Y') }}
         </div>
     </div>
 
@@ -57,48 +63,57 @@
                 <tr>
                     <td>{{ $line->description }}</td>
                     <td style="text-align:center;">{{ $line->quantity }}</td>
-                    <td style="text-align:right;">{{ number_format($line->unit_price, 2) }} MAD</td>
-                    <td style="text-align:right;">{{ number_format($line->total_price, 2) }} MAD</td>
+                    <td style="text-align:right;">{{ number_format($line->unit_price, 2, ',', ' ') }} MAD</td>
+                    <td style="text-align:right;">{{ number_format($line->total_price, 2, ',', ' ') }} MAD</td>
                 </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr class="total-row">
                 <td colspan="3">Sous-total</td>
-                <td style="text-align:right;">{{ number_format($payment->subtotal, 2) }} MAD</td>
+                <td style="text-align:right;">{{ number_format($payment->subtotal, 2, ',', ' ') }} MAD</td>
             </tr>
             @if($payment->discount > 0)
                 <tr>
                     <td colspan="3">Remise</td>
-                    <td style="text-align:right;">- {{ number_format($payment->discount, 2) }} MAD</td>
+                    <td style="text-align:right;">- {{ number_format($payment->discount, 2, ',', ' ') }} MAD</td>
                 </tr>
             @endif
             @if($payment->insurance_coverage > 0)
                 <tr>
                     <td colspan="3">Part assurance</td>
-                    <td style="text-align:right;">- {{ number_format($payment->insurance_coverage, 2) }} MAD</td>
+                    <td style="text-align:right;">- {{ number_format($payment->insurance_coverage, 2, ',', ' ') }} MAD</td>
                 </tr>
             @endif
             <tr class="grand-total">
                 <td colspan="3"><strong>TOTAL À PAYER</strong></td>
-                <td style="text-align:right;"><strong>{{ number_format($payment->total_amount, 2) }} MAD</strong></td>
+                <td style="text-align:right;"><strong>{{ number_format($payment->total_amount, 2, ',', ' ') }} MAD</strong></td>
             </tr>
             <tr>
                 <td colspan="3">Montant payé</td>
-                <td style="text-align:right; color: green;">{{ number_format($payment->amount_paid, 2) }} MAD</td>
+                <td style="text-align:right; color: green;">{{ number_format($payment->amount_paid, 2, ',', ' ') }} MAD</td>
             </tr>
             <tr class="{{ $payment->amount_due > 0 ? '' : 'total-row' }}">
                 <td colspan="3"><strong>Reste à payer</strong></td>
                 <td style="text-align:right; color: {{ $payment->amount_due > 0 ? 'red' : 'green' }};">
-                    <strong>{{ number_format($payment->amount_due, 2) }} MAD</strong>
+                    <strong>{{ number_format($payment->amount_due, 2, ',', ' ') }} MAD</strong>
                 </td>
             </tr>
         </tfoot>
     </table>
 
+    @if(!empty($amountInWords))
+        <div style="margin-top: 5px; font-size: 11px;">
+            Arrêtée la présente facture à la somme de : <strong>{{ $amountInWords }}</strong>.
+        </div>
+    @endif
+
     {{-- Statut --}}
     <div style="text-align:right; margin-top: 10px;">
-        <span class="{{ $payment->status === 'paid' ? 'badge-paid' : 'badge-pending' }}">
+        @if($payment->payment_method)
+            <span style="font-size: 11px; color: #666;">Mode : {{ \App\Models\Payment::METHOD_LABELS[$payment->payment_method] ?? $payment->payment_method }}</span>&nbsp;
+        @endif
+        <span class="{{ $payment->status === 'paid' ? 'badge-paid' : ($payment->isClosed() ? 'badge-cancelled' : 'badge-pending') }}">
             {{ \App\Models\Payment::STATUS_LABELS[$payment->status] ?? $payment->status }}
         </span>
     </div>
@@ -110,7 +125,7 @@
     @endif
 
     <div style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 15px; font-size: 10px; color: #999; text-align: center;">
-        Merci de votre confiance — Cabinet Médical MISAHATI
+        {{ $settings['pdf_footer_text'] ?? ('Merci de votre confiance — '.($settings['cabinet_name'] ?? 'Cabinet Médical')) }}
     </div>
 </body>
 </html>

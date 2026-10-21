@@ -33,6 +33,16 @@ class RoleIndex extends Component
         'Administration'  => ['manage users', 'manage roles', 'manage medications', 'view activity-log'],
     ];
 
+    /** Rôles utilisés en dur dans le code (hasRole, scopes…) : ni renommables ni supprimables */
+    public const SYSTEM_ROLES = ['admin', 'medecin', 'secretaire'];
+
+    /** Vérifiée à chaque requête (rendu initial ET appels d'actions Livewire) */
+    public function boot(): void
+    {
+        $user = auth()->user();
+        abort_unless($user?->can('manage users') && $user->can('manage roles'), 403);
+    }
+
     #[Computed]
     public function roles()
     {
@@ -69,24 +79,33 @@ class RoleIndex extends Component
     public function save(): void
     {
         $this->validate([
-            'name' => 'required|string|max:50',
-        ]);
+            'name' => 'required|string|max:50|regex:/^[\pL\pN _-]+$/u|unique:roles,name' . ($this->editingId ? ",{$this->editingId}" : ''),
+            'selectedPermissions' => 'array',
+            'selectedPermissions.*' => 'string|exists:permissions,name',
+        ], [], ['name' => 'nom du rôle']);
 
         if ($this->editingId) {
             $role = Role::findOrFail($this->editingId);
 
-            // Protéger le rôle admin
-            if ($role->name === 'admin' && $this->name !== 'admin') {
-                $this->addError('name', 'Le rôle admin ne peut pas être renommé.');
+            // Protéger les rôles système (utilisés en dur dans le code)
+            if (in_array($role->name, self::SYSTEM_ROLES) && $this->name !== $role->name) {
+                $this->addError('name', "Le rôle système « {$role->name} » ne peut pas être renommé.");
                 return;
             }
 
             $role->update(['name' => $this->name]);
-            $role->syncPermissions($this->selectedPermissions);
+
+            // Le rôle admin conserve toujours toutes les permissions
+            // (évite qu'un administrateur se verrouille hors de l'administration).
+            $role->syncPermissions(
+                $role->name === 'admin' ? Permission::all() : $this->selectedPermissions
+            );
+            activity()->on($role)->withProperties(['permissions' => $role->permissions()->pluck('name')])->log('Rôle modifié');
             session()->flash('success', "Rôle « {$role->name} » mis à jour.");
         } else {
             $role = Role::create(['name' => $this->name]);
             $role->syncPermissions($this->selectedPermissions);
+            activity()->on($role)->withProperties(['permissions' => $this->selectedPermissions])->log('Rôle créé');
             session()->flash('success', "Rôle « {$role->name} » créé.");
         }
 
@@ -111,8 +130,8 @@ class RoleIndex extends Component
     public function confirmDelete(int $id): void
     {
         $role = Role::findOrFail($id);
-        if (in_array($role->name, ['admin', 'medecin', 'secretaire'])) {
-            session()->flash('error', "Le rôle « {$role->name} » est un rôle système et ne peut pas être supprimé.");
+        if ($error = $this->deletionError($role)) {
+            session()->flash('error', $error);
             return;
         }
         $this->deletingId = $id;
@@ -122,12 +141,32 @@ class RoleIndex extends Component
     public function delete(): void
     {
         $role = Role::findOrFail($this->deletingId);
+        // Re-vérification côté serveur : delete() peut être appelé directement
+        if ($error = $this->deletionError($role)) {
+            session()->flash('error', $error);
+            $this->showDeleteModal = false;
+            $this->deletingId = null;
+            return;
+        }
         $roleName = $role->name;
+        activity()->on($role)->log("Rôle « {$roleName} » supprimé");
         $role->delete();
         $this->showDeleteModal = false;
         $this->deletingId = null;
         unset($this->roles);
         session()->flash('success', "Rôle « {$roleName} » supprimé.");
+    }
+
+    private function deletionError(Role $role): ?string
+    {
+        if (in_array($role->name, self::SYSTEM_ROLES)) {
+            return "Le rôle « {$role->name} » est un rôle système et ne peut pas être supprimé.";
+        }
+        if ($role->users()->exists()) {
+            return "Le rôle « {$role->name} » est attribué à des utilisateurs : réaffectez-les avant de le supprimer.";
+        }
+
+        return null;
     }
 
     private function resetForm(): void

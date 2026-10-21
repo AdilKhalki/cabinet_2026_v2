@@ -1,3 +1,8 @@
+@php
+    // Requêtes limitées (évite de charger toutes les notifications non lues à chaque page)
+    $navUnreadCount = auth()->user()?->unreadNotifications()->count() ?? 0;
+    $navUnreadLatest = auth()->user()?->unreadNotifications()->latest()->take(5)->get() ?? collect();
+@endphp
 <nav class="navbar header-navbar pcoded-header">
     <div class="navbar-wrapper">
 
@@ -39,7 +44,7 @@
                     <div class="dropdown-primary dropdown">
                         <div class="dropdown-toggle" data-toggle="dropdown">
                             <i class="feather icon-bell"></i>
-                            <span class="badge bg-c-pink">{{ auth()->user()?->unreadNotifications?->count() ?? 0 }}</span>
+                            <span class="badge bg-c-pink">{{ $navUnreadCount }}</span>
                         </div>
                         <ul class="show-notification notification-view dropdown-menu" data-dropdown-in="fadeIn"
                             data-dropdown-out="fadeOut">
@@ -47,7 +52,7 @@
                                 <h6>Notifications</h6>
                                 <label class="label label-danger">Nouveau</label>
                             </li>
-                            @forelse(auth()->user()?->unreadNotifications?->take(5) ?? [] as $notif)
+                            @forelse($navUnreadLatest as $notif)
                                 <li>
                                     <div class="media">
                                         <div class="media-body">

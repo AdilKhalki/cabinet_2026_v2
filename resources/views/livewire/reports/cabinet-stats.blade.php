@@ -106,7 +106,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="feather icon-package"></i> Top 5 Médicaments prescrits</h5>
+                    <h5><i class="feather icon-package"></i> Top 10 Médicaments prescrits</h5>
                 </div>
                 <div class="card-block">
                     <div class="table-responsive">
@@ -139,7 +139,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="feather icon-activity"></i> Top 5 Analyses demandées</h5>
+                    <h5><i class="feather icon-activity"></i> Top 10 Paramètres d'analyse</h5>
                 </div>
                 <div class="card-block">
                     <div class="table-responsive">
@@ -147,8 +147,8 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Type d'analyse</th>
-                                    <th>Nb demandes</th>
+                                    <th>Paramètre</th>
+                                    <th>Nb résultats</th>
                                 </tr>
                             </thead>
                             <tbody>

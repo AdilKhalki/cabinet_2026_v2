@@ -31,6 +31,12 @@ class MedicationIndex extends Component
     public string $description = '';
     public bool $is_active = true;
 
+    /** Vérifiée à chaque requête (rendu initial ET appels d'actions Livewire) */
+    public function boot(): void
+    {
+        abort_unless(auth()->user()?->can('manage medications'), 403);
+    }
+
     public function updatingSearch(): void { $this->resetPage(); }
     public function updatingStatusFilter(): void { $this->resetPage(); }
 

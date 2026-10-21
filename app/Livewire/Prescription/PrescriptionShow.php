@@ -11,6 +11,8 @@ class PrescriptionShow extends Component
 
     public function mount(Prescription $prescription): void
     {
+        $this->authorize('view', $prescription);
+
         $this->prescription = $prescription->load(['patient', 'doctor', 'lines.medication', 'consultation']);
     }
 

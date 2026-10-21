@@ -24,10 +24,17 @@
                     </p>
                 </div>
                 <div class="col-md-6 text-right">
+                    @can('print', $prescription)
                     <a href="{{ route('prescriptions.pdf', $prescription->id) }}"
                        target="_blank" class="btn btn-primary btn-sm m-r-5">
                         <i class="feather icon-printer"></i> Imprimer PDF
                     </a>
+                    @endcan
+                    @can('update', $prescription)
+                    <a href="{{ route('prescriptions.edit', $prescription->id) }}" class="btn btn-warning btn-sm m-r-5">
+                        <i class="feather icon-edit"></i> Modifier
+                    </a>
+                    @endcan
                     <a href="{{ url()->previous() }}" class="btn btn-default btn-sm">
                         <i class="feather icon-arrow-left"></i> Retour
                     </a>
