@@ -213,7 +213,7 @@
             </ul>
             <div class="tab-content m-t-20">
 
-                <div id="tab-prescriptions" class="tab-pane fade in active">
+                <div id="tab-prescriptions" class="tab-pane fade show active">
                     @if($consultation->prescriptions->isEmpty())
                         <p class="text-center text-muted p-20">Aucune ordonnance pour cette consultation.</p>
                     @else

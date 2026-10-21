@@ -115,11 +115,13 @@ class DocumentForm extends Component
         }
 
         if ($this->file) {
-            // Disque privé : jamais d'URL publique pour un document médical
-            $data['file_path'] = $this->file->store('documents', Document::DISK);
+            // Lire nom, type et taille AVANT store() : sur le même disque que les fichiers
+            // temporaires Livewire, store() déplace le fichier (il n'existe plus ensuite).
             $data['file_name'] = mb_substr(basename($this->file->getClientOriginalName()), 0, 255);
             $data['file_type'] = strtolower($this->file->guessExtension() ?: $this->file->getClientOriginalExtension());
             $data['file_size'] = $this->file->getSize();
+            // Disque privé : jamais d'URL publique pour un document médical
+            $data['file_path'] = $this->file->store('documents', Document::DISK);
         }
 
         if ($this->isEdit) {

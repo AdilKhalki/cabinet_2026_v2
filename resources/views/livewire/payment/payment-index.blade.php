@@ -326,7 +326,7 @@
 
     {{-- Modal suppression --}}
     @if($confirmingDeleteId ?? false)
-    <div class="modal fade in" style="display:block;background:rgba(0,0,0,0.5);">
+    <div class="modal fade show" style="display:block;background:rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header"><h4 class="modal-title">Confirmer la suppression</h4></div>

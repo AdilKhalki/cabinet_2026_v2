@@ -133,7 +133,7 @@
 
     {{-- Modal création / édition --}}
     @if($showModal)
-        <div class="modal fade in" style="display: block; background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5);" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <form wire:submit="save">

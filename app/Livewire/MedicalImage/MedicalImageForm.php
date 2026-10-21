@@ -134,10 +134,12 @@ class MedicalImageForm extends Component
         }
 
         if ($this->imageFile) {
-            // Disque privé : l'imagerie médicale n'est jamais exposée publiquement
-            $data['file_path'] = $this->imageFile->store('medical-images', MedicalImage::DISK);
+            // Lire type et taille AVANT store() : sur le même disque que les fichiers
+            // temporaires Livewire, store() déplace le fichier (il n'existe plus ensuite).
             $data['file_type'] = strtolower($this->imageFile->guessExtension() ?: $this->imageFile->getClientOriginalExtension());
             $data['file_size'] = $this->imageFile->getSize();
+            // Disque privé : l'imagerie médicale n'est jamais exposée publiquement
+            $data['file_path'] = $this->imageFile->store('medical-images', MedicalImage::DISK);
         }
 
         if ($this->isEdit) {

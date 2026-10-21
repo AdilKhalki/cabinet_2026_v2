@@ -116,7 +116,7 @@
 
     {{-- Modal confirmation suppression --}}
     @if($confirmingDeleteId)
-    <div class="modal fade in" style="display:block;background:rgba(0,0,0,0.5);" wire:ignore.self>
+    <div class="modal fade show" style="display:block;background:rgba(0,0,0,0.5);" wire:ignore.self>
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">

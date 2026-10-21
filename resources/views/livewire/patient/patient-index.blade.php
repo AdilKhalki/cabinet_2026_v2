@@ -1,7 +1,7 @@
 <div>
     {{-- Flash messages --}}
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade in" role="alert">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
             <button type="button" class="close" data-dismiss="alert">×</button>
             <i class="feather icon-check-circle"></i> {{ session('success') }}
         </div>
@@ -201,7 +201,7 @@
 
     {{-- Modal Confirmation suppression --}}
     @if($showDeleteModal)
-        <div class="modal fade in" style="display:block; background:rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal fade show" style="display:block; background:rgba(0,0,0,0.5);" tabindex="-1">
             <div class="modal-dialog modal-sm">
                 <div class="modal-content">
                     <div class="modal-header">
