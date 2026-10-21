@@ -354,3 +354,84 @@
 .page-link:hover { z-index: 2; color: #006e70; background-color: #eee; border-color: #ddd; }
 .page-item.active .page-link { z-index: 3; color: #fff; background-color: var(--primary); border-color: var(--primary); }
 .page-item.disabled .page-link { color: #777; cursor: not-allowed; background-color: #fff; border-color: #ddd; }
+
+/* ══════════════════════════════════════════════════════════
+   BARRE DU HAUT — Accès rapides
+   ══════════════════════════════════════════════════════════ */
+.header-navbar .navbar-wrapper .navbar-container .nav-left li.quick-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 56px;
+    line-height: normal;
+    padding: 0 6px;
+}
+
+.header-navbar .navbar-wrapper .navbar-container .nav-left li.quick-actions a.qa-btn {
+    --qa: var(--primary);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 17px;
+    border: 1px solid color-mix(in srgb, var(--qa) 35%, transparent);
+    background: color-mix(in srgb, var(--qa) 10%, #fff);
+    color: var(--qa);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+.header-navbar .navbar-wrapper .navbar-container .nav-left li.quick-actions a.qa-btn i {
+    font-size: 15px;
+}
+
+.header-navbar .navbar-wrapper .navbar-container .nav-left li.quick-actions a.qa-btn:hover,
+.header-navbar .navbar-wrapper .navbar-container .nav-left li.quick-actions a.qa-btn.active {
+    background: var(--qa);
+    color: #fff;
+    box-shadow: 0 2px 6px color-mix(in srgb, var(--qa) 40%, transparent);
+}
+
+.qa-teal   { --qa: #3d8f96 !important; }
+.qa-blue   { --qa: #3b7dd8 !important; }
+.qa-orange { --qa: #d9822b !important; }
+.qa-green  { --qa: #2e9e6b !important; }
+.qa-purple { --qa: #7b5bc4 !important; }
+.qa-coral  { --qa: #c07a52 !important; }
+
+.qa-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    box-shadow: 0 0 0 2px #fff;
+}
+
+/* Écrans moyens : icônes seules (le libellé reste en infobulle) */
+@media (max-width: 1399px) {
+    .header-navbar .navbar-wrapper .navbar-container .nav-left li.quick-actions a.qa-btn {
+        width: 34px;
+        padding: 0;
+        justify-content: center;
+    }
+    .qa-label { display: none; }
+}
+
+/* Mobile : le menu latéral suffit */
+@media (max-width: 767px) {
+    .header-navbar .navbar-wrapper .navbar-container .nav-left li.quick-actions { display: none; }
+}

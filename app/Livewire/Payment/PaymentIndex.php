@@ -58,6 +58,11 @@ class PaymentIndex extends Component
         $this->payment_date = today()->format('Y-m-d');
         $this->doctor_id = auth()->user()->isMedecin() ? auth()->id() : '';
         $this->addLine();
+
+        // Accès rapide « Encaisser » de la barre du haut : /payments?nouveau=1
+        if (request()->boolean('nouveau') && auth()->user()->can('create', Payment::class)) {
+            $this->openForm();
+        }
     }
 
     public function updating($property): void

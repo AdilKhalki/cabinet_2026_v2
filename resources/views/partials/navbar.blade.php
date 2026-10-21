@@ -2,6 +2,24 @@
     // Requêtes limitées (évite de charger toutes les notifications non lues à chaque page)
     $navUnreadCount = auth()->user()?->unreadNotifications()->count() ?? 0;
     $navUnreadLatest = auth()->user()?->unreadNotifications()->latest()->take(5)->get() ?? collect();
+
+    // Accès rapides : patients en salle d'attente (un médecin ne voit que les siens)
+    $navUser = auth()->user();
+    $navWaitingCount = $navUser?->can('view appointments')
+        ? \App\Models\Appointment::waitingRoom()
+            ->when($navUser->isMedecin() && ! $navUser->isAdmin(), fn ($q) => $q->where('doctor_id', $navUser->id))
+            ->count()
+        : 0;
+
+    // [permission, route, icône, libellé, classe de couleur]
+    $quickActions = [
+        ['create patients',      'patients.create',          'icon-user-plus',  'Patient',      'qa-teal'],
+        ['create appointments',  'appointments.create',      'icon-calendar',   'RDV',          'qa-blue'],
+        ['view appointments',    'appointments.waiting-room','icon-users',      'Salle d\'attente', 'qa-orange'],
+        ['create consultations', 'consultations.create',     'icon-activity',   'Consultation', 'qa-green'],
+        ['create prescriptions', 'prescriptions.create',     'icon-file-text',  'Ordonnance',   'qa-purple'],
+        ['create payments',      'payments.index',           'icon-credit-card','Encaisser',    'qa-coral'],
+    ];
 @endphp
 <nav class="navbar header-navbar pcoded-header">
     <div class="navbar-wrapper">
@@ -35,6 +53,29 @@
                     <a href="#!" onclick="javascript:toggleFullScreen()">
                         <i class="feather icon-maximize full-screen"></i>
                     </a>
+                </li>
+
+                {{-- Accès rapides (affichés selon les permissions) --}}
+                <li class="quick-actions">
+                    @foreach($quickActions as [$permission, $routeName, $icon, $label, $color])
+                        @can($permission)
+                            @php
+                                $href = $routeName === 'payments.index'
+                                    ? route('payments.index', ['nouveau' => 1])
+                                    : route($routeName);
+                                $isWaiting = $routeName === 'appointments.waiting-room';
+                            @endphp
+                            <a href="{{ $href }}"
+                               class="qa-btn {{ $color }} {{ request()->routeIs($routeName) ? 'active' : '' }}"
+                               title="{{ $isWaiting ? 'Salle d\'attente' : 'Nouveau : '.$label }}">
+                                <i class="feather {{ $icon }}"></i>
+                                <span class="qa-label">{{ $isWaiting ? '' : '+ ' }}{{ $label }}</span>
+                                @if($isWaiting && $navWaitingCount > 0)
+                                    <span class="qa-badge">{{ $navWaitingCount }}</span>
+                                @endif
+                            </a>
+                        @endcan
+                    @endforeach
                 </li>
             </ul>
 
